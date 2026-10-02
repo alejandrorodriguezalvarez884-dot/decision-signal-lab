@@ -24,6 +24,8 @@ Si el resultado es "no hay señal", se dirá así.
    (deriva post-resultados, reversión, diccionario Loughran-McDonald), con un holdout 2025–2026
    sellado por pre-registro.
 
+**Para retomar el trabajo (otra sesión u ordenador): [docs/HANDOFF.md](docs/HANDOFF.md).**
+
 Diseño completo y limitaciones: [docs/METHODOLOGY.md](docs/METHODOLOGY.md). Hipótesis y reglas
 de decisión fijadas de antemano: [docs/PREREGISTRATION.md](docs/PREREGISTRATION.md).
 
