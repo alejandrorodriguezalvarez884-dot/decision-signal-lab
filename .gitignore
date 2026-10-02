@@ -1,0 +1,22 @@
+# Secrets
+.env
+*.key
+
+# Data (downloaded or derived; reproducible with the CLI)
+data/
+!data/README.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
