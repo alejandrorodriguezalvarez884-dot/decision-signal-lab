@@ -73,7 +73,7 @@ gcp storage buckets add-iam-policy-binding "gs://$BUCKET" \
   --member "serviceAccount:$SERVICE_ACCOUNT" --role roles/storage.objectAdmin >/dev/null
 
 echo "→ Building with Cloud Build and deploying '$SERVICE_NAME' to $GCP_REGION (a few minutes)"
-# "^@^" makes "@" the separator, because the SEC user agent has spaces and could have commas.
+# "^|^" makes "|" the separator: the SEC user agent has spaces and an "@", and could have commas.
 gcp run deploy "$SERVICE_NAME" \
   --source . \
   --region "$GCP_REGION" \
@@ -85,7 +85,7 @@ gcp run deploy "$SERVICE_NAME" \
   --max-instances "$MAX_INSTANCES" \
   --timeout 120 \
   --set-secrets "PERPLEXITY_API_KEY=$SECRET:latest" \
-  --set-env-vars "^@^SEC_USER_AGENT=$SEC_USER_AGENT@RADAR_BUCKET=$BUCKET@RADAR_DAILY_MAX_USD=$RADAR_DAILY_MAX_USD@RADAR_TOTAL_MAX_USD=$RADAR_TOTAL_MAX_USD"
+  --set-env-vars "^|^SEC_USER_AGENT=$SEC_USER_AGENT|RADAR_BUCKET=$BUCKET|RADAR_DAILY_MAX_USD=$RADAR_DAILY_MAX_USD|RADAR_TOTAL_MAX_USD=$RADAR_TOTAL_MAX_USD"
 
 URL="$(gcp run services describe "$SERVICE_NAME" --region "$GCP_REGION" --format 'value(status.url)')"
 if curl -fsS "$URL/api/health" >/dev/null; then

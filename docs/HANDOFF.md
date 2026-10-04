@@ -37,7 +37,7 @@ Decisiones del usuario ese día:
 | Topes del servicio: $0.25 al día, $4 en total, $0.03 por petición, 30 análisis por IP y hora, 2 instancias | El límite por IP vive en la memoria de cada instancia; el que protege de verdad es el tope diario, que se guarda en el bucket |
 | Sitio Astro (103 páginas): portada con buscador de cualquier empresa, `/analyze/`, fichas del estudio, `/trends/`, `/method/` | |
 | `Makefile`: `api`, `dev`, `serve`, `deploy` (Cloud Run), `check`, `update`, `save`, `publish`. Sin GitHub Actions | `make update` no se ha probado con comunicados nuevos reales |
-| `Dockerfile` y `scripts/deploy-cloudrun.sh` (Cloud Build, Secret Manager, bucket para los análisis) | Ver más abajo el estado del despliegue |
+| **Desplegado el 2026-10-04** en Cloud Run: https://earnings-radar-3qwezbjyfq-ew.a.run.app (proyecto `arctic-robot-474306-g3`, `europe-west1`, servicio `earnings-radar`, bucket `arctic-robot-474306-g3-earnings-radar`, secreto `earnings-radar-perplexity-api-key`). Comprobado en producción: páginas, búsqueda, análisis de AMD en 3 s por $0.0016 y segunda petición servida desde el bucket | La página antigua de GitHub Pages redirige a esta dirección. Dominio propio pendiente (pasos en RADAR.md). `site/SITE_URL` ya tiene la dirección, pero los enlaces canónicos entran en el próximo despliegue |
 | | Las lecturas bajo demanda se quedan en el bucket; no entran en `radar/` ni en las tendencias |
 | | El análisis del estudio cubre 99 empresas; ampliar ese universo exige pagar su histórico |
 | Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`, campo nuevo `liveUrl`), publicada en alejandrorodriguez.dev/projects/ con enlace al sitio | No se ha añadido a `featuredProjectNames` (la selección de la portada) |

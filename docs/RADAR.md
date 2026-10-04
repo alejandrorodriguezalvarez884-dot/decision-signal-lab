@@ -84,6 +84,8 @@ Los comandos de debajo siguen disponibles: `uv run decisionsignal radar estimate
 
 ## Despliegue en Cloud Run
 
+En producción: https://earnings-radar-3qwezbjyfq-ew.a.run.app
+
 Mismo patrón que `lease-lens`: un solo contenedor con el sitio estático servido por la app
 FastAPI, así que web y API comparten origen. `make deploy` ejecuta
 `scripts/deploy-cloudrun.sh`, que:
