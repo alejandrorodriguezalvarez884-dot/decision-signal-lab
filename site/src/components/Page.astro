@@ -12,15 +12,13 @@ const { title, description } = Astro.props;
 const m = summary.meta;
 
 const links = [
-	{ href: link("/"), label: "Overview" },
-	{ href: link("/companies/"), label: "Companies" },
+	{ href: link("/"), label: "Companies" },
+	{ href: link("/trends/"), label: "Market trends" },
 	{ href: link("/method/"), label: "Method" },
 ];
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
-	href === link("/")
-		? path === href
-		: path.startsWith(href) || (href === link("/companies/") && path.startsWith(link("/company/")));
+	href === link("/") ? path === href || path.startsWith(link("/company/")) : path.startsWith(href);
 ---
 
 <Layout title={`${title} — Earnings Radar`} description={description}>

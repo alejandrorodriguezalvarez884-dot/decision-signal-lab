@@ -1,15 +1,22 @@
 ---
 import Page from "../../components/Page.astro";
 import GuidanceChip from "../../components/GuidanceChip.astro";
+import ScaleRow from "../../components/ScaleRow.astro";
 import TrendChart from "../../components/TrendChart.astro";
 import {
+	FLAGS,
 	GUIDANCE_LABEL,
+	GUIDANCE_ORDER,
+	SCALES,
 	THEME_WORD,
 	cautionWord,
+	changesSince,
+	flagValue,
 	fmtDate,
+	historyOf,
 	outlookWord,
 	pct,
-	releases,
+	peersOf,
 	slug,
 	strengthWord,
 	summary,
@@ -24,10 +31,23 @@ interface Props {
 	company: Company;
 }
 const { company } = Astro.props;
-const history = releases.filter((r) => r.ticker === company.ticker); // oldest first
+const history = historyOf(company.ticker); // oldest first
 const rows = [...history].reverse();
 const latest = rows[0];
+const previous = rows[1];
 const threshold = summary.meta.theme_threshold;
+const peers = peersOf(company);
+const changes = changesSince(latest, previous);
+
+// The three likeliest answers, plus any other the model gives a real chance.
+const guidanceBars = GUIDANCE_ORDER.map((c) => ({ c, p: latest.guidance_p[c] }))
+	.sort((a, b) => b.p - a.p)
+	.filter((x, i) => i < 3 || x.p >= 0.03);
+const flags = FLAGS.map((f) => ({ ...f, p: flagValue(latest, f.key) })).filter((f) => f.p !== undefined) as {
+	key: string;
+	label: string;
+	p: number;
+}[];
 
 const series = (key: "results_strength" | "uncertainty") =>
 	history.map((r) => ({ label: fmtDate(r.date), year: r.date.slice(0, 4), value: r[key] }));
@@ -44,61 +64,156 @@ const cautionTicks = [
 ---
 
 <Page
-	title={company.name}
-	description={`What ${company.name} said in each of its ${company.n} results releases since 2021: guidance, results, outlook, demand and margins.`}
+	title={`${company.name}: latest results`}
+	description={`What ${company.name} said in its latest results release, read by a decision model: guidance, results, outlook, margins and demand, against its previous release and its peers.`}
 >
 	<Fragment slot="header">
-		<h1 class="mt-3 font-serif text-3xl font-semibold text-stone-900">
+		<h1 class="mt-3 font-serif text-3xl font-semibold text-stone-900 sm:text-4xl">
 			{company.name} <span class="text-xl font-normal text-stone-400">{company.ticker}</span>
 		</h1>
-		<p class="mt-2 text-sm text-stone-500">{company.sector} · {company.n} results releases since 2021</p>
+		<p class="mt-2 text-sm text-stone-500">
+			{company.sector} · latest results published {fmtDate(latest.date)} ·{" "}
+			<a href={latest.url} target="_blank" rel="noreferrer" class="underline hover:text-stone-900">SEC filing</a>
+		</p>
 	</Fragment>
 
-	<section class="mt-8 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
-		<div class="text-xs text-stone-500">Latest release, {fmtDate(latest.date)}</div>
-		<div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-stone-700">
-			<span class="flex items-center gap-2">
-				Guidance <GuidanceChip value={latest.guidance} />
-				<span class="text-xs text-stone-400">{pct(latest.guidance_p[latest.guidance])} sure</span>
-			</span>
-			<span>Results: <span class="font-medium text-stone-900">{strengthWord(latest.results_strength).toLowerCase()}</span></span>
-			<span>Outlook: <span class="font-medium text-stone-900">{outlookWord(latest.outlook_tone).toLowerCase()}</span></span>
-			<span>Caution: <span class="font-medium text-stone-900">{cautionWord(latest.uncertainty).toLowerCase()}</span></span>
+	<section class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+		<div class="rounded-xl border border-stone-200 bg-white p-4">
+			<div class="text-xs text-stone-500">Guidance</div>
+			<div class="mt-2"><GuidanceChip value={latest.guidance} /></div>
+			<div class="mt-2 text-xs text-stone-500">{pct(latest.guidance_p[latest.guidance])} likely</div>
+		</div>
+		{
+			SCALES.map((s) => (
+				<div class="rounded-xl border border-stone-200 bg-white p-4">
+					<div class="text-xs text-stone-500">{s.label}</div>
+					<div class="mt-2 text-lg font-semibold leading-tight text-stone-900">{s.word(latest[s.key])}</div>
+					{previous && (
+						<div class="mt-1 text-xs text-stone-500">
+							{s.word(previous[s.key]) === s.word(latest[s.key])
+								? "same as last time"
+								: `was ${s.word(previous[s.key]).toLowerCase()}`}
+						</div>
+					)}
+				</div>
+			))
+		}
+	</section>
+
+	<section class="mt-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">What changed</h2>
+		{previous && <p class="mt-1 text-sm text-stone-500">Against the previous release, published {fmtDate(previous.date)}.</p>}
+		<ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+			{changes.map((c) => <li>{c}</li>)}
+		</ul>
+	</section>
+
+	<section class="mt-6 grid gap-6 md:grid-cols-2">
+		<div class="min-w-0 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+			<h2 class="font-serif text-lg font-semibold text-stone-900">Guidance, as the model reads it</h2>
+			<p class="mt-1 text-xs text-stone-500">How likely each answer is, likeliest first.</p>
+			<div class="mt-4 space-y-2.5">
+				{
+					guidanceBars.map((g) => (
+						<div class="grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-3 text-sm">
+							<span class="text-stone-600">{GUIDANCE_LABEL[g.c]}</span>
+							<span class="h-2.5">
+								<span class="block h-full rounded-r" style={`width: ${Math.max(g.p * 100, 1)}%; background: var(--radar-line)`} />
+							</span>
+							<span class="text-right tabular-nums text-stone-900">{pct(g.p)}</span>
+						</div>
+					))
+				}
+			</div>
+		</div>
+
+		<div class="min-w-0 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+			<h2 class="font-serif text-lg font-semibold text-stone-900">Against {peers.label}</h2>
+			<p class="mt-1 text-xs text-stone-500">
+				<span class="mr-1 inline-block h-2.5 w-2.5 rounded-full align-[-1px]" style="background: var(--radar-line)"></span>
+				this release
+				<span class="ml-3 mr-1 inline-block h-3 w-0.5 align-[-2px]" style="background: var(--radar-ink-2)"></span>
+				median of the latest release of {peers.n} companies
+			</p>
+			<div class="mt-3">
+				{
+					SCALES.map((s) => (
+						<ScaleRow
+							label={s.label}
+							low={s.low}
+							high={s.high}
+							value={latest[s.key]}
+							peer={peers.median[s.key]}
+						/>
+					))
+				}
+			</div>
 		</div>
 	</section>
 
-	<section class="mt-6 grid gap-6 sm:grid-cols-2">
-		<div class="rounded-2xl border border-stone-200 bg-white p-5">
-			<TrendChart
-				title="Strength of reported results"
-				note="How the release describes the quarter"
-				points={series("results_strength")}
-				max={1}
-				ticks={strengthTicks}
-				format={strengthWord}
-				what="results"
-				height={130}
-				endLabel={false}
-			/>
-		</div>
-		<div class="rounded-2xl border border-stone-200 bg-white p-5">
-			<TrendChart
-				title="Caution about the future"
-				note="How much uncertainty management voices"
-				points={series("uncertainty")}
-				max={1}
-				ticks={cautionTicks}
-				format={cautionWord}
-				what="caution"
-				height={130}
-				endLabel={false}
-			/>
+	<section class="mt-6">
+		<div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
+						<th class="px-4 py-3 font-medium">Does it say so?</th>
+						<th class="px-3 py-3 font-medium">This release</th>
+						<th class="px-3 py-3 text-right font-medium">How likely</th>
+						<th class="px-4 py-3 text-right font-medium">Peers that say it</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						flags.map((f) => (
+							<tr class="border-b border-stone-100 last:border-0">
+								<td class="px-4 py-2.5 text-stone-800">{f.label}</td>
+								<td class="px-3 py-2.5">
+									<span class={f.p >= threshold ? "font-medium text-stone-900" : "text-stone-400"}>
+										{f.p >= threshold ? "Yes" : "No"}
+									</span>
+								</td>
+								<td class="px-3 py-2.5 text-right tabular-nums text-stone-600">{pct(f.p)}</td>
+								<td class="px-4 py-2.5 text-right tabular-nums text-stone-600">{pct(peers.share[f.key])}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
 		</div>
 	</section>
 
-	<section class="mt-10">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">Every release</h2>
-		<div class="mt-4 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+	<section class="mt-12">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">History</h2>
+		<p class="mt-1 text-sm text-stone-500">{company.n} results releases since 2021.</p>
+		<div class="mt-4 grid gap-6 sm:grid-cols-2">
+			<div class="rounded-2xl border border-stone-200 bg-white p-5">
+				<TrendChart
+					title="Strength of reported results"
+					note="How the release describes the quarter"
+					points={series("results_strength")}
+					max={1}
+					ticks={strengthTicks}
+					format={strengthWord}
+					what="results"
+					height={130}
+					endLabel={false}
+				/>
+			</div>
+			<div class="rounded-2xl border border-stone-200 bg-white p-5">
+				<TrendChart
+					title="Caution about the future"
+					note="How much uncertainty management voices"
+					points={series("uncertainty")}
+					max={1}
+					ticks={cautionTicks}
+					format={cautionWord}
+					what="caution"
+					height={130}
+					endLabel={false}
+				/>
+			</div>
+		</div>
+		<div class="mt-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b border-stone-200 text-left text-xs text-stone-500">

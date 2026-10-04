@@ -35,13 +35,20 @@ Los topes `DECIDER_MAX_USD` y `DECIDER_TOTAL_MAX_USD` siguen aplicando.
 
 ## El sitio
 
-`site/` es un sitio Astro estático que lee `radar/*.json` directamente del repositorio. Se
-publica en GitHub Pages, en un enlace propio:
+`site/` es un sitio Astro estático que lee `radar/*.json` directamente del repositorio. Es una
+herramienta para **analizar los últimos resultados de una empresa**:
 
-**https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/**
+- **Portada (`/`)**: buscador por nombre o ticker, los últimos comunicados publicados y la
+  lista de las 99 empresas.
+- **Ficha de empresa (`/company/<ticker>/`)**: el análisis del último comunicado. Qué dice
+  (guidance, resultados, perspectivas, cautela), qué ha cambiado respecto al comunicado
+  anterior, la probabilidad de cada respuesta de guidance, la comparación con la mediana de
+  sus pares de sector, las preguntas de sí o no (márgenes, demanda y temas) y el histórico.
+- **Market trends (`/trends/`)**: los agregados por trimestre y sector. Secundario.
+- **Method (`/method/`)**: preguntas exactas, validación y el estudio que salió nulo.
 
-Tiene cuatro tipos de página: resumen, empresas, ficha por empresa (`/company/<ticker>/`) y
-método. La web personal (`personal-website`) solo lo enlaza desde la tarjeta del proyecto.
+Las frases de "qué ha cambiado" y la comparación con pares se calculan al compilar, en
+`site/src/lib/radar.ts` (`changesSince`, `peersOf`). No se llama al modelo para eso.
 
 ```bash
 cd site
@@ -50,25 +57,36 @@ npx astro dev --background   # http://localhost:4321/decision-signal-lab/
 npm run build                # genera site/dist
 ```
 
-Todos los enlaces internos pasan por `link()` (`site/src/lib/radar.ts`), que antepone la ruta
-base `/decision-signal-lab`. Si el sitio se moviera a un dominio propio, basta con cambiar
-`site` y `base` en `site/astro.config.mjs`.
+## Publicación y dominio
 
-## Actualización y despliegue automáticos
+GitHub Pages sirve la rama `gh-pages`. Hoy el sitio está en
+https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/.
 
-`.github/workflows/radar.yml` se ejecuta dos veces al día (13:30 y 22:30 UTC), y también al
-hacer push a `main` de cambios en `site/` o `radar/`:
+Para pasarlo a un dominio propio comprado en Cloudflare basta un archivo:
 
-1. `radar update`: busca filings nuevos, los puntúa y hace commit de `radar/` si hay algo.
-   Este paso necesita dos secretos en GitHub (Settings → Secrets and variables → Actions):
-   `PERPLEXITY_API_KEY` y `SEC_USER_AGENT`. Si faltan, el paso se salta con un aviso y el
-   resto sigue. En un push no se ejecuta.
-2. Compila `site/`.
-3. Publica `site/dist` en la rama `gh-pages`, que es la que sirve GitHub Pages
-   (Settings → Pages → Deploy from a branch → `gh-pages`).
+1. Crear `site/public/CNAME` con el dominio en una línea (por ejemplo `midominio.com`) y
+   hacer push. `site/astro.config.mjs` lee ese archivo y compila con la raíz `/`; GitHub Pages
+   lo lee para servir el dominio.
+2. En Cloudflare, DNS del dominio: un registro `CNAME` con nombre `@` y destino
+   `alejandrorodriguezalvarez884-dot.github.io`, y otro igual con nombre `www`. Con el proxy
+   desactivado ("DNS only") hasta que GitHub emita el certificado.
+3. En GitHub, Settings → Pages: comprobar que aparece el dominio y marcar "Enforce HTTPS".
+4. Cambiar `liveUrl` de la tarjeta en `personal-website/src/data/profile.ts`.
 
-En GitHub no hay caché de respuestas, así que el tope total no cuenta lo gastado antes; el tope
-por ejecución es $0.25.
+## Actualizaciones: solo a mano
+
+No hay nada programado. Los datos cambian únicamente cuando el usuario lo decide, por una de
+estas dos vías:
+
+- **Desde GitHub** (sirve desde el móvil): Actions → Radar → Run workflow. Busca filings
+  nuevos, los puntúa, hace commit de `radar/` y publica el sitio. Necesita los secretos
+  `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` (Settings → Secrets and variables → Actions); si
+  faltan, se salta la búsqueda y solo republica. Tope por ejecución: $0.25.
+- **Desde este ordenador**: `uv run decisionsignal radar update`, revisar, y hacer commit y
+  push de `radar/`.
+
+Un push a `main` que toque `site/` o `radar/` recompila y publica el sitio, sin buscar nada ni
+gastar en la API.
 
 ## Validación
 

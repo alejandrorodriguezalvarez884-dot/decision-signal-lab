@@ -1,0 +1,188 @@
+---
+import Page from "../components/Page.astro";
+import GuidanceChart from "../components/GuidanceChart.astro";
+import TrendChart from "../components/TrendChart.astro";
+import {
+	THEME_LABEL,
+	chartQuarters,
+	inProgress,
+	link,
+	lastFull,
+	pct,
+	quarterLabel,
+	quarterMonths,
+	SMALL_SECTOR,
+	sectorRows,
+	summary,
+	yearBefore,
+} from "../lib/radar";
+
+const prev = yearBefore(lastFull);
+const tiles = [
+	{ label: "Raised guidance", now: lastFull.guidance.raised, before: prev?.guidance.raised },
+	{ label: "Lowered guidance", now: lastFull.guidance.lowered, before: prev?.guidance.lowered },
+	{ label: "Describe margin pressure", now: lastFull.flags.margin_pressure, before: prev?.flags.margin_pressure },
+	{ label: "Describe weakening demand", now: lastFull.flags.demand_weakness, before: prev?.flags.demand_weakness },
+];
+const delta = (now: number, before: number) => {
+	const d = Math.round(now * 100) - Math.round(before * 100);
+	return d === 0 ? "same as" : `${d > 0 ? "+" : "−"}${Math.abs(d)} ${Math.abs(d) === 1 ? "pt" : "pts"} vs`;
+};
+
+const share = (key: string) =>
+	chartQuarters.map((q) => ({
+		label: quarterLabel(q.quarter),
+		year: q.quarter.slice(0, 4),
+		value: q.flags[key],
+		n: q.n,
+	}));
+const pctTicks = [0, 0.2, 0.4].map((v) => ({ v, label: pct(v) }));
+const trends = [
+	{ title: "Margin pressure", note: "Releases that describe declining or pressured margins", key: "margin_pressure" },
+	{ title: "Weakening demand", note: "Releases that describe weaker demand, orders or bookings", key: "demand_weakness" },
+	{ title: "Caution", note: "Releases where management voices at least moderate uncertainty", key: "uncertainty" },
+];
+const trendMax = 0.5;
+
+const themeKeys = summary.meta.has_themes ? Object.keys(summary.meta.theme_questions) : [];
+const themeQuarters = chartQuarters.filter((q) => themeKeys.every((k) => q.themes[k] !== null));
+const themeMax = Math.max(0.2, Math.ceil(Math.max(...themeQuarters.flatMap((q) => themeKeys.map((k) => q.themes[k] ?? 0)), 0) * 5) / 5);
+const themeTicks = [0, themeMax / 2, themeMax].map((v) => ({ v, label: pct(v) }));
+
+---
+
+<Page
+	title="Market trends"
+	description="Guidance changes, margin pressure, demand and themes across the results releases of 99 large US companies since 2021."
+>
+	<Fragment slot="header">
+		<h1 class="mt-3 font-serif text-3xl font-semibold leading-tight text-stone-900 sm:text-4xl">Market trends</h1>
+		<p class="mt-4 max-w-2xl text-base leading-relaxed text-stone-600">
+			The readings of every company added up by quarter. The answers are probabilities, so they add up into
+			shares: how many of the {summary.meta.companies} companies raised guidance, how many describe pressured margins.
+		</p>
+	</Fragment>
+
+	<section class="mt-10">
+		<h2 class="text-sm font-medium text-stone-500">
+			Releases published in {quarterLabel(lastFull.quarter)} ({quarterMonths(lastFull.quarter)}) · {lastFull.n} companies
+		</h2>
+		<div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+			{
+				tiles.map((t) => (
+					<div class="rounded-xl border border-stone-200 bg-white p-4">
+						<div class="text-xs leading-snug text-stone-500">{t.label}</div>
+						<div class="mt-2 text-3xl font-semibold text-stone-900">{pct(t.now)}</div>
+						{t.before !== undefined && prev && (
+							<div class="mt-1 text-xs text-stone-500">
+								{delta(t.now, t.before)} {quarterLabel(prev.quarter)}
+							</div>
+						)}
+					</div>
+				))
+			}
+		</div>
+		{
+			inProgress && (
+				<p class="mt-3 text-xs text-stone-500">
+					{quarterLabel(inProgress.quarter)} is under way: {inProgress.n} {inProgress.n === 1 ? "release" : "releases"} so far.
+				</p>
+			)
+		}
+	</section>
+
+	<section class="mt-12 rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">Guidance: who raised, who lowered</h2>
+		<p class="mb-5 mt-1 text-sm text-stone-500">Share of the releases published each quarter.</p>
+		<GuidanceChart quarters={chartQuarters} />
+		<p class="mt-4 text-xs leading-relaxed text-stone-500">
+			The first quarter of every year is low on both sides because most companies are then giving guidance for a new
+			year, which has nothing to be raised or lowered against. Compare a quarter with the same quarter of other years.
+		</p>
+	</section>
+
+	<section class="mt-6 grid gap-6 md:grid-cols-3">
+		{
+			trends.map((t) => (
+				<div class="rounded-2xl border border-stone-200 bg-white p-5">
+					<TrendChart
+						title={t.title}
+						note={t.note}
+						points={share(t.key)}
+						max={trendMax}
+						ticks={pctTicks}
+						format={pct}
+						what="of releases"
+					/>
+				</div>
+			))
+		}
+	</section>
+
+	{
+		themeKeys.length > 0 && (
+			<section class="mt-12">
+				<h2 class="font-serif text-xl font-semibold text-stone-900">Themes</h2>
+				<p class="mt-1 text-sm text-stone-500">
+					Share of releases in which each topic is said to affect the business. The exact questions are on the{" "}
+					<a href={link("/method/")} class="underline hover:text-stone-900">method page</a>.
+				</p>
+				<div class="mt-5 grid gap-6 sm:grid-cols-2">
+					{themeKeys.map((k) => (
+						<div class="rounded-2xl border border-stone-200 bg-white p-5">
+							<TrendChart
+								title={THEME_LABEL[k] ?? k}
+								points={themeQuarters.map((q) => ({
+									label: quarterLabel(q.quarter),
+									year: q.quarter.slice(0, 4),
+									value: q.themes[k] ?? 0,
+									n: q.n,
+								}))}
+								max={themeMax}
+								ticks={themeTicks}
+								format={pct}
+								what="of releases"
+							/>
+						</div>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<section class="mt-12">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">By sector, last 12 months</h2>
+		<p class="mt-1 text-sm text-stone-500">
+			Sorted by raised minus lowered. Sectors with fewer than {SMALL_SECTOR} companies are listed last: one
+			release moves them a lot.
+		</p>
+		<div class="mt-4 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+			<table class="w-full text-sm tabular-nums">
+				<thead>
+					<tr class="border-b border-stone-200 text-left text-xs font-medium text-stone-500">
+						<th class="px-4 py-3 font-medium">Sector</th>
+						<th class="px-3 py-3 text-right font-medium">Companies</th>
+						<th class="px-3 py-3 text-right font-medium">Raised</th>
+						<th class="px-3 py-3 text-right font-medium">Lowered</th>
+						<th class="px-3 py-3 text-right font-medium">Margin pressure</th>
+						<th class="px-4 py-3 text-right font-medium">Weak demand</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						sectorRows.map((s) => (
+							<tr class={`border-b border-stone-100 last:border-0 ${s.companies < SMALL_SECTOR ? "text-stone-400" : "text-stone-800"}`}>
+								<td class="whitespace-nowrap px-4 py-2.5">{s.sector}</td>
+								<td class="px-3 py-2.5 text-right text-stone-500">{s.companies}</td>
+								<td class="px-3 py-2.5 text-right">{pct(s.guidance.raised)}</td>
+								<td class="px-3 py-2.5 text-right">{pct(s.guidance.lowered)}</td>
+								<td class="px-3 py-2.5 text-right">{pct(s.flags.margin_pressure)}</td>
+								<td class="px-4 py-2.5 text-right">{pct(s.flags.demand_weakness)}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</Page>

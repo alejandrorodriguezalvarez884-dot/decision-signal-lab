@@ -1,9 +1,11 @@
 # DecisionSignalLab
 
-**El producto: el radar de resultados.** Un modelo de decisión lee cada comunicado de resultados
-de 99 empresas del S&P 100 y responde siempre las mismas preguntas (¿sube o baja el guidance?,
-¿hay presión en márgenes?, ¿se debilita la demanda?). Las respuestas se publican como datos en
-`radar/` y se ven en el sitio de `site/`, publicado en
+**El producto: una herramienta para analizar los últimos resultados de una empresa.** Un
+modelo de decisión lee cada comunicado de resultados de 99 empresas del S&P 100 y responde
+siempre las mismas preguntas (¿sube o baja el guidance?, ¿hay presión en márgenes?, ¿se debilita
+la demanda?). El sitio de `site/` muestra, por empresa, qué dice el último comunicado, qué ha
+cambiado respecto al anterior y cómo queda frente a sus pares. Los datos están en `radar/` y se
+actualizan solo a mano. Publicado en
 https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/. Cómo funciona,
 comandos y validación: [docs/RADAR.md](docs/RADAR.md).
 

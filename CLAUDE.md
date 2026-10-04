@@ -15,6 +15,8 @@ Reglas que no se negocian:
   `report --holdout` siguen bloqueados sin `lock`.
 - **El radar solo lee texto.** `radar.py` no usa precios, retornos ni la reacción del mercado, y
   la web no publica nada que sea una predicción o una recomendación.
+- **Nada programado.** Los datos del radar se actualizan solo cuando el usuario lo lanza a
+  mano. No se añaden `schedule`, cron ni tareas periódicas.
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.
 - **Los resultados nulos se reportan tal cual.**
 

@@ -190,7 +190,8 @@ const QUESTION_LABEL: Record<string, string> = {
 		<h2>Cost and code</h2>
 		<p>
 			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls, and a new release costs
-			about {perRelease} cents. The site is static and rebuilds from a JSON file that a scheduled job updates.
+			about {perRelease} cents. The site is static: it is rebuilt from a JSON file that is updated by hand, so the latest release shown for a
+			company is the latest one at the time of the last update ({fmtDate(m.last_date)}).
 			The pipeline, the questions, the validation sample and the dataset are in{" "}
 			<a href={REPO_URL}>the repository</a>.
 		</p>

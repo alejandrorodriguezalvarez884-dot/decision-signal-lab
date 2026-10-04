@@ -161,3 +161,109 @@ export const yearGroups = (years: string[]) =>
 
 export type Tip = { title: string; rows: [string, string, string?][] };
 export const tip = (t: Tip) => JSON.stringify(t);
+
+// =========================================================================== one company
+// Everything the company page says about a release: its history, the previous release and
+// what other companies' latest releases look like.
+const byTicker = new Map<string, Release[]>();
+for (const r of releases) {
+  if (!byTicker.has(r.ticker)) byTicker.set(r.ticker, []);
+  byTicker.get(r.ticker)!.push(r); // releases.json is sorted oldest first
+}
+export const historyOf = (ticker: string) => byTicker.get(ticker) ?? [];
+export const latestOf = (ticker: string) => historyOf(ticker).at(-1)!;
+
+export const SCALES = [
+  { key: "results_strength", label: "Results", low: "weak", high: "strong", word: strengthWord },
+  { key: "outlook_tone", label: "Outlook", low: "negative", high: "positive", word: outlookWord },
+  { key: "uncertainty", label: "Caution", low: "none", high: "a lot", word: cautionWord },
+] as const;
+export type ScaleKey = (typeof SCALES)[number]["key"];
+
+// Yes/no readings: the two core ones and the themes.
+export const FLAGS: { key: string; label: string; phrase: string }[] = [
+  { key: "margin_pressure", label: "Margin pressure", phrase: "describes pressured margins" },
+  { key: "demand_weakness", label: "Weakening demand", phrase: "describes weakening demand" },
+  { key: "tariffs", label: "Tariffs", phrase: "says tariffs affect the business" },
+  { key: "ai", label: "AI", phrase: "presents AI as a driver of demand or investment" },
+  { key: "supply_chain", label: "Supply chain", phrase: "says supply chain problems hurt results" },
+  { key: "restructuring", label: "Restructuring", phrase: "reports job cuts or restructuring" },
+];
+export const flagValue = (r: Release, key: string): number | undefined =>
+  key === "margin_pressure" || key === "demand_weakness" ? r[key] : r.themes[key];
+const says = (r: Release, key: string) => (flagValue(r, key) ?? 0) >= summary.meta.theme_threshold;
+
+const median = (xs: number[]) => {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+export type Peers = {
+  label: string; // who the comparison is with
+  n: number;
+  median: Record<ScaleKey, number>;
+  share: Record<string, number>; // share of peers whose latest release says each flag
+};
+
+// The latest release of every other company in the sector, or of every other company when the
+// sector is too small for a median to mean anything.
+export function peersOf(company: Company): Peers {
+  const others = summary.companies.filter((c) => c.ticker !== company.ticker);
+  const sector = others.filter((c) => c.sector === company.sector);
+  const useSector = sector.length + 1 >= SMALL_SECTOR;
+  const set = (useSector ? sector : others).map((c) => latestOf(c.ticker));
+  return {
+    label: useSector ? `${company.sector} peers` : "all other companies",
+    n: set.length,
+    median: Object.fromEntries(SCALES.map((s) => [s.key, median(set.map((r) => r[s.key]))])) as Record<ScaleKey, number>,
+    share: Object.fromEntries(FLAGS.map((f) => [f.key, set.filter((r) => says(r, f.key)).length / set.length])),
+  };
+}
+
+const GUIDANCE_NOW: Record<GuidanceClass, string> = {
+  raised: "Guidance was raised",
+  lowered: "Guidance was lowered",
+  mixed: "Guidance was partly raised and partly lowered",
+  reaffirmed: "Guidance was reaffirmed",
+  new_period: "Guidance was given for a new period",
+  withdrawn: "Guidance was withdrawn",
+  none: "No guidance was given",
+};
+const GUIDANCE_BEFORE: Record<GuidanceClass, string> = {
+  raised: "it was raised",
+  lowered: "it was lowered",
+  mixed: "it was partly raised and partly lowered",
+  reaffirmed: "it was reaffirmed",
+  new_period: "it was given for a new period",
+  withdrawn: "it was withdrawn",
+  none: "none was given",
+};
+
+// Plain sentences on how a release differs from the company's previous one.
+export function changesSince(now: Release, prev: Release | undefined): string[] {
+  if (!prev) return [`${GUIDANCE_NOW[now.guidance]}. This is the first release on record for the company.`];
+  const out: string[] = [];
+  out.push(
+    now.guidance === prev.guidance
+      ? `${GUIDANCE_NOW[now.guidance]}, as in the previous release.`
+      : `${GUIDANCE_NOW[now.guidance]}; in the previous release ${GUIDANCE_BEFORE[prev.guidance]}.`,
+  );
+  const same: string[] = [];
+  for (const s of SCALES) {
+    const a = s.word(now[s.key]).toLowerCase();
+    const b = s.word(prev[s.key]).toLowerCase();
+    if (a === b) same.push(s.label.toLowerCase());
+    else out.push(`${s.label} ${s.key === "uncertainty" ? "is" : "reads as"} ${a}, ${now[s.key] > prev[s.key] ? "up" : "down"} from ${b}.`);
+  }
+  if (same.length) {
+    const list = same.length > 1 ? `${same.slice(0, -1).join(", ")} and ${same.at(-1)}` : same[0];
+    out.push(`${list[0].toUpperCase()}${list.slice(1)} ${same.length > 1 ? "read" : "reads"} the same as last time.`);
+  }
+  const asked = FLAGS.filter((f) => flagValue(now, f.key) !== undefined && flagValue(prev, f.key) !== undefined);
+  const added = asked.filter((f) => says(now, f.key) && !says(prev, f.key)).map((f) => f.phrase);
+  const dropped = asked.filter((f) => !says(now, f.key) && says(prev, f.key)).map((f) => f.phrase);
+  if (added.length) out.push(`New in this release: it ${added.join("; it ")}.`);
+  if (dropped.length) out.push(`No longer the case: it ${dropped.join("; it ")}.`);
+  return out;
+}

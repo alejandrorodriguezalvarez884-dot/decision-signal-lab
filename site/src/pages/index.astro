@@ -1,248 +1,142 @@
 ---
 import Page from "../components/Page.astro";
-import GuidanceChart from "../components/GuidanceChart.astro";
-import TrendChart from "../components/TrendChart.astro";
 import GuidanceChip from "../components/GuidanceChip.astro";
-import {
-	THEME_LABEL,
-	THEME_WORD,
-	chartQuarters,
-	companyUrl,
-	fmtDate,
-	inProgress,
-	link,
-	lastFull,
-	pct,
-	quarterLabel,
-	quarterMonths,
-	SMALL_SECTOR,
-	sectorRows,
-	summary,
-	yearBefore,
-} from "../lib/radar";
+import { companyUrl, fmtDate, latestOf, link, strengthWord, summary } from "../lib/radar";
 
-const prev = yearBefore(lastFull);
-const tiles = [
-	{ label: "Raised guidance", now: lastFull.guidance.raised, before: prev?.guidance.raised },
-	{ label: "Lowered guidance", now: lastFull.guidance.lowered, before: prev?.guidance.lowered },
-	{ label: "Describe margin pressure", now: lastFull.flags.margin_pressure, before: prev?.flags.margin_pressure },
-	{ label: "Describe weakening demand", now: lastFull.flags.demand_weakness, before: prev?.flags.demand_weakness },
-];
-const delta = (now: number, before: number) => {
-	const d = Math.round(now * 100) - Math.round(before * 100);
-	return d === 0 ? "same as" : `${d > 0 ? "+" : "−"}${Math.abs(d)} ${Math.abs(d) === 1 ? "pt" : "pts"} vs`;
-};
-
-const share = (key: string) =>
-	chartQuarters.map((q) => ({
-		label: quarterLabel(q.quarter),
-		year: q.quarter.slice(0, 4),
-		value: q.flags[key],
-		n: q.n,
-	}));
-const pctTicks = [0, 0.2, 0.4].map((v) => ({ v, label: pct(v) }));
-const trends = [
-	{ title: "Margin pressure", note: "Releases that describe declining or pressured margins", key: "margin_pressure" },
-	{ title: "Weakening demand", note: "Releases that describe weaker demand, orders or bookings", key: "demand_weakness" },
-	{ title: "Caution", note: "Releases where management voices at least moderate uncertainty", key: "uncertainty" },
-];
-const trendMax = 0.5;
-
-const themeKeys = summary.meta.has_themes ? Object.keys(summary.meta.theme_questions) : [];
-const themeQuarters = chartQuarters.filter((q) => themeKeys.every((k) => q.themes[k] !== null));
-const themeMax = Math.max(0.2, Math.ceil(Math.max(...themeQuarters.flatMap((q) => themeKeys.map((k) => q.themes[k] ?? 0)), 0) * 5) / 5);
-const themeTicks = [0, themeMax / 2, themeMax].map((v) => ({ v, label: pct(v) }));
-
-const latest = summary.latest.slice(0, 25);
+const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
+const recent = summary.latest.slice(0, 6);
 ---
 
 <Page
-	title="What large US companies say in their results"
-	description="Guidance changes, margin pressure and demand in the results releases of 99 large US companies, read by a decision model and updated daily from SEC filings."
+	title="Analyse a company's latest results"
+	description="Pick one of 99 large US companies and see what its latest results release says about guidance, results, outlook, margins and demand, read by a decision model and set against its previous release and its peers."
 >
 	<Fragment slot="header">
 		<h1 class="mt-3 font-serif text-3xl font-semibold leading-tight text-stone-900 sm:text-4xl">
-			What large US companies say in their results
+			What did the company say in its latest results?
 		</h1>
 		<p class="mt-4 max-w-2xl text-base leading-relaxed text-stone-600">
-			Every results release that {summary.meta.companies} S&P 100 companies file with the SEC is read by a decision
-			model that answers the same fixed questions each time: did guidance go up or down, are margins under
-			pressure, is demand weakening. The answers are probabilities, so they add up into the charts below.
+			Pick a company. A decision model has read its latest results release and answered the same fixed questions
+			it answers for every company: did guidance go up or down, how strong are the results, are margins under
+			pressure, is demand weakening. You get the answers, what changed since the previous release and how the
+			company compares with its peers.
 		</p>
+		<div class="mt-6 max-w-xl">
+			<label for="company-search" class="sr-only">Search a company by name or ticker</label>
+			<input
+				id="company-search"
+				type="search"
+				autocomplete="off"
+				placeholder="Search by name or ticker, for example Apple or NVDA"
+				class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
+			/>
+			<p id="company-empty" class="mt-3 text-sm text-stone-500" hidden>
+				No company matches. The tool covers {summary.meta.companies} companies of the S&P 100, listed below.
+			</p>
+		</div>
 	</Fragment>
 
-	<section class="mt-10">
-		<h2 class="text-sm font-medium text-stone-500">
-			Releases published in {quarterLabel(lastFull.quarter)} ({quarterMonths(lastFull.quarter)}) · {lastFull.n} companies
-		</h2>
-		<div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+	<section id="recent" class="mt-10">
+		<h2 class="text-sm font-medium text-stone-500">Latest results published</h2>
+		<div class="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
 			{
-				tiles.map((t) => (
-					<div class="rounded-xl border border-stone-200 bg-white p-4">
-						<div class="text-xs leading-snug text-stone-500">{t.label}</div>
-						<div class="mt-2 text-3xl font-semibold text-stone-900">{pct(t.now)}</div>
-						{t.before !== undefined && prev && (
-							<div class="mt-1 text-xs text-stone-500">
-								{delta(t.now, t.before)} {quarterLabel(prev.quarter)}
-							</div>
-						)}
-					</div>
+				recent.map((r) => (
+					<a
+						href={companyUrl(r.ticker)}
+						class="rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-stone-400"
+					>
+						<div class="flex items-baseline justify-between gap-3">
+							<span class="font-medium text-stone-900">{r.name}</span>
+							<span class="shrink-0 text-xs tabular-nums text-stone-400">{fmtDate(r.date)}</span>
+						</div>
+						<div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-stone-600">
+							<GuidanceChip value={r.guidance} />
+							<span>Results: {strengthWord(latestOf(r.ticker).results_strength).toLowerCase()}</span>
+						</div>
+					</a>
 				))
 			}
 		</div>
-		{
-			inProgress && (
-				<p class="mt-3 text-xs text-stone-500">
-					{quarterLabel(inProgress.quarter)} is under way: {inProgress.n} {inProgress.n === 1 ? "release" : "releases"} so far.
-				</p>
-			)
-		}
 	</section>
 
-	<section class="mt-12 rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">Guidance: who raised, who lowered</h2>
-		<p class="mb-5 mt-1 text-sm text-stone-500">Share of the releases published each quarter.</p>
-		<GuidanceChart quarters={chartQuarters} />
-		<p class="mt-4 text-xs leading-relaxed text-stone-500">
-			The first quarter of every year is low on both sides because most companies are then giving guidance for a new
-			year, which has nothing to be raised or lowered against. Compare a quarter with the same quarter of other years.
+	<section class="mt-12">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">All companies</h2>
+		<p class="mt-1 text-sm text-stone-500">
+			The S&P 100 as it stood in December 2020. The label is what each one said about guidance in its latest release.
 		</p>
-	</section>
-
-	<section class="mt-6 grid gap-6 md:grid-cols-3">
 		{
-			trends.map((t) => (
-				<div class="rounded-2xl border border-stone-200 bg-white p-5">
-					<TrendChart
-						title={t.title}
-						note={t.note}
-						points={share(t.key)}
-						max={trendMax}
-						ticks={pctTicks}
-						format={pct}
-						what="of releases"
-					/>
+			sectors.map((sector) => (
+				<div class="company-group mt-6">
+					<h3 class="text-sm font-medium text-stone-500">{sector}</h3>
+					<div class="mt-2 grid gap-2 sm:grid-cols-2">
+						{summary.companies
+							.filter((c) => c.sector === sector)
+							.map((c) => (
+								<a
+									href={companyUrl(c.ticker)}
+									data-company={`${c.name} ${c.ticker}`.toLowerCase()}
+									class="company-item flex items-center justify-between gap-3 rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm transition-colors hover:border-stone-400"
+								>
+									<span class="min-w-0 truncate">
+										<span class="font-medium text-stone-900">{c.name}</span>
+										<span class="ml-1.5 text-xs text-stone-400">{c.ticker}</span>
+									</span>
+									<GuidanceChip value={c.last_guidance} />
+								</a>
+							))}
+					</div>
 				</div>
 			))
 		}
 	</section>
 
-	{
-		themeKeys.length > 0 && (
-			<section class="mt-12">
-				<h2 class="font-serif text-xl font-semibold text-stone-900">Themes</h2>
-				<p class="mt-1 text-sm text-stone-500">
-					Share of releases in which each topic is said to affect the business. The exact questions are on the{" "}
-					<a href={link("/method/")} class="underline hover:text-stone-900">method page</a>.
-				</p>
-				<div class="mt-5 grid gap-6 sm:grid-cols-2">
-					{themeKeys.map((k) => (
-						<div class="rounded-2xl border border-stone-200 bg-white p-5">
-							<TrendChart
-								title={THEME_LABEL[k] ?? k}
-								points={themeQuarters.map((q) => ({
-									label: quarterLabel(q.quarter),
-									year: q.quarter.slice(0, 4),
-									value: q.themes[k] ?? 0,
-									n: q.n,
-								}))}
-								max={themeMax}
-								ticks={themeTicks}
-								format={pct}
-								what="of releases"
-							/>
-						</div>
-					))}
-				</div>
-			</section>
-		)
-	}
-
-	<section class="mt-12">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">By sector, last 12 months</h2>
-		<p class="mt-1 text-sm text-stone-500">
-			Sorted by raised minus lowered. Sectors with fewer than {SMALL_SECTOR} companies are listed last: one
-			release moves them a lot.
+	<section class="mt-14 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+		<h2 class="font-serif text-lg font-semibold text-stone-900">Across all companies</h2>
+		<p class="mt-1 max-w-2xl text-sm leading-relaxed text-stone-600">
+			The same readings added up over {summary.meta.releases.toLocaleString("en-US")} releases since 2021: how many
+			companies raise or lower guidance each quarter, margin pressure, tariffs, AI. And the study this tool came
+			from, including what did not work.
 		</p>
-		<div class="mt-4 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-			<table class="w-full text-sm tabular-nums">
-				<thead>
-					<tr class="border-b border-stone-200 text-left text-xs font-medium text-stone-500">
-						<th class="px-4 py-3 font-medium">Sector</th>
-						<th class="px-3 py-3 text-right font-medium">Companies</th>
-						<th class="px-3 py-3 text-right font-medium">Raised</th>
-						<th class="px-3 py-3 text-right font-medium">Lowered</th>
-						<th class="px-3 py-3 text-right font-medium">Margin pressure</th>
-						<th class="px-4 py-3 text-right font-medium">Weak demand</th>
-					</tr>
-				</thead>
-				<tbody>
-					{
-						sectorRows.map((s) => (
-							<tr class={`border-b border-stone-100 last:border-0 ${s.companies < SMALL_SECTOR ? "text-stone-400" : "text-stone-800"}`}>
-								<td class="whitespace-nowrap px-4 py-2.5">{s.sector}</td>
-								<td class="px-3 py-2.5 text-right text-stone-500">{s.companies}</td>
-								<td class="px-3 py-2.5 text-right">{pct(s.guidance.raised)}</td>
-								<td class="px-3 py-2.5 text-right">{pct(s.guidance.lowered)}</td>
-								<td class="px-3 py-2.5 text-right">{pct(s.flags.margin_pressure)}</td>
-								<td class="px-4 py-2.5 text-right">{pct(s.flags.demand_weakness)}</td>
-							</tr>
-						))
-					}
-				</tbody>
-			</table>
-		</div>
-	</section>
-
-	<section class="mt-12">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">Latest releases</h2>
-		<p class="mt-1 text-sm text-stone-500">
-			Newest first. <a href={link("/companies/")} class="underline hover:text-stone-900">All {summary.meta.companies} companies</a>.
+		<p class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm font-medium">
+			<a href={link("/trends/")} class="text-stone-900 underline underline-offset-4 hover:text-emerald-700">Market trends</a>
+			<a href={link("/method/")} class="text-stone-900 underline underline-offset-4 hover:text-emerald-700">Method and study</a>
 		</p>
-		<div class="mt-4 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
-			<table class="w-full text-sm">
-				<thead>
-					<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
-						<th class="px-4 py-3 font-medium">Date</th>
-						<th class="px-3 py-3 font-medium">Company</th>
-						<th class="px-3 py-3 font-medium">Guidance</th>
-						<th class="px-3 py-3 font-medium">Previous</th>
-						<th class="px-3 py-3 font-medium">Also says</th>
-						<th class="px-4 py-3 text-right font-medium">Filing</th>
-					</tr>
-				</thead>
-				<tbody>
-					{
-						latest.map((r) => {
-							const says = [
-								r.margin_pressure >= 0.5 && "margin pressure",
-								r.demand_weakness >= 0.5 && "weak demand",
-								...r.themes.map((k) => THEME_WORD[k] ?? k),
-							].filter(Boolean);
-							return (
-								<tr class="border-b border-stone-100 last:border-0">
-									<td class="whitespace-nowrap px-4 py-2.5 tabular-nums text-stone-500">{fmtDate(r.date)}</td>
-									<td class="px-3 py-2.5">
-										<a href={companyUrl(r.ticker)} class="font-medium text-stone-900 hover:text-emerald-700">
-											{r.name}
-										</a>
-									</td>
-									<td class="px-3 py-2.5">
-										<GuidanceChip value={r.guidance} />
-									</td>
-									<td class="px-3 py-2.5">{r.prev_guidance ? <GuidanceChip value={r.prev_guidance} /> : ""}</td>
-									<td class="px-3 py-2.5 text-xs text-stone-500">{says.join(", ")}</td>
-									<td class="whitespace-nowrap px-4 py-2.5 text-right">
-										<a href={r.url} target="_blank" rel="noreferrer" class="text-xs text-stone-500 underline hover:text-stone-900">
-											SEC
-										</a>
-									</td>
-								</tr>
-							);
-						})
-					}
-				</tbody>
-			</table>
-		</div>
 	</section>
 </Page>
+
+<script>
+	// Filter the company list as the visitor types. Enter opens the first match.
+	const input = document.getElementById("company-search") as HTMLInputElement;
+	const items = [...document.querySelectorAll<HTMLAnchorElement>(".company-item")];
+	const groups = [...document.querySelectorAll<HTMLElement>(".company-group")];
+	const empty = document.getElementById("company-empty")!;
+	const recent = document.getElementById("recent")!;
+
+	function apply() {
+		const q = input.value.trim().toLowerCase();
+		let shown = 0;
+		for (const item of items) {
+			const match = !q || item.dataset.company!.includes(q);
+			item.hidden = !match;
+			if (match) shown += 1;
+		}
+		for (const g of groups) g.hidden = !g.querySelector(".company-item:not([hidden])");
+		empty.hidden = shown > 0;
+		recent.hidden = q.length > 0;
+	}
+
+	input.addEventListener("input", apply);
+	input.addEventListener("keydown", (e) => {
+		if (e.key !== "Enter") return;
+		const first = items.find((i) => !i.hidden);
+		if (first && input.value.trim()) window.location.href = first.href;
+	});
+	apply();
+</script>
+
+<style>
+	/* `hidden` must win over the flex and grid display set by the utility classes. */
+	[hidden] {
+		display: none !important;
+	}
+</style>

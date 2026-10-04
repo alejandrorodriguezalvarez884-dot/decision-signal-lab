@@ -1,11 +1,10 @@
 name: Radar
 
-# Looks for new results releases on EDGAR, scores them, commits radar/ and publishes the site
-# in site/ to the gh-pages branch. A push that touches the site or the data only rebuilds.
+# Nothing here runs on a timer. The data is updated only when someone starts this workflow by
+# hand (Actions > Radar > Run workflow): it looks for new results releases on EDGAR, scores
+# them, commits radar/ and publishes the site in site/ to the gh-pages branch. A push that
+# touches the site or the data rebuilds and publishes without fetching anything.
 on:
-  schedule:
-    - cron: "30 13 * * *" # after the pre-market releases (US Eastern morning)
-    - cron: "30 22 * * *" # after the post-close releases
   push:
     branches: [main]
     paths: ["site/**", "radar/**", ".github/workflows/radar.yml"]
