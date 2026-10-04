@@ -1,0 +1,20 @@
+# Files NOT uploaded by `gcloud run deploy --source`. Without this file gcloud would upload
+# everything, including .env with the API key and data/ with the paid model responses.
+.gcloudignore
+.git
+.gitignore
+.claude
+.env
+.env.*
+data
+results
+docs
+tests
+.venv
+.deploy
+**/__pycache__
+**/.pytest_cache
+site/node_modules
+site/dist
+site/.astro
+validation/guidance_sample.jsonl

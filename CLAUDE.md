@@ -15,9 +15,11 @@ Reglas que no se negocian:
   `report --holdout` siguen bloqueados sin `lock`.
 - **El radar solo lee texto.** `radar.py` no usa precios, retornos ni la reacción del mercado, y
   la web no publica nada que sea una predicción o una recomendación.
-- **Todo en local, nada programado.** No hay GitHub Actions ni tareas periódicas, y no se
-  añaden. Los datos y el sitio cambian solo cuando el usuario lanza un comando del `Makefile`
-  (`make check`, `make update`, `make deploy`, `make publish`).
+- **Nada programado y nada en GitHub Actions.** Todo se lanza a mano desde el `Makefile`
+  (`make check`, `make update`, `make deploy`, `make publish`). El servicio público corre en
+  Cloud Run y solo trabaja cuando un visitante pide un análisis.
+- **El servicio público gasta con la clave del usuario.** No se suben ni se quitan los topes
+  (`RADAR_DAILY_MAX_USD`, `RADAR_TOTAL_MAX_USD`, `ONDEMAND_REQUEST_MAX_USD`, límite por IP) sin preguntarle.
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.
 - **Los resultados nulos se reportan tal cual.**
 

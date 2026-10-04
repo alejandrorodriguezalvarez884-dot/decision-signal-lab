@@ -19,6 +19,10 @@ Decisiones del usuario ese día:
 - **Sin actualizaciones programadas y sin GitHub Actions.** Todo se ejecuta en local y lo
   orquesta el `Makefile`: `make check`, `make update`, `make deploy`, `make publish`.
 - Va a comprar un dominio en Cloudflare para el sitio. Aún no lo tiene.
+- **Lo principal es ejecutar la metodología para la empresa que el visitante quiera**, bajo
+  demanda, descargando el comunicado en ese momento. Lo ya ejecutado alimenta las tendencias.
+- Alojado en **Cloud Run**, con el mismo patrón que `lease-lens` (un contenedor con web y API,
+  `make deploy`).
 
 | Hecho | Pendiente |
 |---|---|
@@ -29,9 +33,13 @@ Decisiones del usuario ese día:
 | Preguntas temáticas (aranceles, IA, cadena de suministro, reestructuración) sobre todo el histórico: 2.338 peticiones, $0.99 reales ($1.24 estimados). **Gasto acumulado del proyecto: $4.98 de $10** | |
 | Dataset en `radar/`: 2.238 comunicados de 99 empresas, de 2021-01-13 a 2026-10-01; 79 filings descartados por no ser de resultados y 21 por duplicados | |
 | `radar update` probado contra EDGAR en local: 20 segundos, no encuentra nada nuevo y deja el dataset igual | |
-| Sitio estático en `site/` (Astro, 102 páginas), publicado en https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/. Portada con buscador de empresas; ficha de empresa con el análisis del último comunicado (qué dice, qué ha cambiado, comparación con pares, histórico); agregados en `/trends/`; método y estudio en `/method/`. Revisado en escritorio y móvil | Dominio propio: cuando el usuario lo compre, crear `site/public/CNAME` con el nombre y seguir los pasos de RADAR.md |
-| `Makefile` en la raíz: `check` (gratis, mira qué hay nuevo y cuánto costaría), `update`, `site`, `deploy` (sube `site/dist` a `gh-pages`), `save`, `publish`. El workflow de GitHub Actions se eliminó. `make check` y `make deploy` probados el 2026-10-04 | `make update` no se ha probado con comunicados nuevos reales (no había ninguno); la ruta de puntuación es la misma que `build` |
-| | El análisis cubre solo las 99 empresas del universo. Analizar otra empresa exige añadirla a `radar_universe.py` |
+| Análisis bajo demanda (`ondemand.py`, `api.py`, 13 tests): busca los últimos Item 2.02 de cualquier empresa, lee el último comunicado de resultados y el anterior, y guarda cada lectura. Probado en local con AMD el 2026-10-04: 1,9 s y $0.0016 | Solo empresas que presentan resultados en un 8-K (quedan fuera casi todas las extranjeras). La comparación de una empresa de fuera del estudio es contra las 99 del estudio, no contra su sector |
+| Topes del servicio: $0.25 al día, $4 en total, $0.03 por petición, 30 análisis por IP y hora, 2 instancias | El límite por IP vive en la memoria de cada instancia; el que protege de verdad es el tope diario, que se guarda en el bucket |
+| Sitio Astro (103 páginas): portada con buscador de cualquier empresa, `/analyze/`, fichas del estudio, `/trends/`, `/method/` | |
+| `Makefile`: `api`, `dev`, `serve`, `deploy` (Cloud Run), `check`, `update`, `save`, `publish`. Sin GitHub Actions | `make update` no se ha probado con comunicados nuevos reales |
+| `Dockerfile` y `scripts/deploy-cloudrun.sh` (Cloud Build, Secret Manager, bucket para los análisis) | Ver más abajo el estado del despliegue |
+| | Las lecturas bajo demanda se quedan en el bucket; no entran en `radar/` ni en las tendencias |
+| | El análisis del estudio cubre 99 empresas; ampliar ese universo exige pagar su histórico |
 | Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`, campo nuevo `liveUrl`), publicada en alejandrorodriguez.dev/projects/ con enlace al sitio | No se ha añadido a `featuredProjectNames` (la selección de la portada) |
 | | Ampliar al S&P 500 (estimación previa: $8–12, por encima de lo que queda del tope) |
 

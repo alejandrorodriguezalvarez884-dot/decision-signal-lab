@@ -1,0 +1,233 @@
+---
+// The on-demand analysis. The page is an empty shell: the browser asks the API to read the
+// company's latest results release and draws the answer.
+import Page from "../components/Page.astro";
+import { studyBenchmark, summary } from "../lib/radar";
+
+const context = {
+	benchmark: studyBenchmark,
+	study: summary.companies.map((c) => c.ticker),
+};
+---
+
+<Page
+	title="Analyse a company"
+	description="Run the Earnings Radar reading on the latest results release of any company that files with the SEC."
+>
+	<div id="analysis" class="mt-6" data-context={JSON.stringify(context)}>
+		<div id="analysis-status" class="rounded-2xl border border-stone-200 bg-white p-6 text-sm text-stone-600">
+			<p class="font-medium text-stone-900">Reading the latest results release</p>
+			<ol class="mt-3 space-y-1.5">
+				<li data-step="0">Finding the company's results filings on EDGAR</li>
+				<li data-step="1">Downloading the press release</li>
+				<li data-step="2">Asking the model the fixed questions</li>
+			</ol>
+			<p class="mt-4 text-xs text-stone-500">A company nobody has asked about takes a few seconds. After that it is instant.</p>
+		</div>
+	</div>
+	<noscript><p class="mt-6 text-sm text-stone-600">This page needs JavaScript to run the analysis.</p></noscript>
+</Page>
+
+<script>
+	import {
+		FLAGS,
+		GUIDANCE_LABEL,
+		GUIDANCE_ORDER,
+		SCALES,
+		THRESHOLD,
+		changesSince,
+		companyUrl,
+		flagValue,
+		fmtDate,
+		link,
+		pct,
+		type GuidanceClass,
+		type Peers,
+		type Release,
+	} from "../lib/reading";
+
+	type Result = {
+		company: { ticker: string; name: string; in_study: boolean };
+		latest: Release;
+		previous: Release | null;
+		read_now: number;
+	};
+
+	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
+	const root = document.getElementById("analysis")!;
+	const { benchmark, study } = JSON.parse(root.dataset.context!) as { benchmark: Peers; study: string[] };
+
+	// Everything that comes from the API or the address bar goes in as text, never as markup.
+	function h(tag: string, cls = "", text?: string): HTMLElement {
+		const e = document.createElement(tag);
+		if (cls) e.className = cls;
+		if (text !== undefined) e.textContent = text;
+		return e;
+	}
+	const add = (parent: HTMLElement, ...children: (HTMLElement | string)[]) => (parent.append(...children), parent);
+	const a = (href: string, text: string, cls = "underline hover:text-stone-900", external = false) => {
+		const e = h("a", cls, text) as HTMLAnchorElement;
+		e.href = href;
+		if (external) (e.target = "_blank"), (e.rel = "noreferrer");
+		return e;
+	};
+	// SEC lists many names in capitals.
+	const tidy = (name: string) =>
+		name === name.toUpperCase() ? name.toLowerCase().replace(/(^|[\s\-/&.(])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : name;
+	const card = "rounded-2xl border border-stone-200 bg-white p-5 sm:p-6";
+
+	function chip(value: GuidanceClass) {
+		const dot = value === "raised" ? "var(--radar-up)" : value === "lowered" ? "var(--radar-down)" : "var(--radar-axis)";
+		const e = h("span", "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-700");
+		const d = h("span", "h-2 w-2 rounded-full");
+		d.style.background = dot;
+		return add(e, d, GUIDANCE_LABEL[value]);
+	}
+
+	function render(r: Result) {
+		const { latest, previous, company } = r;
+		const out = document.createDocumentFragment();
+
+		const head = h("div");
+		const h1 = h("h1", "font-serif text-3xl font-semibold text-stone-900 sm:text-4xl", `${tidy(company.name)} `);
+		h1.append(h("span", "text-xl font-normal text-stone-400", company.ticker));
+		const meta = h("p", "mt-2 text-sm text-stone-500", `Latest results published ${fmtDate(latest.date)} · `);
+		meta.append(a(latest.url, "SEC filing", undefined, true));
+		add(head, h1, meta);
+		if (company.in_study) {
+			const more = h("p", "mt-1 text-sm text-stone-500", "This company is in the study. ");
+			more.append(a(companyUrl(company.ticker), "See its full history since 2021"));
+			head.append(more);
+		}
+		out.append(head);
+
+		const tiles = h("section", "mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4");
+		const tile = (label: string, value: HTMLElement | string, sub: string) => {
+			const t = h("div", "rounded-xl border border-stone-200 bg-white p-4");
+			const v = typeof value === "string" ? h("div", "mt-2 text-lg font-semibold leading-tight text-stone-900", value) : add(h("div", "mt-2"), value);
+			return add(t, h("div", "text-xs text-stone-500", label), v, h("div", "mt-1 text-xs text-stone-500", sub));
+		};
+		tiles.append(tile("Guidance", chip(latest.guidance), `${pct(latest.guidance_p[latest.guidance])} likely`));
+		for (const s of SCALES) {
+			const now = s.word(latest[s.key]);
+			const before = previous ? s.word(previous[s.key]) : null;
+			tiles.append(tile(s.label, now, before === null ? "" : before === now ? "same as last time" : `was ${before.toLowerCase()}`));
+		}
+		out.append(tiles);
+
+		const changed = h("section", `mt-6 ${card}`);
+		changed.append(h("h2", "font-serif text-xl font-semibold text-stone-900", "What changed"));
+		if (previous) changed.append(h("p", "mt-1 text-sm text-stone-500", `Against the previous release, published ${fmtDate(previous.date)}.`));
+		const list = h("ul", "mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700");
+		for (const c of changesSince(latest, previous ?? undefined)) list.append(h("li", "", c));
+		out.append(add(changed, list));
+
+		const two = h("section", "mt-6 grid gap-6 md:grid-cols-2");
+		const g = h("div", `min-w-0 ${card}`);
+		g.append(
+			h("h2", "font-serif text-lg font-semibold text-stone-900", "Guidance, as the model reads it"),
+			h("p", "mt-1 text-xs text-stone-500", "How likely each answer is, likeliest first."),
+		);
+		const bars = h("div", "mt-4 space-y-2.5");
+		GUIDANCE_ORDER.map((c) => ({ c, p: latest.guidance_p[c] }))
+			.sort((x, y) => y.p - x.p)
+			.filter((x, i) => i < 3 || x.p >= 0.03)
+			.forEach(({ c, p }) => {
+				const row = h("div", "grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-3 text-sm");
+				const track = h("span", "h-2.5");
+				const bar = h("span", "block h-full rounded-r");
+				bar.style.width = `${Math.max(p * 100, 1)}%`;
+				bar.style.background = "var(--radar-line)";
+				bars.append(add(row, h("span", "text-stone-600", GUIDANCE_LABEL[c]), add(track, bar), h("span", "text-right tabular-nums text-stone-900", pct(p))));
+			});
+		two.append(add(g, bars));
+
+		const peers = h("div", `min-w-0 ${card}`);
+		peers.append(
+			h("h2", "font-serif text-lg font-semibold text-stone-900", "Against the study"),
+			h("p", "mt-1 text-xs text-stone-500", `The dot is this release. The tick is the median of the latest release of ${benchmark.label}.`),
+		);
+		const rows = h("div", "mt-3");
+		for (const s of SCALES) {
+			const row = h("div", "scale-row");
+			const track = h("div", "scale-track");
+			const tick = h("span", "scale-peer");
+			tick.style.left = `${benchmark.median[s.key] * 100}%`;
+			const dot = h("span", "scale-dot");
+			dot.style.left = `${latest[s.key] * 100}%`;
+			const ends = add(h("div", "scale-ends"), h("span", "", s.low), h("span", "", s.high));
+			rows.append(add(row, h("div", "scale-label", s.label), add(h("div", "scale-body"), add(track, tick, dot), ends)));
+		}
+		two.append(add(peers, rows));
+		out.append(two);
+
+		const tableWrap = h("section", "mt-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white");
+		const table = h("table", "w-full text-sm");
+		const thead = h("tr", "border-b border-stone-200 text-left text-xs text-stone-500");
+		[
+			["Does it say so?", "px-4 py-3 font-medium"],
+			["This release", "px-3 py-3 font-medium"],
+			["How likely", "px-3 py-3 text-right font-medium"],
+			["Study companies that say it", "px-4 py-3 text-right font-medium"],
+		].forEach(([t, c]) => thead.append(h("th", c, t)));
+		const tbody = h("tbody");
+		for (const f of FLAGS) {
+			const p = flagValue(latest, f.key);
+			if (p === undefined) continue;
+			const tr = h("tr", "border-b border-stone-100 last:border-0");
+			const yes = p >= THRESHOLD;
+			add(
+				tr,
+				h("td", "px-4 py-2.5 text-stone-800", f.label),
+				add(h("td", "px-3 py-2.5"), h("span", yes ? "font-medium text-stone-900" : "text-stone-400", yes ? "Yes" : "No")),
+				h("td", "px-3 py-2.5 text-right tabular-nums text-stone-600", pct(p)),
+				h("td", "px-4 py-2.5 text-right tabular-nums text-stone-600", pct(benchmark.share[f.key])),
+			);
+			tbody.append(tr);
+		}
+		out.append(add(tableWrap, add(table, add(h("thead"), thead), tbody)));
+
+		out.append(
+			h(
+				"p",
+				"mt-4 text-xs text-stone-500",
+				r.read_now > 0 ? "Read just now, for this request, and stored so the next visitor gets it at once." : "This release had already been read.",
+			),
+		);
+		root.replaceChildren(out);
+		document.title = `${tidy(company.name)}: latest results — Earnings Radar`;
+	}
+
+	function fail(message: string) {
+		const box = h("div", card);
+		const back = h("p", "mt-4 text-sm");
+		back.append(a(link("/"), "Search another company", "font-medium text-stone-900 underline underline-offset-4"));
+		add(box, h("p", "font-medium text-stone-900", "The analysis could not be run"), h("p", "mt-2 text-sm text-stone-600", message), back);
+		root.replaceChildren(box);
+	}
+
+	async function run() {
+		const ticker = (new URLSearchParams(location.search).get("ticker") ?? "").trim();
+		if (!/^[A-Za-z][A-Za-z0-9.\-]{0,9}$/.test(ticker)) return fail("No company was given. Search for one from the home page.");
+
+		// The steps are not reported by the server: they only show that work is under way.
+		const steps = [...root.querySelectorAll<HTMLElement>("[data-step]")];
+		let i = 0;
+		const mark = () => steps.forEach((s, n) => (s.style.color = n < i ? "#a8a29e" : n === i ? "#1c1917" : ""));
+		mark();
+		const timer = setInterval(() => ((i = Math.min(i + 1, steps.length - 1)), mark()), 1500);
+
+		try {
+			const res = await fetch(`${API}/api/analysis/${encodeURIComponent(ticker.toUpperCase())}`);
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok) return fail(typeof body.detail === "string" ? body.detail : "The service did not answer. Try again in a moment.");
+			if (!study.includes(body.company.ticker)) body.company.in_study = false;
+			render(body as Result);
+		} catch {
+			fail("The service could not be reached. Try again in a moment.");
+		} finally {
+			clearInterval(timer);
+		}
+	}
+	run();
+</script>

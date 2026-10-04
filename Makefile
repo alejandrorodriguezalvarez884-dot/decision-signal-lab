@@ -1,18 +1,18 @@
-# Everything about the radar runs from here, on this machine. Nothing runs on a server or on a
-# timer: the data changes when you run `make update`, the site when you run `make deploy`.
+# Everything about the radar is started from here, by hand. Nothing runs on a timer.
 #
 #   make            list the targets
-#   make publish    the whole thing: fetch and score new filings, save them, publish the site
+#   make check      what is new on EDGAR for the study companies, and what it would cost
+#   make publish    fetch and score those filings, save them, redeploy the service
+#
+# The public service (site + on-demand analysis) runs on Cloud Run; `make deploy` builds and
+# deploys it. `make serve` runs the same thing on this machine.
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 # Most a single `make update` may spend on the API, in USD. Override: make update MAX_USD=1
 MAX_USD ?= 0.25
-REMOTE := $(shell git remote get-url origin)
-DEPLOY_DIR := .deploy
-
-.PHONY: help install test check update summary site dev deploy save publish
+.PHONY: help install test check update summary site api dev serve deploy save publish
 
 help: ## List the targets
 	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
@@ -36,22 +36,21 @@ summary: ## Rebuild radar/summary.json from radar/releases.json
 site: ## Build the site into site/dist
 	cd site && npm run build
 
-dev: ## Preview the site locally at http://localhost:4321
+api: ## Run the API alone at http://localhost:8000, with reload (pair it with `make dev`)
+	RADAR_ALLOWED_ORIGINS=http://localhost:4321 uv run uvicorn decisionsignal.api:create_app --factory --reload --port 8000
+
+dev: ## Run the site at http://localhost:4321 with reload (it calls the API on port 8000)
 	cd site && npm run dev
 
-deploy: site ## Build the site and publish it (pushes site/dist to the gh-pages branch)
-	rm -rf $(DEPLOY_DIR)
-	cp -R site/dist $(DEPLOY_DIR)
-	touch $(DEPLOY_DIR)/.nojekyll
-	cd $(DEPLOY_DIR) && git init -q -b gh-pages && git add -A \
-		&& git -c user.name="$$(git -C .. config user.name)" -c user.email="$$(git -C .. config user.email)" \
-			commit -q -m "Deploy $$(git -C .. rev-parse --short HEAD)" \
-		&& git push -f $(REMOTE) gh-pages
-	rm -rf $(DEPLOY_DIR)
+serve: site ## Run site and API together at http://localhost:8080, as in production
+	RADAR_STATIC_DIR=site/dist uv run uvicorn decisionsignal.api:create_app --factory --port 8080
+
+deploy: ## Build and deploy the service to Cloud Run (see scripts/deploy-cloudrun.sh)
+	./scripts/deploy-cloudrun.sh
 
 save: ## Commit radar/ if it changed and push the current branch
 	@if git diff --quiet HEAD -- radar/; then echo "radar/: nothing to commit"; \
 		else git commit -q -m "Radar: update data" -- radar/ && echo "radar/: committed"; fi
 	git push origin HEAD
 
-publish: update save deploy ## Update the data, save it and publish the site
+publish: update save deploy ## Update the study data, save it and redeploy the service

@@ -14,6 +14,7 @@ import {
 	flagValue,
 	fmtDate,
 	historyOf,
+	link,
 	outlookWord,
 	pct,
 	peersOf,
@@ -74,6 +75,10 @@ const cautionTicks = [
 		<p class="mt-2 text-sm text-stone-500">
 			{company.sector} · latest results published {fmtDate(latest.date)} ·{" "}
 			<a href={latest.url} target="_blank" rel="noreferrer" class="underline hover:text-stone-900">SEC filing</a>
+		</p>
+		<p class="mt-1 text-sm text-stone-500">
+			Has the company reported since?{" "}
+			<a href={`${link("/analyze/")}?ticker=${company.ticker}`} class="underline hover:text-stone-900">Check EDGAR now</a>
 		</p>
 	</Fragment>
 

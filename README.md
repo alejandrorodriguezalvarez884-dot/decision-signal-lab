@@ -1,14 +1,14 @@
 # DecisionSignalLab
 
-**El producto: una herramienta para analizar los últimos resultados de una empresa.** Un
-modelo de decisión lee cada comunicado de resultados de 99 empresas del S&P 100 y responde
-siempre las mismas preguntas (¿sube o baja el guidance?, ¿hay presión en márgenes?, ¿se debilita
-la demanda?). El sitio de `site/` muestra, por empresa, qué dice el último comunicado, qué ha
-cambiado respecto al anterior y cómo queda frente a sus pares. Los datos están en `radar/`.
-Todo se ejecuta en local con `make` (`make check`, `make publish`); no hay nada programado ni
-en GitHub Actions. Publicado en
-https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/. Cómo funciona,
-comandos y validación: [docs/RADAR.md](docs/RADAR.md).
+**El producto: una herramienta para analizar los últimos resultados de cualquier empresa.** El
+visitante escribe una empresa que presente resultados ante la SEC; el servicio descarga su
+último comunicado, un modelo de decisión responde siempre las mismas preguntas (¿sube o baja el
+guidance?, ¿hay presión en márgenes?, ¿se debilita la demanda?) y la web muestra las respuestas,
+qué ha cambiado respecto al comunicado anterior y cómo queda frente a 99 grandes empresas. Lo ya
+ejecutado sobre esas 99 (2.238 comunicados desde 2021, en `radar/`) alimenta las tendencias.
+
+El servicio (web y API en un contenedor) corre en Cloud Run y se despliega con `make deploy`.
+Nada está programado ni en GitHub Actions. Detalle: [docs/RADAR.md](docs/RADAR.md).
 
 **El origen: un estudio que salió nulo.** Lo que sigue describe ese estudio, cerrado el
 2026-10-04. El radar reutiliza su descarga, su limpieza de texto y su cliente.
@@ -106,8 +106,11 @@ src/decisionsignal/
   radar.py       dataset público: puntuación solo de texto, agregados, actualización incremental
   radar_universe.py  empresas del radar con nombre y sector
   validation.py  muestra a ciegas y acuerdo con un segundo lector
+  ondemand.py    análisis bajo demanda de cualquier empresa, con almacén y tope de gasto
+  api.py         servicio FastAPI: la API y el sitio estático en un mismo origen
 radar/           dataset publicado (releases.json, summary.json)
-site/            sitio Astro estático que muestra radar/ (GitHub Pages)
+site/            sitio Astro estático (portada con buscador, análisis, tendencias, método)
+Dockerfile, scripts/deploy-cloudrun.sh   imagen y despliegue en Cloud Run
 validation/      muestra, etiquetas y resultado de la validación
 tests/           look-ahead, limpieza de texto, cliente, estadística, e2e sintético
 ```

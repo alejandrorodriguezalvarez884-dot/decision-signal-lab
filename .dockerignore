@@ -1,0 +1,18 @@
+# Kept out of the image build context. Same list as .gcloudignore.
+.git
+.gitignore
+.claude
+.env
+.env.*
+data
+results
+docs
+tests
+.venv
+.deploy
+**/__pycache__
+**/.pytest_cache
+site/node_modules
+site/dist
+site/.astro
+validation/guidance_sample.jsonl

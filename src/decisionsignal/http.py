@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import threading
 import time
 from pathlib import Path
@@ -48,7 +49,9 @@ def cached_get(
     Raises ``httpx.HTTPStatusError`` for 404 and other non-retryable statuses.
     """
     path = _cache_path(url)
-    if use_cache and path.exists():
+    # A server has no use for the on-disk copy and its disk is memory: DECISIONSIGNAL_HTTP_CACHE=off.
+    keep = os.environ.get("DECISIONSIGNAL_HTTP_CACHE", "on") != "off"
+    if use_cache and keep and path.exists():
         return path.read_bytes()
     own_client = client is None
     client = client or httpx.Client(timeout=60, follow_redirects=True)
@@ -67,8 +70,9 @@ def cached_get(
                 time.sleep(float(resp.headers.get("retry-after", 2**attempt)))
                 continue
             resp.raise_for_status()
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(resp.content)
+            if keep:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(resp.content)
             return resp.content
         resp.raise_for_status()
         raise RuntimeError(f"GET failed after {retries} attempts: {url}")

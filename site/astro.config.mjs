@@ -3,16 +3,13 @@ import { existsSync, readFileSync } from "node:fs";
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
-// The site moves to its own domain by adding one file: public/CNAME, holding the domain name
-// (for example "example.com"). GitHub Pages reads that file to serve the domain, and this
-// config reads it to build the links. Without it the site is the GitHub Pages project site.
-const cname = new URL("./public/CNAME", import.meta.url);
-const domain = existsSync(cname) ? readFileSync(cname, "utf8").trim() : "";
+// The public address, for canonical links. It lives in the file SITE_URL (one line) so that
+// moving to a domain is a one-line change; without the file the links are left relative.
+const file = new URL("./SITE_URL", import.meta.url);
+const site = existsSync(file) ? readFileSync(file, "utf8").trim() : undefined;
 
-// Every internal link goes through `link()` in src/lib/radar.ts, which prefixes `base`.
 export default defineConfig({
-  site: domain ? `https://${domain}` : "https://alejandrorodriguezalvarez884-dot.github.io",
-  base: domain ? "/" : "/decision-signal-lab",
+  site,
   trailingSlash: "always",
   vite: {
     plugins: [tailwindcss()],

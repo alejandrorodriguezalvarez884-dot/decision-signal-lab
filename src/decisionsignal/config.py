@@ -153,6 +153,30 @@ RADAR_THEME_THRESHOLD = 0.5
 RADAR_LATEST = 40
 
 
+# --------------------------------------------------------------------------- on demand
+# The public service analyses a company's latest release when a visitor asks for it.
+# How far back it looks for the latest and the previous results release.
+ONDEMAND_LOOKBACK_DAYS = 430
+# Filings it will read, newest first, before giving up on finding two results releases.
+ONDEMAND_MAX_FILINGS = 6
+# Most one request may spend, and most the service may spend in a day (UTC), in USD.
+ONDEMAND_REQUEST_MAX_USD = 0.03
+
+
+def ondemand_daily_max_usd() -> float:
+    return float(os.environ.get("RADAR_DAILY_MAX_USD", "0.25"))
+
+
+def ondemand_total_max_usd() -> float:
+    """Most the public service may ever spend, over its whole life. Raising it is how the owner
+    lets it keep reading new companies."""
+    return float(os.environ.get("RADAR_TOTAL_MAX_USD", "4.00"))
+
+
+# Analyses one address may ask for per hour.
+ONDEMAND_PER_IP_PER_HOUR = 30
+
+
 # --------------------------------------------------------------------------- SEC
 SEC_MAX_RPS = 8  # SEC fair-access policy allows 10 requests/second
 

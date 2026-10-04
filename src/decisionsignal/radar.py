@@ -52,9 +52,14 @@ def _r(x: float, nd: int = 3) -> float:
 
 
 # =========================================================================== scoring
+def _ticker(row: dict) -> str:
+    """The study's ticker for the company, or the one the row carries for any other company."""
+    return row.get("ticker") or TICKER_BY_CIK[int(row["cik"])]
+
+
 def requests_for(row: dict) -> tuple[dict, dict]:
     """(core, themes) payloads for one filing. Same masking as the study, so the cache hits."""
-    anon = anonymize(row["text"], row.get("sec_name") or "", [TICKER_BY_CIK[int(row["cik"])]])
+    anon = anonymize(row["text"], row.get("sec_name") or "", [_ticker(row)])
     return payload(*Q.text_request(anon)), payload(*Q.theme_request(anon))
 
 
@@ -76,7 +81,7 @@ def release_record(row: dict, core: dict, themes: dict | None) -> dict | None:
     g = a["guidance"]
     return {
         "id": acc,
-        "ticker": TICKER_BY_CIK[cik],
+        "ticker": _ticker(row),
         "accepted": accepted.isoformat(),
         "date": accepted.date().isoformat(),
         "quarter": f"{accepted.year}Q{accepted.quarter}",

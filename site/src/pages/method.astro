@@ -36,6 +36,15 @@ const QUESTION_LABEL: Record<string, string> = {
 			second Item 2.02 within 20 days, only the first counts.
 		</p>
 
+		<h2>On demand</h2>
+		<p>
+			Any other company is read when someone asks for it. The service looks up the company's Item 2.02 filings
+			on EDGAR, takes the newest one the model reads as a results release and the one before it, and asks the
+			same questions. Each filing is read once and stored, so the same company is instant afterwards. It works
+			for companies that report results in a Form 8-K, which leaves out most foreign companies. The service has
+			a spending limit; when it is reached, companies already read keep working and new ones have to wait.
+		</p>
+
 		<h2>The questions</h2>
 		<p>
 			The reader is a decision model (<code>{m.model}</code>). Unlike a chat model it does not write: it takes a
@@ -190,8 +199,8 @@ const QUESTION_LABEL: Record<string, string> = {
 		<h2>Cost and code</h2>
 		<p>
 			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls, and a new release costs
-			about {perRelease} cents. The site is static: it is rebuilt from a JSON file that is updated by hand, so the latest release shown for a
-			company is the latest one at the time of the last update ({fmtDate(m.last_date)}).
+			about {perRelease} cents. The study's data is updated by hand, so the history shown for its companies
+			runs to {fmtDate(m.last_date)}; the on-demand analysis always looks at EDGAR at the moment you ask.
 			The pipeline, the questions, the validation sample and the dataset are in{" "}
 			<a href={REPO_URL}>the repository</a>.
 		</p>

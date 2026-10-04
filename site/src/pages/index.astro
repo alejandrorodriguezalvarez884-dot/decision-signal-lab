@@ -9,17 +9,17 @@ const recent = summary.latest.slice(0, 6);
 
 <Page
 	title="Analyse a company's latest results"
-	description="Pick one of 99 large US companies and see what its latest results release says about guidance, results, outlook, margins and demand, read by a decision model and set against its previous release and its peers."
+	description="Run a fixed reading on the latest results release of any company that files with the SEC: guidance, results, outlook, margins and demand, read by a decision model and set against its previous release."
 >
 	<Fragment slot="header">
 		<h1 class="mt-3 font-serif text-3xl font-semibold leading-tight text-stone-900 sm:text-4xl">
 			What did the company say in its latest results?
 		</h1>
 		<p class="mt-4 max-w-2xl text-base leading-relaxed text-stone-600">
-			Pick a company. A decision model has read its latest results release and answered the same fixed questions
-			it answers for every company: did guidance go up or down, how strong are the results, are margins under
-			pressure, is demand weakening. You get the answers, what changed since the previous release and how the
-			company compares with its peers.
+			Type any company that files with the SEC. The tool fetches its latest results release from EDGAR and a
+			decision model answers the same fixed questions it answers for every company: did guidance go up or down,
+			how strong are the results, are margins under pressure, is demand weakening. You get the answers, what
+			changed since the previous release and how it compares with {summary.meta.companies} large companies.
 		</p>
 		<div class="mt-6 max-w-xl">
 			<label for="company-search" class="sr-only">Search a company by name or ticker</label>
@@ -27,12 +27,14 @@ const recent = summary.latest.slice(0, 6);
 				id="company-search"
 				type="search"
 				autocomplete="off"
-				placeholder="Search by name or ticker, for example Apple or NVDA"
+				placeholder="Name or ticker, for example AMD or Uber"
 				class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
 			/>
-			<p id="company-empty" class="mt-3 text-sm text-stone-500" hidden>
-				No company matches. The tool covers {summary.meta.companies} companies of the S&P 100, listed below.
-			</p>
+			<div id="remote" class="mt-3" hidden>
+				<p class="text-sm font-medium text-stone-500">Run the analysis now</p>
+				<div id="remote-list" class="mt-2 grid gap-2 sm:grid-cols-2"></div>
+				<p id="remote-note" class="mt-2 text-xs text-stone-500"></p>
+			</div>
 		</div>
 	</Fragment>
 
@@ -60,9 +62,10 @@ const recent = summary.latest.slice(0, 6);
 	</section>
 
 	<section class="mt-12">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">All companies</h2>
+		<h2 class="font-serif text-xl font-semibold text-stone-900">Already analysed, with history</h2>
 		<p class="mt-1 text-sm text-stone-500">
-			The S&P 100 as it stood in December 2020. The label is what each one said about guidance in its latest release.
+			The {summary.meta.companies} companies of the study, every release since 2021. The label is what each one said about
+			guidance in its latest release.
 		</p>
 		{
 			sectors.map((sector) => (
@@ -105,33 +108,77 @@ const recent = summary.latest.slice(0, 6);
 </Page>
 
 <script>
-	// Filter the company list as the visitor types. Enter opens the first match.
+	// The list of study companies filters as the visitor types. Any other company comes from
+	// the API's search and opens the on-demand analysis.
+	import { link } from "../lib/reading";
+
+	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
 	const input = document.getElementById("company-search") as HTMLInputElement;
 	const items = [...document.querySelectorAll<HTMLAnchorElement>(".company-item")];
 	const groups = [...document.querySelectorAll<HTMLElement>(".company-group")];
-	const empty = document.getElementById("company-empty")!;
 	const recent = document.getElementById("recent")!;
+	const remote = document.getElementById("remote")!;
+	const remoteList = document.getElementById("remote-list")!;
+	const remoteNote = document.getElementById("remote-note")!;
+	const analyseUrl = (ticker: string) => `${link("/analyze/")}?ticker=${encodeURIComponent(ticker)}`;
+	const tidy = (name: string) =>
+		name === name.toUpperCase() ? name.toLowerCase().replace(/(^|[\s\-/&.(])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : name;
 
-	function apply() {
-		const q = input.value.trim().toLowerCase();
-		let shown = 0;
-		for (const item of items) {
-			const match = !q || item.dataset.company!.includes(q);
-			item.hidden = !match;
-			if (match) shown += 1;
-		}
+	let seq = 0;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+
+	function filterLocal(q: string) {
+		for (const item of items) item.hidden = !!q && !item.dataset.company!.includes(q);
 		for (const g of groups) g.hidden = !g.querySelector(".company-item:not([hidden])");
-		empty.hidden = shown > 0;
 		recent.hidden = q.length > 0;
 	}
 
-	input.addEventListener("input", apply);
-	input.addEventListener("keydown", (e) => {
-		if (e.key !== "Enter") return;
-		const first = items.find((i) => !i.hidden);
-		if (first && input.value.trim()) window.location.href = first.href;
+	async function searchRemote(q: string) {
+		const mine = ++seq;
+		if (!q) return void (remote.hidden = true);
+		let found: { ticker: string; name: string }[] = [];
+		let note = "";
+		try {
+			const res = await fetch(`${API}/api/companies?q=${encodeURIComponent(q)}`);
+			if (!res.ok) throw new Error(String(res.status));
+			found = (await res.json()).companies;
+			if (!found.length) note = "No company with that name or ticker files with the SEC.";
+		} catch {
+			note = "The company search is not available right now.";
+		}
+		if (mine !== seq) return; // a newer keystroke already answered
+		remoteList.replaceChildren(
+			...found.map((c) => {
+				const a = document.createElement("a");
+				a.href = analyseUrl(c.ticker);
+				a.className =
+					"remote-item flex items-center justify-between gap-3 rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm transition-colors hover:border-stone-500";
+				const name = document.createElement("span");
+				name.className = "min-w-0 truncate font-medium text-stone-900";
+				name.textContent = tidy(c.name);
+				const ticker = document.createElement("span");
+				ticker.className = "shrink-0 text-xs text-stone-400";
+				ticker.textContent = c.ticker;
+				a.append(name, ticker);
+				return a;
+			}),
+		);
+		remoteNote.textContent = note;
+		remoteNote.hidden = !note;
+		remote.hidden = false;
+	}
+
+	input.addEventListener("input", () => {
+		const q = input.value.trim().toLowerCase();
+		filterLocal(q);
+		clearTimeout(timer);
+		timer = setTimeout(() => searchRemote(q), 250);
 	});
-	apply();
+	input.addEventListener("keydown", (e) => {
+		if (e.key !== "Enter" || !input.value.trim()) return;
+		const first = remoteList.querySelector<HTMLAnchorElement>(".remote-item") ?? items.find((i) => !i.hidden);
+		window.location.href = first ? first.href : analyseUrl(input.value.trim());
+	});
 </script>
 
 <style>
