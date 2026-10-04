@@ -18,7 +18,8 @@ Decisiones del usuario ese día:
   estudio se pueden ver, pero son secundarios.
 - **Sin actualizaciones programadas y sin GitHub Actions.** Todo se ejecuta en local y lo
   orquesta el `Makefile`: `make check`, `make update`, `make deploy`, `make publish`.
-- Va a comprar un dominio en Cloudflare para el sitio. Aún no lo tiene.
+- Compró el dominio **`earningsradar.app`** en Cloudflare el 2026-10-04 y quedó asignado al
+  servicio de Cloud Run ese mismo día.
 - **Lo principal es ejecutar la metodología para la empresa que el visitante quiera**, bajo
   demanda, descargando el comunicado en ese momento. Lo ya ejecutado alimenta las tendencias.
 - Alojado en **Cloud Run**, con el mismo patrón que `lease-lens` (un contenedor con web y API,
@@ -37,7 +38,7 @@ Decisiones del usuario ese día:
 | Topes del servicio: $0.25 al día, $4 en total, $0.03 por petición, 30 análisis por IP y hora, 2 instancias | El límite por IP vive en la memoria de cada instancia; el que protege de verdad es el tope diario, que se guarda en el bucket |
 | Sitio Astro (103 páginas): portada con buscador de cualquier empresa, `/analyze/`, fichas del estudio, `/trends/`, `/method/` | |
 | `Makefile`: `api`, `dev`, `serve`, `deploy` (Cloud Run), `check`, `update`, `save`, `publish`. Sin GitHub Actions | `make update` no se ha probado con comunicados nuevos reales |
-| **Desplegado el 2026-10-04** en Cloud Run: https://earnings-radar-3qwezbjyfq-ew.a.run.app (proyecto `arctic-robot-474306-g3`, `europe-west1`, servicio `earnings-radar`, bucket `arctic-robot-474306-g3-earnings-radar`, secreto `earnings-radar-perplexity-api-key`). Comprobado en producción: páginas, búsqueda, análisis de AMD en 3 s por $0.0016 y segunda petición servida desde el bucket | La página antigua de GitHub Pages redirige a esta dirección. Dominio propio pendiente (pasos en RADAR.md). `site/SITE_URL` ya tiene la dirección, pero los enlaces canónicos entran en el próximo despliegue |
+| **Desplegado el 2026-10-04** en Cloud Run: https://earnings-radar-3qwezbjyfq-ew.a.run.app (proyecto `arctic-robot-474306-g3`, `europe-west1`, servicio `earnings-radar`, bucket `arctic-robot-474306-g3-earnings-radar`, secreto `earnings-radar-perplexity-api-key`). Comprobado en producción: páginas, búsqueda, análisis de AMD en 3 s por $0.0016 y segunda petición servida desde el bucket | Dominio `earningsradar.app` asignado (8 registros DNS en Cloudflare, solo DNS). `www` sin configurar |
 | | Las lecturas bajo demanda se quedan en el bucket; no entran en `radar/` ni en las tendencias |
 | | El análisis del estudio cubre 99 empresas; ampliar ese universo exige pagar su histórico |
 | Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`, campo nuevo `liveUrl`), publicada en alejandrorodriguez.dev/projects/ con enlace al sitio | No se ha añadido a `featuredProjectNames` (la selección de la portada) |

@@ -84,7 +84,8 @@ Los comandos de debajo siguen disponibles: `uv run decisionsignal radar estimate
 
 ## Despliegue en Cloud Run
 
-En producción: https://earnings-radar-3qwezbjyfq-ew.a.run.app
+En producción: **https://earningsradar.app** (la dirección propia de Cloud Run,
+https://earnings-radar-3qwezbjyfq-ew.a.run.app, sigue funcionando).
 
 Mismo patrón que `lease-lens`: un solo contenedor con el sitio estático servido por la app
 FastAPI, así que web y API comparten origen. `make deploy` ejecuta
@@ -103,10 +104,13 @@ FastAPI, así que web y API comparten origen. `make deploy` ejecuta
 La imagen lleva dentro `radar/`, así que tras `make update` hay que volver a desplegar para
 que el servicio y las tendencias vean los datos nuevos (`make publish` lo hace todo).
 
-**Dominio propio.** Cuando esté comprado en Cloudflare: asignarlo al servicio de Cloud Run
-(`gcloud beta run domain-mappings create --service earnings-radar --domain <dominio> --region europe-west1`),
-crear en Cloudflare los registros DNS que indique ese comando, y escribir la dirección en
-`site/SITE_URL` para los enlaces canónicos.
+**Dominio.** `earningsradar.app` está registrado en Cloudflare (cuenta
+`alejandrorodriguezalvarez884@gmail.com`, renueva el 2027-10-04) y asignado al servicio con un
+*domain mapping* de Cloud Run en `europe-west1`. En el DNS de Cloudflare hay 4 registros A y 4
+AAAA en la raíz que apuntan a Google, todos en modo "DNS only" (sin proxy, para que Google pueda
+emitir y renovar el certificado), más el TXT de verificación de Google, que no hay que borrar.
+`www.earningsradar.app` no está configurado. La dirección pública del sitio para los enlaces
+canónicos está en `site/SITE_URL`.
 
 ## Validación
 
