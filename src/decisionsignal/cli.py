@@ -48,6 +48,16 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--end", type=_d, default=date(2024, 12, 31))
     s.add_argument("--skip-model", action="store_true", help="stop before calling the API")
 
+    s = sub.add_parser("radar", help="the public dataset in radar/ (text only, no prices)")
+    s.add_argument("action", choices=["estimate", "build", "update", "summary"],
+                   help="estimate: cost of `build` | build: score the local download | "
+                        "update: fetch and score filings since the last update | summary: rebuild summary.json")
+    s.add_argument("--no-themes", action="store_true", help="skip the theme questions (about a third of the cost)")
+
+    s = sub.add_parser("validate", help="check the model's guidance reading against an independent reader")
+    s.add_argument("action", choices=["sample", "evaluate"])
+    s.add_argument("--answers", help="answers parquet to use instead of data/interim/answers.parquet")
+
     a = ap.parse_args(argv)
     from . import pipeline as P
 
@@ -72,6 +82,27 @@ def main(argv: list[str] | None = None) -> None:
         from .report import run
         res = run(include_holdout=a.holdout)
         print(f"wrote results/report.md ({', '.join(res['splits'])})")
+    elif a.cmd == "radar":
+        from . import radar as R
+        if a.action == "estimate":
+            print(json.dumps(R.estimate(R.local_filings(), themes=not a.no_themes), indent=2))
+            return
+        if a.action == "build":
+            R.build(themes=not a.no_themes)
+        elif a.action == "update":
+            R.update(themes=not a.no_themes)
+        m = R.write_summary()["meta"]
+        print(f"radar: {m['releases']} releases from {m['companies']} companies, "
+              f"{m['first_date']} to {m['last_date']} -> radar/")
+    elif a.cmd == "validate":
+        from pathlib import Path
+
+        from . import validation as V
+        answers = Path(a.answers) if a.answers else V.PATHS.answers
+        if a.action == "sample":
+            print(f"wrote {V.sample(answers)} excerpts to {V.SAMPLE_FILE}")
+        else:
+            print(json.dumps(V.evaluate(answers), indent=2))
     elif a.cmd == "pilot":
         if a.end >= HOLDOUT_START:
             raise SystemExit("The pilot must use design-period events; the holdout stays sealed.")

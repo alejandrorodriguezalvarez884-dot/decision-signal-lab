@@ -1,0 +1,111 @@
+{
+ "labelled": 45,
+ "agree_strict": 37,
+ "agree_lenient": 40,
+ "agree_direction": 42,
+ "by_model_class": {
+  "lowered": {
+   "n": 9,
+   "agree_strict": 7,
+   "agree_lenient": 7
+  },
+  "mixed": {
+   "n": 6,
+   "agree_strict": 3,
+   "agree_lenient": 5
+  },
+  "new_period": {
+   "n": 5,
+   "agree_strict": 4,
+   "agree_lenient": 4
+  },
+  "none": {
+   "n": 7,
+   "agree_strict": 7,
+   "agree_lenient": 7
+  },
+  "raised": {
+   "n": 9,
+   "agree_strict": 9,
+   "agree_lenient": 9
+  },
+  "reaffirmed": {
+   "n": 7,
+   "agree_strict": 7,
+   "agree_lenient": 7
+  },
+  "withdrawn": {
+   "n": 2,
+   "agree_strict": 0,
+   "agree_lenient": 1
+  }
+ },
+ "disagreements": [
+  {
+   "id": "r20",
+   "accessionNumber": "0000882095-23-000014",
+   "model": "lowered",
+   "reader": "reaffirmed",
+   "alt": "",
+   "note": "all lines unchanged from prior guidance"
+  },
+  {
+   "id": "r29",
+   "accessionNumber": "0000764180-24-000091",
+   "model": "lowered",
+   "reader": "reaffirmed",
+   "alt": "mixed",
+   "note": "narrows the EPS range around the same midpoint"
+  },
+  {
+   "id": "r30",
+   "accessionNumber": "0001090727-21-000010",
+   "model": "withdrawn",
+   "reader": "none",
+   "alt": "new_period",
+   "note": "no revenue or EPS guidance; only capital allocation items"
+  },
+  {
+   "id": "r42",
+   "accessionNumber": "0000318154-21-000017",
+   "model": "mixed",
+   "reader": "reaffirmed",
+   "alt": "lowered",
+   "note": "revenue and non-GAAP EPS reaffirmed; GAAP EPS revised without stating the direction"
+  },
+  {
+   "id": "r47",
+   "accessionNumber": "0000732712-23-000026",
+   "model": "new_period",
+   "reader": "reaffirmed",
+   "alt": "",
+   "note": "continues to expect the same ranges"
+  }
+ ],
+ "unclear": [
+  {
+   "id": "r15",
+   "accessionNumber": "0000318154-23-000061",
+   "model": "new_period",
+   "reader": "unclear",
+   "alt": "",
+   "note": "says it now expects new ranges, with no comparison to the previous ones"
+  },
+  {
+   "id": "r32",
+   "accessionNumber": "0000875045-21-000041",
+   "model": "mixed",
+   "reader": "unclear",
+   "alt": "",
+   "note": "says it is updating its ranges; the table with the numbers is not in the text"
+  },
+  {
+   "id": "r48",
+   "accessionNumber": "0001666700-21-000065",
+   "model": "new_period",
+   "reader": "unclear",
+   "alt": "",
+   "note": "says it now estimates new ranges, with no comparison to the previous ones"
+  }
+ ]
+}

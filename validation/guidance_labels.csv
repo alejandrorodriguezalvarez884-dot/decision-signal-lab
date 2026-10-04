@@ -1,0 +1,49 @@
+id,reader,alt,note
+r01,new_period,,initial outlook for the next fiscal year
+r02,raised,,raises EPS guidance range
+r03,none,,no guidance in the release
+r04,raised,,raises revenue and EPS guidance; expense lines unchanged
+r05,lowered,,EPS guidance restated lower to include an acquired IPR&D charge
+r06,none,,no guidance in the release
+r07,reaffirmed,,affirms full-year outlook
+r08,raised,,raises revenue and adjusted EPS guidance
+r09,new_period,,issues guidance for the new year
+r10,none,,no guidance in the release
+r11,raised,,raises EPS range and midpoint of sales guidance
+r12,none,,no guidance in the release
+r13,reaffirmed,,every outlook line marked no change
+r14,none,,no guidance in the release
+r15,unclear,,"says it now expects new ranges, with no comparison to the previous ones"
+r16,reaffirmed,,maintains prior guidance
+r17,mixed,,some cost lines better and operating cost guidance worse
+r18,new_period,,issues guidance for the new fiscal year
+r19,none,,no guidance in the release
+r20,reaffirmed,,all lines unchanged from prior guidance
+r21,reaffirmed,,long-term expectations remain unchanged
+r22,raised,,sales and free cash flow outlook up; EPS range tightened
+r23,reaffirmed,,re-confirms guidance given earlier
+r24,lowered,,EPS guidance revised down; cash flow confirmed
+r25,lowered,,revises revenue and EPS guidance citing the macro environment
+r26,lowered,,EPS and cash flow guidance revised down
+r27,lowered,,EPS guidance lowered; revenue unchanged
+r28,lowered,,non-COVID growth expectation reduced; revenue range narrowed; EPS maintained
+r29,reaffirmed,mixed,narrows the EPS range around the same midpoint
+r30,none,new_period,no revenue or EPS guidance; only capital allocation items
+r31,none,withdrawn,states it is not providing guidance
+r32,unclear,,"says it is updating its ranges; the table with the numbers is not in the text"
+r33,mixed,,capital and cost guidance up; depreciation guidance down; production unchanged
+r34,mixed,,revenue outlook lowered; EPS before pension adjustments raised
+r35,raised,,raises and narrows sales and EPS ranges
+r36,none,,no guidance in the release
+r37,raised,,raises full-year adjusted EBIT guidance
+r38,raised,mixed,EPS forecast raised; capital spending forecast lowered
+r39,new_period,,guidance for the next quarter only
+r40,reaffirmed,,reaffirms full-year guidance
+r41,reaffirmed,mixed,narrows the EPS range; capital spending forecast lowered
+r42,reaffirmed,lowered,revenue and non-GAAP EPS reaffirmed; GAAP EPS revised without stating the direction
+r43,raised,,raises full-year forecast
+r44,lowered,,organic revenue growth outlook cut; EPS growth maintained
+r45,raised,,organic revenue growth raised; rest consistent with previous guidance
+r46,reaffirmed,,reaffirms guidance ranges
+r47,reaffirmed,,continues to expect the same ranges
+r48,unclear,,"says it now estimates new ranges, with no comparison to the previous ones"

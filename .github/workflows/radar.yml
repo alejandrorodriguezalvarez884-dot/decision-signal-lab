@@ -1,0 +1,43 @@
+name: Update radar
+
+# Looks for new results releases on EDGAR, scores them and commits radar/. The personal
+# website rebuilds from those files half an hour later.
+on:
+  schedule:
+    - cron: "30 13 * * *" # after the pre-market releases (US Eastern morning)
+    - cron: "30 22 * * *" # after the post-close releases
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen --no-dev
+      - name: Fetch and score new filings
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          # Per-run ceiling. A busy day in results season is about $0.05; the run fails
+          # rather than spend past this.
+          DECIDER_MAX_USD: "0.25"
+        run: uv run decisionsignal radar update --no-themes
+      - name: Commit the dataset if it changed
+        run: |
+          if git diff --quiet -- radar/releases.json; then
+            echo "No new filings."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add radar/
+          git commit -m "Radar: add new releases"
+          git push

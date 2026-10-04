@@ -1,7 +1,7 @@
 # Instrucciones para agentes
 
 Lee primero [docs/HANDOFF.md](docs/HANDOFF.md): contiene el encargo, el estado, lo pendiente y
-los siguientes pasos.
+los siguientes pasos. El producto actual es el radar: [docs/RADAR.md](docs/RADAR.md).
 
 Reglas que no se negocian:
 - **Nada de trading.** No se escribe código que envíe órdenes ni que se conecte a un broker, y
@@ -10,8 +10,11 @@ Reglas que no se negocian:
   `tests/test_events.py`.
 - **Antes de gastar en la API de Perplexity o de descargar volúmenes grandes,**
   se pide permiso al usuario con una estimación (`uv run decisionsignal estimate …`).
-- **El holdout (eventos desde 2025-01-01) está sellado** hasta `decisionsignal lock`. No se ajustan
-  preguntas mirando el holdout.
+- **El estudio de predicción está cerrado como resultado nulo** (2026-10-04). El contraste con
+  retornos sobre el holdout (eventos desde 2025-01-01) no se hizo y no se hace: `score` y
+  `report --holdout` siguen bloqueados sin `lock`.
+- **El radar solo lee texto.** `radar.py` no usa precios, retornos ni la reacción del mercado, y
+  la web no publica nada que sea una predicción o una recomendación.
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.
 - **Los resultados nulos se reportan tal cual.**
 
@@ -20,4 +23,5 @@ Convenciones:
 - Python 3.12 con `uv`. Los tests se lanzan con `uv run pytest`.
 - Las preguntas al modelo viven solo en `src/decisionsignal/questions.py` y las constantes del estudio en
   `src/decisionsignal/config.py`.
+- `radar/` (el dataset publicado) y `validation/` están en git. `data/` no.
 - Al terminar una tarea relevante, actualizar el apartado "Dónde estamos" de `docs/HANDOFF.md`.

@@ -1,5 +1,16 @@
 # Pre-registro
 
+> **Estudio cerrado el 2026-10-04, sin bloquear este pre-registro.** En el split de diseño
+> (1.529 comunicados, 80 semanas) ninguna señal predijo el retorno posterior en el sentido
+> esperado: la pregunta original dio un IC semanal de −0.053 (p 0.11) y tres reformulaciones no
+> lo mejoraron. El contraste confirmatorio sobre el holdout no se hizo, porque no había nada que
+> confirmar.
+>
+> Después del cierre, los comunicados de 2025 en adelante se han puntuado con las preguntas de
+> **solo texto** para el radar (`docs/RADAR.md`). Esas peticiones no llevan precios ni la
+> reacción, y sus respuestas no se han cruzado con retornos. Si alguien retomara el estudio, el
+> holdout ya no está intacto para las preguntas de texto y habría que fijar uno nuevo.
+
 **Estado: BORRADOR.** Se congela con `uv run decisionsignal lock` cuando las preguntas estén cerradas
 sobre el split de diseño. A partir de ese momento, el hash de este archivo, de `questions.py`,
 de `features.py` y de `config.py` queda guardado en `PREREGISTRATION.lock.json`. El pipeline se

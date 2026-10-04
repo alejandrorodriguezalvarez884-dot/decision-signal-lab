@@ -29,12 +29,12 @@ _limiter = RateLimiter(SEC_MAX_RPS)
 _client: httpx.Client | None = None
 
 
-def _get(url: str) -> bytes:
+def _get(url: str, fresh: bool = False) -> bytes:
     global _client
     if _client is None:
         _client = httpx.Client(timeout=60, follow_redirects=True)
     return cached_get(
-        url, headers={"User-Agent": sec_user_agent()}, limiter=_limiter, client=_client
+        url, headers={"User-Agent": sec_user_agent()}, limiter=_limiter, client=_client, use_cache=not fresh
     )
 
 
@@ -43,9 +43,13 @@ def _recent_frame(block: dict) -> pd.DataFrame:
     return pd.DataFrame({c: block.get(c, []) for c in cols})
 
 
-def list_item_202_filings(cik: int, start: date, end: date) -> pd.DataFrame:
-    """All original 8-Ks (no amendments) for ``cik`` that report Item 2.02 within the window."""
-    sub = json.loads(_get(SUBMISSIONS_URL.format(name=f"CIK{cik:010d}.json")))
+def list_item_202_filings(cik: int, start: date, end: date, fresh: bool = False) -> pd.DataFrame:
+    """All original 8-Ks (no amendments) for ``cik`` that report Item 2.02 within the window.
+
+    ``fresh`` skips the on-disk copy of the company's filing list, which otherwise never changes
+    once downloaded.
+    """
+    sub = json.loads(_get(SUBMISSIONS_URL.format(name=f"CIK{cik:010d}.json"), fresh=fresh))
     frames = [_recent_frame(sub["filings"]["recent"])]
     for extra in sub["filings"].get("files", []):
         if extra.get("filingTo", "9999") >= start.isoformat():

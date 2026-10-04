@@ -1,0 +1,3224 @@
+{
+ "meta": {
+  "generated_utc": "2026-10-04T11:40:11+00:00",
+  "model": "pplx-decider-v1-27b",
+  "releases": 2238,
+  "companies": 99,
+  "first_date": "2021-01-13",
+  "last_date": "2026-10-01",
+  "current_quarter": "2026Q4",
+  "input_tokens": 48813034,
+  "api_cost_usd": 1.95,
+  "theme_threshold": 0.5,
+  "guidance_classes": {
+   "raised": "Guidance for at least one key metric is raised and none is lowered",
+   "lowered": "Guidance for at least one key metric is lowered and none is raised",
+   "mixed": "Some guidance is raised and some is lowered",
+   "reaffirmed": "Previous guidance is reaffirmed or kept unchanged",
+   "new_period": "Guidance is given for a new period without saying how it compares with previous guidance",
+   "withdrawn": "Guidance is withdrawn or suspended",
+   "none": "The release gives no financial guidance"
+  },
+  "questions": {
+   "guidance": "What does `press_release` say about the company's financial guidance for future periods?",
+   "results_strength": "How strong are the financial results reported in `press_release`?",
+   "outlook_tone": "How does management describe the business outlook for the coming periods in `press_release`?",
+   "uncertainty": "How much uncertainty or caution about the future does management express in `press_release`?",
+   "demand_weakness": "Does `press_release` describe weakening customer demand, orders, or bookings?",
+   "margin_pressure": "Does `press_release` describe declining or pressured profit margins?"
+  },
+  "theme_questions": {
+   "tariffs": "Does `press_release` say that tariffs or trade restrictions affect, or are expected to affect, the company's costs, prices, demand or outlook?",
+   "ai": "Does `press_release` describe artificial intelligence as a driver of the company's demand, revenue or investment?",
+   "supply_chain": "Does `press_release` say that supply chain disruptions, component shortages or logistics constraints hurt the company's results or outlook?",
+   "restructuring": "Does `press_release` report job cuts, a restructuring program or restructuring charges?"
+  },
+  "has_themes": false,
+  "validation": {
+   "labelled": 45,
+   "agree_strict": 37,
+   "agree_lenient": 40,
+   "agree_direction": 42,
+   "by_model_class": {
+    "lowered": {
+     "n": 9,
+     "agree_strict": 7,
+     "agree_lenient": 7
+    },
+    "mixed": {
+     "n": 6,
+     "agree_strict": 3,
+     "agree_lenient": 5
+    },
+    "new_period": {
+     "n": 5,
+     "agree_strict": 4,
+     "agree_lenient": 4
+    },
+    "none": {
+     "n": 7,
+     "agree_strict": 7,
+     "agree_lenient": 7
+    },
+    "raised": {
+     "n": 9,
+     "agree_strict": 9,
+     "agree_lenient": 9
+    },
+    "reaffirmed": {
+     "n": 7,
+     "agree_strict": 7,
+     "agree_lenient": 7
+    },
+    "withdrawn": {
+     "n": 2,
+     "agree_strict": 0,
+     "agree_lenient": 1
+    }
+   },
+   "disagreements": [
+    {
+     "id": "r20",
+     "accessionNumber": "0000882095-23-000014",
+     "model": "lowered",
+     "reader": "reaffirmed",
+     "alt": "",
+     "note": "all lines unchanged from prior guidance"
+    },
+    {
+     "id": "r29",
+     "accessionNumber": "0000764180-24-000091",
+     "model": "lowered",
+     "reader": "reaffirmed",
+     "alt": "mixed",
+     "note": "narrows the EPS range around the same midpoint"
+    },
+    {
+     "id": "r30",
+     "accessionNumber": "0001090727-21-000010",
+     "model": "withdrawn",
+     "reader": "none",
+     "alt": "new_period",
+     "note": "no revenue or EPS guidance; only capital allocation items"
+    },
+    {
+     "id": "r42",
+     "accessionNumber": "0000318154-21-000017",
+     "model": "mixed",
+     "reader": "reaffirmed",
+     "alt": "lowered",
+     "note": "revenue and non-GAAP EPS reaffirmed; GAAP EPS revised without stating the direction"
+    },
+    {
+     "id": "r47",
+     "accessionNumber": "0000732712-23-000026",
+     "model": "new_period",
+     "reader": "reaffirmed",
+     "alt": "",
+     "note": "continues to expect the same ranges"
+    }
+   ],
+   "unclear": [
+    {
+     "id": "r15",
+     "accessionNumber": "0000318154-23-000061",
+     "model": "new_period",
+     "reader": "unclear",
+     "alt": "",
+     "note": "says it now expects new ranges, with no comparison to the previous ones"
+    },
+    {
+     "id": "r32",
+     "accessionNumber": "0000875045-21-000041",
+     "model": "mixed",
+     "reader": "unclear",
+     "alt": "",
+     "note": "says it is updating its ranges; the table with the numbers is not in the text"
+    },
+    {
+     "id": "r48",
+     "accessionNumber": "0001666700-21-000065",
+     "model": "new_period",
+     "reader": "unclear",
+     "alt": "",
+     "note": "says it now estimates new ranges, with no comparison to the previous ones"
+    }
+   ]
+  }
+ },
+ "quarters": [
+  {
+   "quarter": "2021Q1",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.1031,
+    "lowered": 0.0103,
+    "mixed": 0.0,
+    "reaffirmed": 0.0515,
+    "new_period": 0.433,
+    "withdrawn": 0.0309,
+    "none": 0.3711
+   },
+   "guidance_net": 0.0928,
+   "scores": {
+    "results_strength": 0.7033,
+    "outlook_tone": 0.7195,
+    "uncertainty": 0.4209,
+    "demand_weakness": 0.3084,
+    "margin_pressure": 0.3631
+   },
+   "flags": {
+    "demand_weakness": 0.2887,
+    "margin_pressure": 0.3299,
+    "uncertainty": 0.3402
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2021Q2",
+   "partial": false,
+   "n": 96,
+   "guidance": {
+    "raised": 0.2292,
+    "lowered": 0.0104,
+    "mixed": 0.0312,
+    "reaffirmed": 0.1562,
+    "new_period": 0.1979,
+    "withdrawn": 0.0,
+    "none": 0.375
+   },
+   "guidance_net": 0.2188,
+   "scores": {
+    "results_strength": 0.8256,
+    "outlook_tone": 0.7429,
+    "uncertainty": 0.3584,
+    "demand_weakness": 0.2252,
+    "margin_pressure": 0.2607
+   },
+   "flags": {
+    "demand_weakness": 0.1667,
+    "margin_pressure": 0.1979,
+    "uncertainty": 0.2396
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2021Q3",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.3505,
+    "lowered": 0.0412,
+    "mixed": 0.0515,
+    "reaffirmed": 0.0825,
+    "new_period": 0.134,
+    "withdrawn": 0.0,
+    "none": 0.3402
+   },
+   "guidance_net": 0.3093,
+   "scores": {
+    "results_strength": 0.8904,
+    "outlook_tone": 0.7397,
+    "uncertainty": 0.3551,
+    "demand_weakness": 0.1187,
+    "margin_pressure": 0.2501
+   },
+   "flags": {
+    "demand_weakness": 0.0515,
+    "margin_pressure": 0.1546,
+    "uncertainty": 0.268
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2021Q4",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.2887,
+    "lowered": 0.0412,
+    "mixed": 0.0722,
+    "reaffirmed": 0.0619,
+    "new_period": 0.1649,
+    "withdrawn": 0.0,
+    "none": 0.3711
+   },
+   "guidance_net": 0.2475,
+   "scores": {
+    "results_strength": 0.8663,
+    "outlook_tone": 0.7318,
+    "uncertainty": 0.3609,
+    "demand_weakness": 0.1191,
+    "margin_pressure": 0.2915
+   },
+   "flags": {
+    "demand_weakness": 0.0515,
+    "margin_pressure": 0.2474,
+    "uncertainty": 0.2165
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2022Q1",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.1031,
+    "lowered": 0.0206,
+    "mixed": 0.0103,
+    "reaffirmed": 0.0206,
+    "new_period": 0.4948,
+    "withdrawn": 0.0,
+    "none": 0.3505
+   },
+   "guidance_net": 0.0825,
+   "scores": {
+    "results_strength": 0.8817,
+    "outlook_tone": 0.7407,
+    "uncertainty": 0.3537,
+    "demand_weakness": 0.1468,
+    "margin_pressure": 0.3392
+   },
+   "flags": {
+    "demand_weakness": 0.0619,
+    "margin_pressure": 0.2887,
+    "uncertainty": 0.2062
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2022Q2",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.1443,
+    "lowered": 0.0825,
+    "mixed": 0.0619,
+    "reaffirmed": 0.2371,
+    "new_period": 0.1237,
+    "withdrawn": 0.0,
+    "none": 0.3505
+   },
+   "guidance_net": 0.0618,
+   "scores": {
+    "results_strength": 0.7524,
+    "outlook_tone": 0.7162,
+    "uncertainty": 0.3996,
+    "demand_weakness": 0.1785,
+    "margin_pressure": 0.41
+   },
+   "flags": {
+    "demand_weakness": 0.0928,
+    "margin_pressure": 0.3505,
+    "uncertainty": 0.2887
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2022Q3",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.1856,
+    "lowered": 0.0515,
+    "mixed": 0.0928,
+    "reaffirmed": 0.2062,
+    "new_period": 0.134,
+    "withdrawn": 0.0206,
+    "none": 0.3093
+   },
+   "guidance_net": 0.1341,
+   "scores": {
+    "results_strength": 0.7386,
+    "outlook_tone": 0.6945,
+    "uncertainty": 0.4015,
+    "demand_weakness": 0.2216,
+    "margin_pressure": 0.4338
+   },
+   "flags": {
+    "demand_weakness": 0.1134,
+    "margin_pressure": 0.3814,
+    "uncertainty": 0.3299
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2022Q4",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.2474,
+    "lowered": 0.1134,
+    "mixed": 0.0515,
+    "reaffirmed": 0.1443,
+    "new_period": 0.1546,
+    "withdrawn": 0.0,
+    "none": 0.2887
+   },
+   "guidance_net": 0.134,
+   "scores": {
+    "results_strength": 0.7399,
+    "outlook_tone": 0.6981,
+    "uncertainty": 0.3827,
+    "demand_weakness": 0.2382,
+    "margin_pressure": 0.4252
+   },
+   "flags": {
+    "demand_weakness": 0.1753,
+    "margin_pressure": 0.4021,
+    "uncertainty": 0.3093
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2023Q1",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.0825,
+    "lowered": 0.0103,
+    "mixed": 0.0103,
+    "reaffirmed": 0.0619,
+    "new_period": 0.5155,
+    "withdrawn": 0.0,
+    "none": 0.3196
+   },
+   "guidance_net": 0.0722,
+   "scores": {
+    "results_strength": 0.7204,
+    "outlook_tone": 0.711,
+    "uncertainty": 0.3658,
+    "demand_weakness": 0.2494,
+    "margin_pressure": 0.4389
+   },
+   "flags": {
+    "demand_weakness": 0.1753,
+    "margin_pressure": 0.4227,
+    "uncertainty": 0.2371
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2023Q2",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.1939,
+    "lowered": 0.0612,
+    "mixed": 0.051,
+    "reaffirmed": 0.2041,
+    "new_period": 0.1633,
+    "withdrawn": 0.0,
+    "none": 0.3265
+   },
+   "guidance_net": 0.1327,
+   "scores": {
+    "results_strength": 0.699,
+    "outlook_tone": 0.704,
+    "uncertainty": 0.358,
+    "demand_weakness": 0.2486,
+    "margin_pressure": 0.3809
+   },
+   "flags": {
+    "demand_weakness": 0.1633,
+    "margin_pressure": 0.3265,
+    "uncertainty": 0.2245
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2023Q3",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2347,
+    "lowered": 0.0714,
+    "mixed": 0.0714,
+    "reaffirmed": 0.1429,
+    "new_period": 0.1735,
+    "withdrawn": 0.0,
+    "none": 0.3061
+   },
+   "guidance_net": 0.1633,
+   "scores": {
+    "results_strength": 0.7294,
+    "outlook_tone": 0.717,
+    "uncertainty": 0.3408,
+    "demand_weakness": 0.2593,
+    "margin_pressure": 0.3232
+   },
+   "flags": {
+    "demand_weakness": 0.2041,
+    "margin_pressure": 0.2653,
+    "uncertainty": 0.2041
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2023Q4",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2449,
+    "lowered": 0.1122,
+    "mixed": 0.0612,
+    "reaffirmed": 0.102,
+    "new_period": 0.1531,
+    "withdrawn": 0.0102,
+    "none": 0.3163
+   },
+   "guidance_net": 0.1327,
+   "scores": {
+    "results_strength": 0.7441,
+    "outlook_tone": 0.7073,
+    "uncertainty": 0.3394,
+    "demand_weakness": 0.2537,
+    "margin_pressure": 0.3039
+   },
+   "flags": {
+    "demand_weakness": 0.1939,
+    "margin_pressure": 0.2449,
+    "uncertainty": 0.2041
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2024Q1",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.0722,
+    "lowered": 0.0309,
+    "mixed": 0.0206,
+    "reaffirmed": 0.0412,
+    "new_period": 0.5155,
+    "withdrawn": 0.0,
+    "none": 0.3196
+   },
+   "guidance_net": 0.0413,
+   "scores": {
+    "results_strength": 0.7516,
+    "outlook_tone": 0.7168,
+    "uncertainty": 0.3272,
+    "demand_weakness": 0.2468,
+    "margin_pressure": 0.2948
+   },
+   "flags": {
+    "demand_weakness": 0.1649,
+    "margin_pressure": 0.2165,
+    "uncertainty": 0.1649
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2024Q2",
+   "partial": false,
+   "n": 97,
+   "guidance": {
+    "raised": 0.2165,
+    "lowered": 0.0515,
+    "mixed": 0.0206,
+    "reaffirmed": 0.2371,
+    "new_period": 0.1856,
+    "withdrawn": 0.0,
+    "none": 0.2887
+   },
+   "guidance_net": 0.165,
+   "scores": {
+    "results_strength": 0.7449,
+    "outlook_tone": 0.7247,
+    "uncertainty": 0.3287,
+    "demand_weakness": 0.2252,
+    "margin_pressure": 0.2651
+   },
+   "flags": {
+    "demand_weakness": 0.134,
+    "margin_pressure": 0.1959,
+    "uncertainty": 0.2062
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2024Q3",
+   "partial": false,
+   "n": 94,
+   "guidance": {
+    "raised": 0.2979,
+    "lowered": 0.0745,
+    "mixed": 0.0319,
+    "reaffirmed": 0.0851,
+    "new_period": 0.2234,
+    "withdrawn": 0.0,
+    "none": 0.2872
+   },
+   "guidance_net": 0.2234,
+   "scores": {
+    "results_strength": 0.773,
+    "outlook_tone": 0.7122,
+    "uncertainty": 0.3348,
+    "demand_weakness": 0.2181,
+    "margin_pressure": 0.2714
+   },
+   "flags": {
+    "demand_weakness": 0.1489,
+    "margin_pressure": 0.1809,
+    "uncertainty": 0.1915
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2024Q4",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2347,
+    "lowered": 0.0612,
+    "mixed": 0.051,
+    "reaffirmed": 0.1327,
+    "new_period": 0.2143,
+    "withdrawn": 0.0102,
+    "none": 0.2959
+   },
+   "guidance_net": 0.1735,
+   "scores": {
+    "results_strength": 0.7503,
+    "outlook_tone": 0.7113,
+    "uncertainty": 0.3328,
+    "demand_weakness": 0.2149,
+    "margin_pressure": 0.2982
+   },
+   "flags": {
+    "demand_weakness": 0.1531,
+    "margin_pressure": 0.2347,
+    "uncertainty": 0.1735
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2025Q1",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.0204,
+    "lowered": 0.0102,
+    "mixed": 0.0204,
+    "reaffirmed": 0.102,
+    "new_period": 0.551,
+    "withdrawn": 0.0,
+    "none": 0.2959
+   },
+   "guidance_net": 0.0102,
+   "scores": {
+    "results_strength": 0.8035,
+    "outlook_tone": 0.7282,
+    "uncertainty": 0.3247,
+    "demand_weakness": 0.2157,
+    "margin_pressure": 0.3027
+   },
+   "flags": {
+    "demand_weakness": 0.1327,
+    "margin_pressure": 0.2245,
+    "uncertainty": 0.1735
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2025Q2",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.0918,
+    "lowered": 0.0714,
+    "mixed": 0.051,
+    "reaffirmed": 0.2449,
+    "new_period": 0.2041,
+    "withdrawn": 0.0102,
+    "none": 0.3265
+   },
+   "guidance_net": 0.0204,
+   "scores": {
+    "results_strength": 0.7279,
+    "outlook_tone": 0.6921,
+    "uncertainty": 0.4052,
+    "demand_weakness": 0.2317,
+    "margin_pressure": 0.2852
+   },
+   "flags": {
+    "demand_weakness": 0.1939,
+    "margin_pressure": 0.2041,
+    "uncertainty": 0.3163
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2025Q3",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2857,
+    "lowered": 0.0306,
+    "mixed": 0.0306,
+    "reaffirmed": 0.1531,
+    "new_period": 0.1531,
+    "withdrawn": 0.0102,
+    "none": 0.3367
+   },
+   "guidance_net": 0.2551,
+   "scores": {
+    "results_strength": 0.7512,
+    "outlook_tone": 0.7206,
+    "uncertainty": 0.3408,
+    "demand_weakness": 0.172,
+    "margin_pressure": 0.3348
+   },
+   "flags": {
+    "demand_weakness": 0.1122,
+    "margin_pressure": 0.2755,
+    "uncertainty": 0.2143
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2025Q4",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2857,
+    "lowered": 0.0306,
+    "mixed": 0.0612,
+    "reaffirmed": 0.102,
+    "new_period": 0.1735,
+    "withdrawn": 0.0,
+    "none": 0.3469
+   },
+   "guidance_net": 0.2551,
+   "scores": {
+    "results_strength": 0.8109,
+    "outlook_tone": 0.7212,
+    "uncertainty": 0.3247,
+    "demand_weakness": 0.169,
+    "margin_pressure": 0.3059
+   },
+   "flags": {
+    "demand_weakness": 0.1224,
+    "margin_pressure": 0.2551,
+    "uncertainty": 0.1735
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2026Q1",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.051,
+    "lowered": 0.0102,
+    "mixed": 0.0,
+    "reaffirmed": 0.0816,
+    "new_period": 0.5714,
+    "withdrawn": 0.0,
+    "none": 0.2857
+   },
+   "guidance_net": 0.0408,
+   "scores": {
+    "results_strength": 0.8006,
+    "outlook_tone": 0.7332,
+    "uncertainty": 0.3142,
+    "demand_weakness": 0.1911,
+    "margin_pressure": 0.3386
+   },
+   "flags": {
+    "demand_weakness": 0.1327,
+    "margin_pressure": 0.2755,
+    "uncertainty": 0.1531
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2026Q2",
+   "partial": false,
+   "n": 98,
+   "guidance": {
+    "raised": 0.2245,
+    "lowered": 0.0102,
+    "mixed": 0.0204,
+    "reaffirmed": 0.2653,
+    "new_period": 0.1837,
+    "withdrawn": 0.0,
+    "none": 0.2959
+   },
+   "guidance_net": 0.2143,
+   "scores": {
+    "results_strength": 0.824,
+    "outlook_tone": 0.7338,
+    "uncertainty": 0.3454,
+    "demand_weakness": 0.1575,
+    "margin_pressure": 0.278
+   },
+   "flags": {
+    "demand_weakness": 0.0816,
+    "margin_pressure": 0.2041,
+    "uncertainty": 0.2143
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2026Q3",
+   "partial": false,
+   "n": 96,
+   "guidance": {
+    "raised": 0.4375,
+    "lowered": 0.0208,
+    "mixed": 0.0208,
+    "reaffirmed": 0.1042,
+    "new_period": 0.0938,
+    "withdrawn": 0.0,
+    "none": 0.3229
+   },
+   "guidance_net": 0.4167,
+   "scores": {
+    "results_strength": 0.8749,
+    "outlook_tone": 0.7448,
+    "uncertainty": 0.3214,
+    "demand_weakness": 0.1394,
+    "margin_pressure": 0.2441
+   },
+   "flags": {
+    "demand_weakness": 0.0833,
+    "margin_pressure": 0.1771,
+    "uncertainty": 0.1771
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  },
+  {
+   "quarter": "2026Q4",
+   "partial": true,
+   "n": 2,
+   "guidance": {
+    "raised": 0.0,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.0,
+    "new_period": 1.0,
+    "withdrawn": 0.0,
+    "none": 0.0
+   },
+   "guidance_net": 0.0,
+   "scores": {
+    "results_strength": 0.6165,
+    "outlook_tone": 0.5385,
+    "uncertainty": 0.6415,
+    "demand_weakness": 0.315,
+    "margin_pressure": 0.0545
+   },
+   "flags": {
+    "demand_weakness": 0.5,
+    "margin_pressure": 0.0,
+    "uncertainty": 1.0
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   }
+  }
+ ],
+ "sectors": [
+  {
+   "sector": "Real Estate",
+   "companies": 2,
+   "n": 8,
+   "guidance": {
+    "raised": 0.75,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.0,
+    "new_period": 0.25,
+    "withdrawn": 0.0,
+    "none": 0.0
+   },
+   "guidance_net": 0.75,
+   "scores": {
+    "results_strength": 0.9315,
+    "outlook_tone": 0.7828,
+    "uncertainty": 0.2834,
+    "demand_weakness": 0.0356,
+    "margin_pressure": 0.0894
+   },
+   "flags": {
+    "demand_weakness": 0.0,
+    "margin_pressure": 0.0,
+    "uncertainty": 0.0
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 8,
+    "guidance": {
+     "raised": 0.125,
+     "lowered": 0.0,
+     "mixed": 0.375,
+     "reaffirmed": 0.25,
+     "new_period": 0.25,
+     "withdrawn": 0.0,
+     "none": 0.0
+    },
+    "guidance_net": 0.125,
+    "scores": {
+     "results_strength": 0.7064,
+     "outlook_tone": 0.7556,
+     "uncertainty": 0.3357,
+     "demand_weakness": 0.0535,
+     "margin_pressure": 0.2353
+    },
+    "flags": {
+     "demand_weakness": 0.0,
+     "margin_pressure": 0.125,
+     "uncertainty": 0.25
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Materials",
+   "companies": 2,
+   "n": 8,
+   "guidance": {
+    "raised": 0.5,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.0,
+    "new_period": 0.125,
+    "withdrawn": 0.0,
+    "none": 0.375
+   },
+   "guidance_net": 0.5,
+   "scores": {
+    "results_strength": 0.6106,
+    "outlook_tone": 0.728,
+    "uncertainty": 0.29,
+    "demand_weakness": 0.423,
+    "margin_pressure": 0.5301
+   },
+   "flags": {
+    "demand_weakness": 0.25,
+    "margin_pressure": 0.5,
+    "uncertainty": 0.0
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 8,
+    "guidance": {
+     "raised": 0.25,
+     "lowered": 0.0,
+     "mixed": 0.0,
+     "reaffirmed": 0.125,
+     "new_period": 0.25,
+     "withdrawn": 0.0,
+     "none": 0.375
+    },
+    "guidance_net": 0.25,
+    "scores": {
+     "results_strength": 0.5449,
+     "outlook_tone": 0.6755,
+     "uncertainty": 0.4336,
+     "demand_weakness": 0.4181,
+     "margin_pressure": 0.4644
+    },
+    "flags": {
+     "demand_weakness": 0.375,
+     "margin_pressure": 0.5,
+     "uncertainty": 0.375
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Health Care",
+   "companies": 15,
+   "n": 60,
+   "guidance": {
+    "raised": 0.4667,
+    "lowered": 0.0333,
+    "mixed": 0.0333,
+    "reaffirmed": 0.1167,
+    "new_period": 0.3333,
+    "withdrawn": 0.0,
+    "none": 0.0167
+   },
+   "guidance_net": 0.4334,
+   "scores": {
+    "results_strength": 0.8593,
+    "outlook_tone": 0.7679,
+    "uncertainty": 0.3084,
+    "demand_weakness": 0.2193,
+    "margin_pressure": 0.3097
+   },
+   "flags": {
+    "demand_weakness": 0.1333,
+    "margin_pressure": 0.2833,
+    "uncertainty": 0.0833
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 61,
+    "guidance": {
+     "raised": 0.3607,
+     "lowered": 0.0492,
+     "mixed": 0.082,
+     "reaffirmed": 0.1475,
+     "new_period": 0.3443,
+     "withdrawn": 0.0,
+     "none": 0.0164
+    },
+    "guidance_net": 0.3115,
+    "scores": {
+     "results_strength": 0.8058,
+     "outlook_tone": 0.7519,
+     "uncertainty": 0.3392,
+     "demand_weakness": 0.2277,
+     "margin_pressure": 0.2885
+    },
+    "flags": {
+     "demand_weakness": 0.0984,
+     "margin_pressure": 0.2295,
+     "uncertainty": 0.1148
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Industrials",
+   "companies": 12,
+   "n": 47,
+   "guidance": {
+    "raised": 0.3617,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.1277,
+    "new_period": 0.2553,
+    "withdrawn": 0.0,
+    "none": 0.2553
+   },
+   "guidance_net": 0.3617,
+   "scores": {
+    "results_strength": 0.858,
+    "outlook_tone": 0.7628,
+    "uncertainty": 0.2983,
+    "demand_weakness": 0.1062,
+    "margin_pressure": 0.329
+   },
+   "flags": {
+    "demand_weakness": 0.0638,
+    "margin_pressure": 0.3191,
+    "uncertainty": 0.1064
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 48,
+    "guidance": {
+     "raised": 0.25,
+     "lowered": 0.0417,
+     "mixed": 0.0208,
+     "reaffirmed": 0.2083,
+     "new_period": 0.2292,
+     "withdrawn": 0.0208,
+     "none": 0.2292
+    },
+    "guidance_net": 0.2083,
+    "scores": {
+     "results_strength": 0.731,
+     "outlook_tone": 0.7119,
+     "uncertainty": 0.381,
+     "demand_weakness": 0.2038,
+     "margin_pressure": 0.3547
+    },
+    "flags": {
+     "demand_weakness": 0.1458,
+     "margin_pressure": 0.3125,
+     "uncertainty": 0.2917
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Information Technology",
+   "companies": 12,
+   "n": 48,
+   "guidance": {
+    "raised": 0.2708,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.0417,
+    "new_period": 0.3958,
+    "withdrawn": 0.0,
+    "none": 0.2917
+   },
+   "guidance_net": 0.2708,
+   "scores": {
+    "results_strength": 0.8911,
+    "outlook_tone": 0.7194,
+    "uncertainty": 0.3558,
+    "demand_weakness": 0.0816,
+    "margin_pressure": 0.1299
+   },
+   "flags": {
+    "demand_weakness": 0.0417,
+    "margin_pressure": 0.0417,
+    "uncertainty": 0.2708
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 48,
+    "guidance": {
+     "raised": 0.1667,
+     "lowered": 0.0208,
+     "mixed": 0.0417,
+     "reaffirmed": 0.0625,
+     "new_period": 0.5208,
+     "withdrawn": 0.0,
+     "none": 0.1875
+    },
+    "guidance_net": 0.1459,
+    "scores": {
+     "results_strength": 0.8537,
+     "outlook_tone": 0.7053,
+     "uncertainty": 0.3357,
+     "demand_weakness": 0.1119,
+     "margin_pressure": 0.1278
+    },
+    "flags": {
+     "demand_weakness": 0.0625,
+     "margin_pressure": 0.0625,
+     "uncertainty": 0.2292
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Consumer Staples",
+   "companies": 11,
+   "n": 44,
+   "guidance": {
+    "raised": 0.2273,
+    "lowered": 0.0682,
+    "mixed": 0.1136,
+    "reaffirmed": 0.2273,
+    "new_period": 0.2273,
+    "withdrawn": 0.0,
+    "none": 0.1364
+   },
+   "guidance_net": 0.1591,
+   "scores": {
+    "results_strength": 0.7072,
+    "outlook_tone": 0.6778,
+    "uncertainty": 0.4144,
+    "demand_weakness": 0.3218,
+    "margin_pressure": 0.4808
+   },
+   "flags": {
+    "demand_weakness": 0.3182,
+    "margin_pressure": 0.5227,
+    "uncertainty": 0.2955
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 43,
+    "guidance": {
+     "raised": 0.1163,
+     "lowered": 0.1395,
+     "mixed": 0.0,
+     "reaffirmed": 0.2558,
+     "new_period": 0.3488,
+     "withdrawn": 0.0,
+     "none": 0.1395
+    },
+    "guidance_net": -0.0232,
+    "scores": {
+     "results_strength": 0.6443,
+     "outlook_tone": 0.6574,
+     "uncertainty": 0.423,
+     "demand_weakness": 0.3732,
+     "margin_pressure": 0.4076
+    },
+    "flags": {
+     "demand_weakness": 0.3488,
+     "margin_pressure": 0.3721,
+     "uncertainty": 0.3256
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Communication Services",
+   "companies": 8,
+   "n": 32,
+   "guidance": {
+    "raised": 0.1562,
+    "lowered": 0.0,
+    "mixed": 0.0312,
+    "reaffirmed": 0.2812,
+    "new_period": 0.3438,
+    "withdrawn": 0.0,
+    "none": 0.1875
+   },
+   "guidance_net": 0.1562,
+   "scores": {
+    "results_strength": 0.7913,
+    "outlook_tone": 0.762,
+    "uncertainty": 0.2968,
+    "demand_weakness": 0.2581,
+    "margin_pressure": 0.3792
+   },
+   "flags": {
+    "demand_weakness": 0.1562,
+    "margin_pressure": 0.3438,
+    "uncertainty": 0.125
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 32,
+    "guidance": {
+     "raised": 0.2188,
+     "lowered": 0.0625,
+     "mixed": 0.0625,
+     "reaffirmed": 0.1875,
+     "new_period": 0.25,
+     "withdrawn": 0.0,
+     "none": 0.2188
+    },
+    "guidance_net": 0.1563,
+    "scores": {
+     "results_strength": 0.8924,
+     "outlook_tone": 0.7663,
+     "uncertainty": 0.2824,
+     "demand_weakness": 0.2414,
+     "margin_pressure": 0.2322
+    },
+    "flags": {
+     "demand_weakness": 0.1875,
+     "margin_pressure": 0.0312,
+     "uncertainty": 0.0938
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Consumer Discretionary",
+   "companies": 10,
+   "n": 40,
+   "guidance": {
+    "raised": 0.175,
+    "lowered": 0.05,
+    "mixed": 0.025,
+    "reaffirmed": 0.075,
+    "new_period": 0.375,
+    "withdrawn": 0.0,
+    "none": 0.3
+   },
+   "guidance_net": 0.125,
+   "scores": {
+    "results_strength": 0.7328,
+    "outlook_tone": 0.7049,
+    "uncertainty": 0.3654,
+    "demand_weakness": 0.2064,
+    "margin_pressure": 0.3242
+   },
+   "flags": {
+    "demand_weakness": 0.15,
+    "margin_pressure": 0.2,
+    "uncertainty": 0.275
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 39,
+    "guidance": {
+     "raised": 0.0,
+     "lowered": 0.0256,
+     "mixed": 0.0513,
+     "reaffirmed": 0.1282,
+     "new_period": 0.3333,
+     "withdrawn": 0.0513,
+     "none": 0.4103
+    },
+    "guidance_net": -0.0256,
+    "scores": {
+     "results_strength": 0.546,
+     "outlook_tone": 0.6709,
+     "uncertainty": 0.3619,
+     "demand_weakness": 0.3585,
+     "margin_pressure": 0.4975
+    },
+    "flags": {
+     "demand_weakness": 0.359,
+     "margin_pressure": 0.4872,
+     "uncertainty": 0.2564
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Financials",
+   "companies": 18,
+   "n": 72,
+   "guidance": {
+    "raised": 0.0833,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.0694,
+    "new_period": 0.0556,
+    "withdrawn": 0.0,
+    "none": 0.7917
+   },
+   "guidance_net": 0.0833,
+   "scores": {
+    "results_strength": 0.9177,
+    "outlook_tone": 0.7109,
+    "uncertainty": 0.2707,
+    "demand_weakness": 0.0607,
+    "margin_pressure": 0.1889
+   },
+   "flags": {
+    "demand_weakness": 0.0,
+    "margin_pressure": 0.0417,
+    "uncertainty": 0.1667
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 72,
+    "guidance": {
+     "raised": 0.0417,
+     "lowered": 0.0,
+     "mixed": 0.0,
+     "reaffirmed": 0.0556,
+     "new_period": 0.0833,
+     "withdrawn": 0.0,
+     "none": 0.8194
+    },
+    "guidance_net": 0.0417,
+    "scores": {
+     "results_strength": 0.8527,
+     "outlook_tone": 0.7006,
+     "uncertainty": 0.3262,
+     "demand_weakness": 0.086,
+     "margin_pressure": 0.2399
+    },
+    "flags": {
+     "demand_weakness": 0.0,
+     "margin_pressure": 0.0972,
+     "uncertainty": 0.2222
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Energy",
+   "companies": 5,
+   "n": 17,
+   "guidance": {
+    "raised": 0.0588,
+    "lowered": 0.0,
+    "mixed": 0.0588,
+    "reaffirmed": 0.1176,
+    "new_period": 0.3529,
+    "withdrawn": 0.0,
+    "none": 0.4118
+   },
+   "guidance_net": 0.0588,
+   "scores": {
+    "results_strength": 0.6808,
+    "outlook_tone": 0.7429,
+    "uncertainty": 0.4099,
+    "demand_weakness": 0.1774,
+    "margin_pressure": 0.3691
+   },
+   "flags": {
+    "demand_weakness": 0.1176,
+    "margin_pressure": 0.3529,
+    "uncertainty": 0.2941
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 16,
+    "guidance": {
+     "raised": 0.125,
+     "lowered": 0.125,
+     "mixed": 0.0,
+     "reaffirmed": 0.0625,
+     "new_period": 0.3125,
+     "withdrawn": 0.0,
+     "none": 0.375
+    },
+    "guidance_net": 0.0,
+    "scores": {
+     "results_strength": 0.6457,
+     "outlook_tone": 0.7561,
+     "uncertainty": 0.3631,
+     "demand_weakness": 0.2184,
+     "margin_pressure": 0.4746
+    },
+    "flags": {
+     "demand_weakness": 0.1875,
+     "margin_pressure": 0.5625,
+     "uncertainty": 0.125
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  },
+  {
+   "sector": "Utilities",
+   "companies": 4,
+   "n": 16,
+   "guidance": {
+    "raised": 0.0,
+    "lowered": 0.0,
+    "mixed": 0.0,
+    "reaffirmed": 0.625,
+    "new_period": 0.125,
+    "withdrawn": 0.0,
+    "none": 0.25
+   },
+   "guidance_net": 0.0,
+   "scores": {
+    "results_strength": 0.8448,
+    "outlook_tone": 0.7663,
+    "uncertainty": 0.3511,
+    "demand_weakness": 0.0582,
+    "margin_pressure": 0.161
+   },
+   "flags": {
+    "demand_weakness": 0.0,
+    "margin_pressure": 0.0,
+    "uncertainty": 0.25
+   },
+   "themes": {
+    "tariffs": null,
+    "ai": null,
+    "supply_chain": null,
+    "restructuring": null
+   },
+   "prior": {
+    "n": 16,
+    "guidance": {
+     "raised": 0.0,
+     "lowered": 0.0,
+     "mixed": 0.0,
+     "reaffirmed": 0.625,
+     "new_period": 0.125,
+     "withdrawn": 0.0,
+     "none": 0.25
+    },
+    "guidance_net": 0.0,
+    "scores": {
+     "results_strength": 0.7873,
+     "outlook_tone": 0.7506,
+     "uncertainty": 0.3329,
+     "demand_weakness": 0.0485,
+     "margin_pressure": 0.2495
+    },
+    "flags": {
+     "demand_weakness": 0.0,
+     "margin_pressure": 0.1875,
+     "uncertainty": 0.25
+    },
+    "themes": {
+     "tariffs": null,
+     "ai": null,
+     "supply_chain": null,
+     "restructuring": null
+    }
+   }
+  }
+ ],
+ "companies": [
+  {
+   "ticker": "MMM",
+   "name": "3M",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-21",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "ABT",
+   "name": "Abbott Laboratories",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-16",
+   "last_guidance": "raised",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "ABBV",
+   "name": "AbbVie",
+   "sector": "Health Care",
+   "n": 24,
+   "last_date": "2026-07-31",
+   "last_guidance": "lowered",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "ACN",
+   "name": "Accenture",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-10-01",
+   "last_guidance": "new_period",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "ADBE",
+   "name": "Adobe",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-09-10",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "ALL",
+   "name": "Allstate",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-08-05",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "GOOG",
+   "name": "Alphabet",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-22",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "MO",
+   "name": "Altria",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "AMZN",
+   "name": "Amazon",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "AXP",
+   "name": "American Express",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-24",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "AIG",
+   "name": "American International Group",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-08-06",
+   "last_guidance": "none",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "AMT",
+   "name": "American Tower",
+   "sector": "Real Estate",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "AMGN",
+   "name": "Amgen",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "AAPL",
+   "name": "Apple",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "T",
+   "name": "AT&T",
+   "sector": "Communication Services",
+   "n": 24,
+   "last_date": "2026-07-22",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "BAC",
+   "name": "Bank of America",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "BRK-B",
+   "name": "Berkshire Hathaway",
+   "sector": "Financials",
+   "n": 22,
+   "last_date": "2026-08-11",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "BIIB",
+   "name": "Biogen",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "raised",
+   "prev_guidance": "lowered"
+  },
+  {
+   "ticker": "BLK",
+   "name": "BlackRock",
+   "sector": "Financials",
+   "n": 8,
+   "last_date": "2026-07-15",
+   "last_guidance": "raised",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "BNY",
+   "name": "BNY",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-15",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "BA",
+   "name": "Boeing",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "BKNG",
+   "name": "Booking Holdings",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "BMY",
+   "name": "Bristol Myers Squibb",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "COF",
+   "name": "Capital One",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-21",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "CAT",
+   "name": "Caterpillar",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "CHTR",
+   "name": "Charter Communications",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-24",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "CVX",
+   "name": "Chevron",
+   "sector": "Energy",
+   "n": 23,
+   "last_date": "2026-07-31",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "CSCO",
+   "name": "Cisco",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-08-12",
+   "last_guidance": "new_period",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "C",
+   "name": "Citigroup",
+   "sector": "Financials",
+   "n": 21,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "KO",
+   "name": "Coca-Cola",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "CL",
+   "name": "Colgate-Palmolive",
+   "sector": "Consumer Staples",
+   "n": 22,
+   "last_date": "2026-07-31",
+   "last_guidance": "raised",
+   "prev_guidance": "mixed"
+  },
+  {
+   "ticker": "CMCSA",
+   "name": "Comcast",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "COP",
+   "name": "ConocoPhillips",
+   "sector": "Energy",
+   "n": 23,
+   "last_date": "2026-08-06",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "COST",
+   "name": "Costco",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-09-24",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "CVS",
+   "name": "CVS Health",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-08-05",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "DHR",
+   "name": "Danaher",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-20",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "DOW",
+   "name": "Dow",
+   "sector": "Materials",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "raised",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "DUK",
+   "name": "Duke Energy",
+   "sector": "Utilities",
+   "n": 23,
+   "last_date": "2026-08-03",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "DD",
+   "name": "DuPont",
+   "sector": "Materials",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "LLY",
+   "name": "Eli Lilly",
+   "sector": "Health Care",
+   "n": 24,
+   "last_date": "2026-08-05",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "EMR",
+   "name": "Emerson Electric",
+   "sector": "Industrials",
+   "n": 24,
+   "last_date": "2026-08-04",
+   "last_guidance": "raised",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "EXC",
+   "name": "Exelon",
+   "sector": "Utilities",
+   "n": 22,
+   "last_date": "2026-07-30",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "XOM",
+   "name": "ExxonMobil",
+   "sector": "Energy",
+   "n": 1,
+   "last_date": "2026-07-31",
+   "last_guidance": "none",
+   "prev_guidance": null
+  },
+  {
+   "ticker": "FDX",
+   "name": "FedEx",
+   "sector": "Industrials",
+   "n": 22,
+   "last_date": "2026-06-23",
+   "last_guidance": "new_period",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "F",
+   "name": "Ford",
+   "sector": "Consumer Discretionary",
+   "n": 21,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "GE",
+   "name": "GE Aerospace",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-16",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "GD",
+   "name": "General Dynamics",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "GM",
+   "name": "General Motors",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-07-21",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "GILD",
+   "name": "Gilead Sciences",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "raised",
+   "prev_guidance": "mixed"
+  },
+  {
+   "ticker": "GS",
+   "name": "Goldman Sachs",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "HD",
+   "name": "Home Depot",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-08-18",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "HON",
+   "name": "Honeywell",
+   "sector": "Industrials",
+   "n": 24,
+   "last_date": "2026-07-23",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "IBM",
+   "name": "IBM",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "INTC",
+   "name": "Intel",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "JNJ",
+   "name": "Johnson & Johnson",
+   "sector": "Health Care",
+   "n": 24,
+   "last_date": "2026-07-15",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "JPM",
+   "name": "JPMorgan Chase",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "KMI",
+   "name": "Kinder Morgan",
+   "sector": "Energy",
+   "n": 23,
+   "last_date": "2026-07-22",
+   "last_guidance": "raised",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "KHC",
+   "name": "Kraft Heinz",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-08-05",
+   "last_guidance": "mixed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "LMT",
+   "name": "Lockheed Martin",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "LOW",
+   "name": "Lowe's",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-08-19",
+   "last_guidance": "lowered",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "MA",
+   "name": "Mastercard",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "MCD",
+   "name": "McDonald's",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "MDT",
+   "name": "Medtronic",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-09-01",
+   "last_guidance": "raised",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "MRK",
+   "name": "Merck",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "META",
+   "name": "Meta Platforms",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "MET",
+   "name": "MetLife",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-08-05",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "MSFT",
+   "name": "Microsoft",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "MDLZ",
+   "name": "Mondelez",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "MS",
+   "name": "Morgan Stanley",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-15",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "NFLX",
+   "name": "Netflix",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-16",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "NEE",
+   "name": "NextEra Energy",
+   "sector": "Utilities",
+   "n": 23,
+   "last_date": "2026-07-24",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "NKE",
+   "name": "Nike",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-10-01",
+   "last_guidance": "new_period",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "NVDA",
+   "name": "Nvidia",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-08-26",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "ORCL",
+   "name": "Oracle",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-09-10",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "PYPL",
+   "name": "PayPal",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "PEP",
+   "name": "PepsiCo",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-08",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "PFE",
+   "name": "Pfizer",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-08-04",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "PM",
+   "name": "Philip Morris International",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-22",
+   "last_guidance": "mixed",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "PG",
+   "name": "Procter & Gamble",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "new_period",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "QCOM",
+   "name": "Qualcomm",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "RTX",
+   "name": "RTX",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "CRM",
+   "name": "Salesforce",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-08-26",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "SPG",
+   "name": "Simon Property Group",
+   "sector": "Real Estate",
+   "n": 23,
+   "last_date": "2026-08-10",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "SLB",
+   "name": "SLB",
+   "sector": "Energy",
+   "n": 23,
+   "last_date": "2026-07-24",
+   "last_guidance": "none",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "SO",
+   "name": "Southern Company",
+   "sector": "Utilities",
+   "n": 23,
+   "last_date": "2026-07-30",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "SBUX",
+   "name": "Starbucks",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-07-29",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "TGT",
+   "name": "Target",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-08-19",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "TSLA",
+   "name": "Tesla",
+   "sector": "Consumer Discretionary",
+   "n": 23,
+   "last_date": "2026-07-22",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "TXN",
+   "name": "Texas Instruments",
+   "sector": "Information Technology",
+   "n": 23,
+   "last_date": "2026-07-22",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "TMO",
+   "name": "Thermo Fisher Scientific",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "new_period",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "USB",
+   "name": "U.S. Bancorp",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-16",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "UNP",
+   "name": "Union Pacific",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-23",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "UNH",
+   "name": "UnitedHealth Group",
+   "sector": "Health Care",
+   "n": 23,
+   "last_date": "2026-07-16",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "UPS",
+   "name": "UPS",
+   "sector": "Industrials",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "raised",
+   "prev_guidance": "reaffirmed"
+  },
+  {
+   "ticker": "VZ",
+   "name": "Verizon",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-07-24",
+   "last_guidance": "raised",
+   "prev_guidance": "raised"
+  },
+  {
+   "ticker": "V",
+   "name": "Visa",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-28",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  },
+  {
+   "ticker": "WMT",
+   "name": "Walmart",
+   "sector": "Consumer Staples",
+   "n": 23,
+   "last_date": "2026-08-20",
+   "last_guidance": "raised",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "DIS",
+   "name": "Walt Disney",
+   "sector": "Communication Services",
+   "n": 23,
+   "last_date": "2026-08-05",
+   "last_guidance": "reaffirmed",
+   "prev_guidance": "new_period"
+  },
+  {
+   "ticker": "WFC",
+   "name": "Wells Fargo",
+   "sector": "Financials",
+   "n": 23,
+   "last_date": "2026-07-14",
+   "last_guidance": "none",
+   "prev_guidance": "none"
+  }
+ ],
+ "latest": [
+  {
+   "id": "0000320187-26-000184",
+   "ticker": "NKE",
+   "name": "Nike",
+   "sector": "Consumer Discretionary",
+   "date": "2026-10-01",
+   "guidance": "new_period",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.826,
+   "results_strength": 0.246,
+   "outlook_tone": 0.321,
+   "uncertainty": 0.521,
+   "demand_weakness": 0.601,
+   "margin_pressure": 0.07,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/320187/000032018726000184/0000320187-26-000184-index.htm"
+  },
+  {
+   "id": "0001467373-26-000037",
+   "ticker": "ACN",
+   "name": "Accenture",
+   "sector": "Information Technology",
+   "date": "2026-10-01",
+   "guidance": "new_period",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.796,
+   "results_strength": 0.987,
+   "outlook_tone": 0.756,
+   "uncertainty": 0.762,
+   "demand_weakness": 0.029,
+   "margin_pressure": 0.039,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1467373/000146737326000037/0001467373-26-000037-index.htm"
+  },
+  {
+   "id": "0000909832-26-000084",
+   "ticker": "COST",
+   "name": "Costco",
+   "sector": "Consumer Staples",
+   "date": "2026-09-24",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.974,
+   "results_strength": 0.958,
+   "outlook_tone": 0.504,
+   "uncertainty": 0.028,
+   "demand_weakness": 0.029,
+   "margin_pressure": 0.062,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/0000909832-26-000084-index.htm"
+  },
+  {
+   "id": "0001193125-26-387905",
+   "ticker": "ORCL",
+   "name": "Oracle",
+   "sector": "Information Technology",
+   "date": "2026-09-10",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.439,
+   "results_strength": 0.989,
+   "outlook_tone": 0.814,
+   "uncertainty": 0.188,
+   "demand_weakness": 0.045,
+   "margin_pressure": 0.166,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/0001193125-26-387905-index.htm"
+  },
+  {
+   "id": "0000796343-26-000147",
+   "ticker": "ADBE",
+   "name": "Adobe",
+   "sector": "Information Technology",
+   "date": "2026-09-10",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.893,
+   "results_strength": 0.989,
+   "outlook_tone": 0.805,
+   "uncertainty": 0.182,
+   "demand_weakness": 0.026,
+   "margin_pressure": 0.039,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000147/0000796343-26-000147-index.htm"
+  },
+  {
+   "id": "0001628280-26-059697",
+   "ticker": "MDT",
+   "name": "Medtronic",
+   "sector": "Health Care",
+   "date": "2026-09-01",
+   "guidance": "raised",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.97,
+   "results_strength": 0.985,
+   "outlook_tone": 0.78,
+   "uncertainty": 0.197,
+   "demand_weakness": 0.023,
+   "margin_pressure": 0.053,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026059697/0001628280-26-059697-index.htm"
+  },
+  {
+   "id": "0001045810-26-000073",
+   "ticker": "NVDA",
+   "name": "Nvidia",
+   "sector": "Information Technology",
+   "date": "2026-08-26",
+   "guidance": "new_period",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.909,
+   "results_strength": 0.988,
+   "outlook_tone": 0.832,
+   "uncertainty": 0.284,
+   "demand_weakness": 0.026,
+   "margin_pressure": 0.2,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/0001045810-26-000073-index.htm"
+  },
+  {
+   "id": "0001108524-26-000187",
+   "ticker": "CRM",
+   "name": "Salesforce",
+   "sector": "Information Technology",
+   "date": "2026-08-26",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.921,
+   "results_strength": 0.988,
+   "outlook_tone": 0.833,
+   "uncertainty": 0.335,
+   "demand_weakness": 0.029,
+   "margin_pressure": 0.073,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000187/0001108524-26-000187-index.htm"
+  },
+  {
+   "id": "0000104169-26-000145",
+   "ticker": "WMT",
+   "name": "Walmart",
+   "sector": "Consumer Staples",
+   "date": "2026-08-20",
+   "guidance": "raised",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.887,
+   "results_strength": 0.888,
+   "outlook_tone": 0.76,
+   "uncertainty": 0.693,
+   "demand_weakness": 0.063,
+   "margin_pressure": 0.325,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/0000104169-26-000145-index.htm"
+  },
+  {
+   "id": "0000060667-26-000113",
+   "ticker": "LOW",
+   "name": "Lowe's",
+   "sector": "Consumer Discretionary",
+   "date": "2026-08-19",
+   "guidance": "lowered",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.765,
+   "results_strength": 0.672,
+   "outlook_tone": 0.632,
+   "uncertainty": 0.407,
+   "demand_weakness": 0.518,
+   "margin_pressure": 0.196,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000113/0000060667-26-000113-index.htm"
+  },
+  {
+   "id": "0000027419-26-000034",
+   "ticker": "TGT",
+   "name": "Target",
+   "sector": "Consumer Staples",
+   "date": "2026-08-19",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.955,
+   "results_strength": 0.949,
+   "outlook_tone": 0.763,
+   "uncertainty": 0.408,
+   "demand_weakness": 0.031,
+   "margin_pressure": 0.138,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/27419/000002741926000034/0000027419-26-000034-index.htm"
+  },
+  {
+   "id": "0000354950-26-000145",
+   "ticker": "HD",
+   "name": "Home Depot",
+   "sector": "Consumer Discretionary",
+   "date": "2026-08-18",
+   "guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.986,
+   "results_strength": 0.86,
+   "outlook_tone": 0.734,
+   "uncertainty": 0.228,
+   "demand_weakness": 0.034,
+   "margin_pressure": 0.07,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/354950/000035495026000145/0000354950-26-000145-index.htm"
+  },
+  {
+   "id": "0000858877-26-000106",
+   "ticker": "CSCO",
+   "name": "Cisco",
+   "sector": "Information Technology",
+   "date": "2026-08-12",
+   "guidance": "new_period",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.795,
+   "results_strength": 0.991,
+   "outlook_tone": 0.821,
+   "uncertainty": 0.201,
+   "demand_weakness": 0.023,
+   "margin_pressure": 0.073,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/858877/000085887726000106/0000858877-26-000106-index.htm"
+  },
+  {
+   "id": "0001193125-26-344495",
+   "ticker": "BRK-B",
+   "name": "Berkshire Hathaway",
+   "sector": "Financials",
+   "date": "2026-08-11",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.974,
+   "results_strength": 0.638,
+   "outlook_tone": 0.5,
+   "uncertainty": 0.113,
+   "demand_weakness": 0.032,
+   "margin_pressure": 0.085,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1067983/000119312526344495/0001193125-26-344495-index.htm"
+  },
+  {
+   "id": "0001104659-26-093361",
+   "ticker": "SPG",
+   "name": "Simon Property Group",
+   "sector": "Real Estate",
+   "date": "2026-08-10",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.899,
+   "results_strength": 0.961,
+   "outlook_tone": 0.773,
+   "uncertainty": 0.117,
+   "demand_weakness": 0.029,
+   "margin_pressure": 0.055,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1063761/000110465926093361/0001104659-26-093361-index.htm"
+  },
+  {
+   "id": "0000005272-26-000072",
+   "ticker": "AIG",
+   "name": "American International Group",
+   "sector": "Financials",
+   "date": "2026-08-06",
+   "guidance": "none",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.776,
+   "results_strength": 0.943,
+   "outlook_tone": 0.761,
+   "uncertainty": 0.226,
+   "demand_weakness": 0.058,
+   "margin_pressure": 0.362,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/5272/000000527226000072/0000005272-26-000072-index.htm"
+  },
+  {
+   "id": "0001163165-26-000030",
+   "ticker": "COP",
+   "name": "ConocoPhillips",
+   "sector": "Energy",
+   "date": "2026-08-06",
+   "guidance": "reaffirmed",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.973,
+   "results_strength": 0.934,
+   "outlook_tone": 0.761,
+   "uncertainty": 0.667,
+   "demand_weakness": 0.044,
+   "margin_pressure": 0.067,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1163165/000116316526000030/0001163165-26-000030-index.htm"
+  },
+  {
+   "id": "0001099219-26-000048",
+   "ticker": "MET",
+   "name": "MetLife",
+   "sector": "Financials",
+   "date": "2026-08-05",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.82,
+   "results_strength": 0.967,
+   "outlook_tone": 0.723,
+   "uncertainty": 0.098,
+   "demand_weakness": 0.032,
+   "margin_pressure": 0.183,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1099219/000109921926000048/0001099219-26-000048-index.htm"
+  },
+  {
+   "id": "0000899051-26-000117",
+   "ticker": "ALL",
+   "name": "Allstate",
+   "sector": "Financials",
+   "date": "2026-08-05",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.952,
+   "results_strength": 0.973,
+   "outlook_tone": 0.707,
+   "uncertainty": 0.167,
+   "demand_weakness": 0.039,
+   "margin_pressure": 0.22,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/899051/000089905126000117/0000899051-26-000117-index.htm"
+  },
+  {
+   "id": "0000059478-26-000077",
+   "ticker": "LLY",
+   "name": "Eli Lilly",
+   "sector": "Health Care",
+   "date": "2026-08-05",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.964,
+   "results_strength": 0.988,
+   "outlook_tone": 0.873,
+   "uncertainty": 0.072,
+   "demand_weakness": 0.032,
+   "margin_pressure": 0.09,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000077/0000059478-26-000077-index.htm"
+  },
+  {
+   "id": "0001637459-26-000052",
+   "ticker": "KHC",
+   "name": "Kraft Heinz",
+   "sector": "Consumer Staples",
+   "date": "2026-08-05",
+   "guidance": "mixed",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.346,
+   "results_strength": 0.223,
+   "outlook_tone": 0.512,
+   "uncertainty": 0.303,
+   "demand_weakness": 0.777,
+   "margin_pressure": 0.85,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1637459/000163745926000052/0001637459-26-000052-index.htm"
+  },
+  {
+   "id": "0000064803-26-000097",
+   "ticker": "CVS",
+   "name": "CVS Health",
+   "sector": "Health Care",
+   "date": "2026-08-05",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.973,
+   "results_strength": 0.975,
+   "outlook_tone": 0.751,
+   "uncertainty": 0.425,
+   "demand_weakness": 0.095,
+   "margin_pressure": 0.286,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/0000064803-26-000097-index.htm"
+  },
+  {
+   "id": "0001744489-26-000056",
+   "ticker": "DIS",
+   "name": "Walt Disney",
+   "sector": "Communication Services",
+   "date": "2026-08-05",
+   "guidance": "reaffirmed",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.61,
+   "results_strength": 0.903,
+   "outlook_tone": 0.771,
+   "uncertainty": 0.394,
+   "demand_weakness": 0.346,
+   "margin_pressure": 0.387,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1744489/000174448926000056/0001744489-26-000056-index.htm"
+  },
+  {
+   "id": "0000032604-26-000042",
+   "ticker": "EMR",
+   "name": "Emerson Electric",
+   "sector": "Industrials",
+   "date": "2026-08-04",
+   "guidance": "raised",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.963,
+   "results_strength": 0.975,
+   "outlook_tone": 0.784,
+   "uncertainty": 0.356,
+   "demand_weakness": 0.032,
+   "margin_pressure": 0.037,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/32604/000003260426000042/0000032604-26-000042-index.htm"
+  },
+  {
+   "id": "0000882095-26-000028",
+   "ticker": "GILD",
+   "name": "Gilead Sciences",
+   "sector": "Health Care",
+   "date": "2026-08-04",
+   "guidance": "raised",
+   "prev_guidance": "mixed",
+   "guidance_confidence": 0.409,
+   "results_strength": 0.754,
+   "outlook_tone": 0.782,
+   "uncertainty": 0.424,
+   "demand_weakness": 0.249,
+   "margin_pressure": 0.149,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/882095/000088209526000028/0000882095-26-000028-index.htm"
+  },
+  {
+   "id": "0000318154-26-000124",
+   "ticker": "AMGN",
+   "name": "Amgen",
+   "sector": "Health Care",
+   "date": "2026-08-04",
+   "guidance": "new_period",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.908,
+   "results_strength": 0.933,
+   "outlook_tone": 0.772,
+   "uncertainty": 0.27,
+   "demand_weakness": 0.217,
+   "margin_pressure": 0.357,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/318154/000031815426000124/0000318154-26-000124-index.htm"
+  },
+  {
+   "id": "0001075531-26-000036",
+   "ticker": "BKNG",
+   "name": "Booking Holdings",
+   "sector": "Consumer Discretionary",
+   "date": "2026-08-04",
+   "guidance": "new_period",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.797,
+   "results_strength": 0.956,
+   "outlook_tone": 0.727,
+   "uncertainty": 0.52,
+   "demand_weakness": 0.084,
+   "margin_pressure": 0.098,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1075531/000107553126000036/0001075531-26-000036-index.htm"
+  },
+  {
+   "id": "0000078003-26-000094",
+   "ticker": "PFE",
+   "name": "Pfizer",
+   "sector": "Health Care",
+   "date": "2026-08-04",
+   "guidance": "raised",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.672,
+   "results_strength": 0.872,
+   "outlook_tone": 0.775,
+   "uncertainty": 0.251,
+   "demand_weakness": 0.239,
+   "margin_pressure": 0.298,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/78003/000007800326000094/0000078003-26-000094-index.htm"
+  },
+  {
+   "id": "0000063908-26-000067",
+   "ticker": "MCD",
+   "name": "McDonald's",
+   "sector": "Consumer Discretionary",
+   "date": "2026-08-04",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.965,
+   "results_strength": 0.863,
+   "outlook_tone": 0.703,
+   "uncertainty": 0.152,
+   "demand_weakness": 0.312,
+   "margin_pressure": 0.138,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000067/0000063908-26-000067-index.htm"
+  },
+  {
+   "id": "0001104659-26-090045",
+   "ticker": "MRK",
+   "name": "Merck",
+   "sector": "Health Care",
+   "date": "2026-08-04",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.914,
+   "results_strength": 0.79,
+   "outlook_tone": 0.76,
+   "uncertainty": 0.668,
+   "demand_weakness": 0.593,
+   "margin_pressure": 0.759,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/310158/000110465926090045/0001104659-26-090045-index.htm"
+  },
+  {
+   "id": "0000018230-26-000040",
+   "ticker": "CAT",
+   "name": "Caterpillar",
+   "sector": "Industrials",
+   "date": "2026-08-04",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.966,
+   "results_strength": 0.989,
+   "outlook_tone": 0.679,
+   "uncertainty": 0.086,
+   "demand_weakness": 0.036,
+   "margin_pressure": 0.049,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000040/0000018230-26-000040-index.htm"
+  },
+  {
+   "id": "0001666700-26-000049",
+   "ticker": "DD",
+   "name": "DuPont",
+   "sector": "Materials",
+   "date": "2026-08-04",
+   "guidance": "raised",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.968,
+   "results_strength": 0.963,
+   "outlook_tone": 0.771,
+   "uncertainty": 0.173,
+   "demand_weakness": 0.248,
+   "margin_pressure": 0.399,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1666700/000166670026000049/0001666700-26-000049-index.htm"
+  },
+  {
+   "id": "0001326160-26-000037",
+   "ticker": "DUK",
+   "name": "Duke Energy",
+   "sector": "Utilities",
+   "date": "2026-08-03",
+   "guidance": "reaffirmed",
+   "prev_guidance": "reaffirmed",
+   "guidance_confidence": 0.976,
+   "results_strength": 0.845,
+   "outlook_tone": 0.758,
+   "uncertainty": 0.849,
+   "demand_weakness": 0.12,
+   "margin_pressure": 0.143,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1326160/000132616026000037/0001326160-26-000037-index.htm"
+  },
+  {
+   "id": "0000021665-26-000041",
+   "ticker": "CL",
+   "name": "Colgate-Palmolive",
+   "sector": "Consumer Staples",
+   "date": "2026-07-31",
+   "guidance": "raised",
+   "prev_guidance": "mixed",
+   "guidance_confidence": 0.525,
+   "results_strength": 0.902,
+   "outlook_tone": 0.751,
+   "uncertainty": 0.457,
+   "demand_weakness": 0.086,
+   "margin_pressure": 0.047,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/21665/000002166526000041/0000021665-26-000041-index.htm"
+  },
+  {
+   "id": "0001551152-26-000023",
+   "ticker": "ABBV",
+   "name": "AbbVie",
+   "sector": "Health Care",
+   "date": "2026-07-31",
+   "guidance": "lowered",
+   "prev_guidance": "raised",
+   "guidance_confidence": 0.864,
+   "results_strength": 0.938,
+   "outlook_tone": 0.914,
+   "uncertainty": 0.253,
+   "demand_weakness": 0.102,
+   "margin_pressure": 0.146,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1551152/000155115226000023/0001551152-26-000023-index.htm"
+  },
+  {
+   "id": "0002115436-26-000006",
+   "ticker": "XOM",
+   "name": "ExxonMobil",
+   "sector": "Energy",
+   "date": "2026-07-31",
+   "guidance": "none",
+   "prev_guidance": null,
+   "guidance_confidence": 0.629,
+   "results_strength": 0.974,
+   "outlook_tone": 0.733,
+   "uncertainty": 0.859,
+   "demand_weakness": 0.045,
+   "margin_pressure": 0.092,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/0002115436-26-000006-index.htm"
+  },
+  {
+   "id": "0000093410-26-000162",
+   "ticker": "CVX",
+   "name": "Chevron",
+   "sector": "Energy",
+   "date": "2026-07-31",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.929,
+   "results_strength": 0.985,
+   "outlook_tone": 0.721,
+   "uncertainty": 0.328,
+   "demand_weakness": 0.685,
+   "margin_pressure": 0.087,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/0000093410-26-000162-index.htm"
+  },
+  {
+   "id": "0000320193-26-000018",
+   "ticker": "AAPL",
+   "name": "Apple",
+   "sector": "Information Technology",
+   "date": "2026-07-30",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.972,
+   "results_strength": 0.993,
+   "outlook_tone": 0.611,
+   "uncertainty": 0.036,
+   "demand_weakness": 0.022,
+   "margin_pressure": 0.046,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/0000320193-26-000018-index.htm"
+  },
+  {
+   "id": "0001018724-26-000024",
+   "ticker": "AMZN",
+   "name": "Amazon",
+   "sector": "Consumer Discretionary",
+   "date": "2026-07-30",
+   "guidance": "new_period",
+   "prev_guidance": "new_period",
+   "guidance_confidence": 0.917,
+   "results_strength": 0.98,
+   "outlook_tone": 0.807,
+   "uncertainty": 0.175,
+   "demand_weakness": 0.037,
+   "margin_pressure": 0.132,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/0001018724-26-000024-index.htm"
+  },
+  {
+   "id": "0000092122-26-000056",
+   "ticker": "SO",
+   "name": "Southern Company",
+   "sector": "Utilities",
+   "date": "2026-07-30",
+   "guidance": "none",
+   "prev_guidance": "none",
+   "guidance_confidence": 0.967,
+   "results_strength": 0.87,
+   "outlook_tone": 0.76,
+   "uncertainty": 0.107,
+   "demand_weakness": 0.032,
+   "margin_pressure": 0.067,
+   "themes": [],
+   "url": "https://www.sec.gov/Archives/edgar/data/92122/000009212226000056/0000092122-26-000056-index.htm"
+  }
+ ]
+}

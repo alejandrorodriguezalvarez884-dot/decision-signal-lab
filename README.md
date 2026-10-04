@@ -1,5 +1,14 @@
 # DecisionSignalLab
 
+**El producto: el radar de resultados.** Un modelo de decisión lee cada comunicado de resultados
+de 99 empresas del S&P 100 y responde siempre las mismas preguntas (¿sube o baja el guidance?,
+¿hay presión en márgenes?, ¿se debilita la demanda?). Las respuestas se publican como datos en
+`radar/` y alimentan la sección `/radar/` de la web. Cómo funciona, comandos y validación:
+[docs/RADAR.md](docs/RADAR.md).
+
+**El origen: un estudio que salió nulo.** Lo que sigue describe ese estudio, cerrado el
+2026-10-04. El radar reutiliza su descarga, su limpieza de texto y su cliente.
+
 Proyecto de investigación. Pregunta: **cuando sale un comunicado de resultados y el precio ya ha
 reaccionado, ¿sabe un modelo de decisión si la noticia es mejor o peor de lo que esa reacción
 descuenta?** Si lo sabe, su juicio debería predecir el retorno anormal de las semanas siguientes.
@@ -90,5 +99,10 @@ src/decisionsignal/
   analysis.py    estadística
   prereg.py      sello del holdout
   report.py      informe
+  radar.py       dataset público: puntuación solo de texto, agregados, actualización incremental
+  radar_universe.py  empresas del radar con nombre y sector
+  validation.py  muestra a ciegas y acuerdo con un segundo lector
+radar/           dataset publicado (releases.json, summary.json)
+validation/      muestra, etiquetas y resultado de la validación
 tests/           look-ahead, limpieza de texto, cliente, estadística, e2e sintético
 ```

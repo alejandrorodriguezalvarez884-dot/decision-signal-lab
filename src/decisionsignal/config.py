@@ -23,6 +23,7 @@ INTERIM = DATA / "interim"
 CACHE = DATA / "cache"
 RESULTS = ROOT / "results"
 DOCS = ROOT / "docs"
+RADAR = ROOT / "radar"  # the published dataset; committed, unlike data/
 
 for _p in (RAW, INTERIM, CACHE, RESULTS):
     _p.mkdir(parents=True, exist_ok=True)
@@ -140,6 +141,18 @@ def in_raw_sample(accession: str) -> bool:
     return in_sample("raw", accession, RAW_SAMPLE_FRACTION)
 
 
+# --------------------------------------------------------------------------- radar
+# A filing is published only if the model itself reads it as a results release.
+RADAR_MIN_EARNINGS_PROB = 0.5
+# Several Item 2.02 filings by one company within this many days count as one release (the first).
+RADAR_DEDUPE_DAYS = 20
+# How far back each update looks for filings it has not seen.
+RADAR_LOOKBACK_DAYS = 45
+# A theme counts as present in a release from this probability up.
+RADAR_THEME_THRESHOLD = 0.5
+RADAR_LATEST = 40
+
+
 # --------------------------------------------------------------------------- SEC
 SEC_MAX_RPS = 8  # SEC fair-access policy allows 10 requests/second
 
@@ -168,6 +181,8 @@ class Paths:
     decision_cache: Path = CACHE / "decision_cache.sqlite"
     http_cache: Path = CACHE / "http"
     lock: Path = DOCS / "PREREGISTRATION.lock.json"
+    radar_releases: Path = RADAR / "releases.json"
+    radar_summary: Path = RADAR / "summary.json"
 
 
 PATHS = Paths()

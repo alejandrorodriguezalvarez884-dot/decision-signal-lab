@@ -129,6 +129,29 @@ PROBE_QUESTIONS: dict[str, dict] = {
 }
 
 
+# =========================================================================== radar: themes
+# State: {"press_release": <text>}. Asked over the whole history for the public radar
+# (``radar.py``). Text only: these requests never carry prices or reactions.
+THEME_QUESTIONS: dict[str, dict] = {
+    "tariffs": {
+        "type": "noul",
+        "instructions": "Does `press_release` say that tariffs or trade restrictions affect, or are expected to affect, the company's costs, prices, demand or outlook?",
+    },
+    "ai": {
+        "type": "noul",
+        "instructions": "Does `press_release` describe artificial intelligence as a driver of the company's demand, revenue or investment?",
+    },
+    "supply_chain": {
+        "type": "noul",
+        "instructions": "Does `press_release` say that supply chain disruptions, component shortages or logistics constraints hurt the company's results or outlook?",
+    },
+    "restructuring": {
+        "type": "noul",
+        "instructions": "Does `press_release` report job cuts, a restructuring program or restructuring charges?",
+    },
+}
+
+
 # =========================================================================== numbers -> words
 def _size_label(z: float) -> str:
     a = abs(z)
@@ -177,6 +200,10 @@ def text_request(text: str) -> tuple[dict, dict]:
     return {"press_release": text}, TEXT_QUESTIONS
 
 
+def theme_request(text: str) -> tuple[dict, dict]:
+    return {"press_release": text}, THEME_QUESTIONS
+
+
 def reaction_request(text: str, reaction_sentence: str) -> tuple[dict, dict]:
     return {"press_release": text, "initial_market_reaction": reaction_sentence}, REACTION_QUESTIONS
 
@@ -195,4 +222,4 @@ def probe_request(company: str, ticker: str, event_date: str, reaction_sentence:
 
 
 ALL_QUESTION_SETS = {"text": TEXT_QUESTIONS, "reaction": REACTION_QUESTIONS,
-                     "primary": PRIMARY_QUESTIONS, "probe": PROBE_QUESTIONS}
+                     "primary": PRIMARY_QUESTIONS, "probe": PROBE_QUESTIONS, "theme": THEME_QUESTIONS}
