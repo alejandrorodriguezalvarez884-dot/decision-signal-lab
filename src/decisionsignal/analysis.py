@@ -144,11 +144,11 @@ def holm(pvals: dict[str, float]) -> dict[str, float]:
 
 def sensitivity_to_reaction(features: pd.DataFrame) -> dict:
     """Does the model's verdict move when only the reaction changes? It should fall as the move rises."""
-    cols = ["cf_strong_neg__nvr", "cf_flat__nvr", "cf_strong_pos__nvr"]
+    cols = ["cf_strong_neg__fvr", "cf_flat__fvr", "cf_strong_pos__fvr"]
     if not all(c in features for c in cols):
         return {}
     d = features[cols].dropna()
     monotone = ((d[cols[0]] >= d[cols[1]]) & (d[cols[1]] >= d[cols[2]])).mean()
     unchanged = ((d[cols].max(axis=1) - d[cols].min(axis=1)) < 0.05).mean()
-    return {"n": int(len(d)), "mean_nvr": d.mean().to_dict(), "share_monotone": float(monotone),
+    return {"n": int(len(d)), "mean_signal": d.mean().to_dict(), "share_monotone": float(monotone),
             "share_insensitive": float(unchanged)}

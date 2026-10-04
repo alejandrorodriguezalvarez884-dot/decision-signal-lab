@@ -54,13 +54,14 @@ def test_report_runs_end_to_end(tmp_path, monkeypatch):
 
     rows = []
     sets = {"text_raw": Q.TEXT_QUESTIONS, "text_anon": Q.TEXT_QUESTIONS, "react_raw": Q.REACTION_QUESTIONS,
-            "react_anon": Q.REACTION_QUESTIONS, "probe": Q.PROBE_QUESTIONS}
+            "react_anon": Q.REACTION_QUESTIONS, "facts_raw": Q.PRIMARY_QUESTIONS,
+            "facts_anon": Q.PRIMARY_QUESTIONS, "probe": Q.PROBE_QUESTIONS}
     for acc in ev["accessionNumber"]:
         for v in MAIN_VARIANTS:
             rows += flatten_answer(acc, v, _fake_response(sets[v], rng))
     for acc in ev["accessionNumber"][:50]:
         for v in CF_VARIANTS:
-            rows += flatten_answer(acc, v, _fake_response(Q.REACTION_QUESTIONS, rng))
+            rows += flatten_answer(acc, v, _fake_response(Q.PRIMARY_QUESTIONS, rng))
     answers = pd.DataFrame(rows)
     # make most releases count as earnings releases
     m = answers["question"] == "is_earnings_release"
@@ -82,8 +83,9 @@ def test_report_runs_end_to_end(tmp_path, monkeypatch):
     res = report.run(include_holdout=True)
     assert set(res["splits"]) == {"design", "holdout"}
     primary = res["splits"]["holdout"]["signals_primary_horizon"][0]
-    assert primary["signal"] == "react_anon__nvr"
+    assert primary["signal"] == "facts_anon__fvr"
     assert primary["p"] > 0.001  # pure noise must not look like a discovery
     assert (tmp_path / "report.md").read_text(encoding="utf-8").startswith("# Results")
-    json.loads((tmp_path / "results.json").read_text())
+    saved = json.loads((tmp_path / "results.json").read_text())
+    assert saved["sensitivity_to_reaction"]["n"] == 50  # counterfactuals carry the primary question
     assert (tmp_path / "quintiles_holdout.png").exists()

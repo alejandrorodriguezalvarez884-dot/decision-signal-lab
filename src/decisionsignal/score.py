@@ -13,13 +13,14 @@ from .prereg import assert_locked
 
 # Variant name -> what the model sees.
 #   text_raw / text_anon       press release only (raw or identity-masked)
-#   react_raw / react_anon     press release + day-0 reaction sentence     <- react_anon is PRIMARY
+#   react_raw / react_anon     press release + day-0 reaction sentence, secondary questions
+#   facts_raw / facts_anon     same state, the primary question alone      <- facts_anon is PRIMARY
 #   probe                      company, date and reaction, NO press release (memorization probe)
-#   cf_*                       masked text + a counterfactual reaction (sensitivity check)
+#   cf_*                       masked text + a counterfactual reaction, primary question (sensitivity check)
 # The raw variants exist only to compare against the masked ones (memorization check), so they
 # are sent for a fixed sample of events: see config.RAW_SAMPLE_FRACTION.
-RAW_VARIANTS = ("text_raw", "react_raw")
-MAIN_VARIANTS = ("text_raw", "text_anon", "react_raw", "react_anon", "probe")
+RAW_VARIANTS = ("text_raw", "react_raw", "facts_raw")
+MAIN_VARIANTS = ("text_raw", "text_anon", "react_raw", "react_anon", "facts_raw", "facts_anon", "probe")
 CF_VARIANTS = tuple(Q.COUNTERFACTUAL_REACTIONS)
 
 
@@ -47,13 +48,17 @@ def build_payloads(events: pd.DataFrame, variants: tuple[str, ...]) -> list[tupl
                 state, qs = Q.reaction_request(raw, sentence)
             elif v == "react_anon":
                 state, qs = Q.reaction_request(anon, sentence)
+            elif v == "facts_raw":
+                state, qs = Q.primary_request(raw, sentence)
+            elif v == "facts_anon":
+                state, qs = Q.primary_request(anon, sentence)
             elif v == "probe":
                 state, qs = Q.probe_request(
                     ev["sec_name"], ev["price_ticker"], ev["event_date"].strftime("%B %d, %Y"), sentence
                 )
             elif v in Q.COUNTERFACTUAL_REACTIONS:
                 r, z = Q.COUNTERFACTUAL_REACTIONS[v]
-                state, qs = Q.reaction_request(anon, Q.describe_reaction(r, z))
+                state, qs = Q.primary_request(anon, Q.describe_reaction(r, z))
             else:
                 raise ValueError(v)
             out.append((ev["accessionNumber"], v, payload(state, qs)))

@@ -22,6 +22,7 @@ from .text import looks_like_earnings_release
 INK, INK_2, SERIES_1, GRID = "#0b0b0b", "#52514e", "#2a78d6", "#e4e3df"
 
 SECONDARY_SIGNALS = [
+    "react_anon__nvr",
     "react_anon__reversal_signal",
     "react_anon__underappreciated_longterm",
     "text_anon__mismatch",
@@ -94,12 +95,13 @@ def run(include_holdout: bool | None = None) -> dict:
 
 def contamination(d: pd.DataFrame) -> dict:
     out = {}
-    for sig in ("react_raw__nvr", "react_anon__nvr", "text_raw__composite", "text_anon__composite",
-                "probe__outperform_next_month"):
+    for sig in ("facts_raw__fvr", "facts_anon__fvr", "react_raw__nvr", "react_anon__nvr",
+                "text_raw__composite", "text_anon__composite", "probe__outperform_next_month"):
         if sig in d and d[sig].notna().any():
             out[sig] = A.fama_macbeth_ic(d, sig, PRIMARY_TARGET, PRIMARY_HORIZON)
     # Raw variants cover a sample of events; compare masked against raw on those same events.
-    for raw, anon in (("react_raw__nvr", "react_anon__nvr"), ("text_raw__composite", "text_anon__composite")):
+    for raw, anon in (("facts_raw__fvr", "facts_anon__fvr"), ("react_raw__nvr", "react_anon__nvr"),
+                      ("text_raw__composite", "text_anon__composite")):
         if raw in d and anon in d and d[raw].notna().any():
             same = d[d[raw].notna()]
             out[f"{anon}__on_raw_sample"] = A.fama_macbeth_ic(same, anon, PRIMARY_TARGET, PRIMARY_HORIZON)
@@ -108,16 +110,16 @@ def contamination(d: pd.DataFrame) -> dict:
     by_year = []
     for yr, g in d.groupby(d["event_date"].dt.year):
         row = {"year": int(yr), "n": int(len(g))}
-        for sig in ("react_raw__nvr", "react_anon__nvr", "probe__outperform_next_month"):
+        for sig in ("facts_raw__fvr", "facts_anon__fvr", "probe__outperform_next_month"):
             if sig in g and g[sig].notna().sum() > 20:
                 row[sig] = A.pooled_ic_bootstrap(g, sig, PRIMARY_TARGET)["pooled_ic"]
         by_year.append(row)
     out["by_year_pooled_ic"] = by_year
     released = model_release_date()
-    if released and "react_anon__nvr" in d:
+    if released and PRIMARY_SIGNAL in d:
         after = d[d["event_date"] > pd.Timestamp(released)]
         out["after_model_release"] = {"release_date": str(released), "n": int(len(after)),
-                                      **A.fama_macbeth_ic(after, "react_anon__nvr", PRIMARY_TARGET, PRIMARY_HORIZON)}
+                                      **A.fama_macbeth_ic(after, PRIMARY_SIGNAL, PRIMARY_TARGET, PRIMARY_HORIZON)}
     return out
 
 
@@ -146,7 +148,7 @@ def figures(panel: pd.DataFrame, splits: list[str]) -> None:
             fig, ax = plt.subplots(figsize=(5, 3.2))
             ax.bar([str(k) for k in ks], [q["q_means"][k] * 100 for k in ks], color=SERIES_1, width=0.6)
             ax.axhline(0, color=INK_2, lw=1)
-            ax.set_xlabel("quintile of primary signal (1 = news worse than reaction)")
+            ax.set_xlabel("quintile of primary signal (1 = facts weaker than reaction)")
             ax.set_ylabel(f"mean {PRIMARY_TARGET} (%)")
             ax.set_title(f"Forward abnormal return by quintile ({split})", color=INK, loc="left")
             fig.tight_layout()
@@ -203,6 +205,6 @@ def render_markdown(res: dict) -> str:
     s = res.get("sensitivity_to_reaction") or {}
     if s:
         L.append(f"## Does the model use the reaction?\n\nSame masked text, three made-up reactions (n={s['n']}). "
-                 f"Mean P(better)−P(worse): {', '.join(f'{k.split(chr(95)*2)[0]} {v:.3f}' for k, v in s['mean_nvr'].items())}. "
+                 f"Mean P(better)−P(worse): {', '.join(f'{k.split(chr(95)*2)[0]} {v:.3f}' for k, v in s['mean_signal'].items())}. "
                  f"Monotone in the expected direction: {s['share_monotone']:.0%}. Essentially unchanged: {s['share_insensitive']:.0%}.")
     return "\n".join(L) + "\n"

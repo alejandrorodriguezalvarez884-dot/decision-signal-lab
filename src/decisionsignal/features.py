@@ -31,7 +31,7 @@ TEXT_COMPOSITE_SIGNS = {
     "margin_pressure": -1,
 }
 
-PRIMARY_SIGNAL = "react_anon__nvr"  # P(better) - P(worse), masked text + reaction
+PRIMARY_SIGNAL = "facts_anon__fvr"  # P(better) - P(worse) on facts_vs_reaction, masked text + reaction
 PRIMARY_TARGET = "fwd_abn_20"
 
 
@@ -56,10 +56,14 @@ def wide_features(answers: pd.DataFrame) -> pd.DataFrame:
 
 def add_derived(w: pd.DataFrame) -> pd.DataFrame:
     w = w.copy()
-    for v in ("react_raw", "react_anon", "cf_strong_neg", "cf_flat", "cf_strong_pos"):
+    for v in ("react_raw", "react_anon"):
         b, wo = f"{v}__news_vs_reaction__p_better", f"{v}__news_vs_reaction__p_worse"
         if b in w and wo in w:
             w[f"{v}__nvr"] = w[b] - w[wo]
+    for v in ("facts_raw", "facts_anon", "cf_strong_neg", "cf_flat", "cf_strong_pos"):
+        b, wo = f"{v}__facts_vs_reaction__p_better", f"{v}__facts_vs_reaction__p_worse"
+        if b in w and wo in w:
+            w[f"{v}__fvr"] = w[b] - w[wo]
     for v in ("text_raw", "text_anon"):
         cols = [f"{v}__guidance__p_{k}" for k in GUIDANCE_DIRECTION]
         if all(c in w for c in cols):

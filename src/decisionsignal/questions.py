@@ -71,7 +71,7 @@ TEXT_QUESTIONS: dict[str, dict] = {
 # =========================================================================== variant: text + reaction
 # State: {"press_release": <text>, "initial_market_reaction": <sentence from describe_reaction>}.
 REACTION_QUESTIONS: dict[str, dict] = {
-    # PRIMARY pre-registered question (see docs/PREREGISTRATION.md).
+    # The primary question of the first draft; a secondary signal since the design split.
     "news_vs_reaction": {
         "type": "choice",
         "instructions": "Comparing the news in `press_release` with `initial_market_reaction`, is the news better or worse than the market reaction implies?",
@@ -92,6 +92,25 @@ REACTION_QUESTIONS: dict[str, dict] = {
     "underappreciated_longterm": {
         "type": "noul",
         "instructions": "Does `press_release` contain news about the company's long-term prospects that `initial_market_reaction` does not reflect?",
+    },
+}
+
+# =========================================================================== variant: primary
+# Same state as the reaction variant, asked on its own.
+PRIMARY_QUESTIONS: dict[str, dict] = {
+    # PRIMARY pre-registered question (see docs/PREREGISTRATION.md). It replaced `news_vs_reaction`
+    # after the design split: releases are upbeat almost without exception, so "is the news
+    # better than the reaction implies" reduced to "did the price fall" (rank correlation with
+    # the reaction -0.71). This one asks for facts, not tone, and its criteria make "worse" as
+    # reachable after a rise as "better" is after a fall.
+    "facts_vs_reaction": {
+        "type": "choice",
+        "instructions": "Company press releases are almost always upbeat, so judge only the concrete facts in `press_release` (growth, margins, guidance changes, one-time items), not its tone. Are those facts stronger or weaker than the price move in `initial_market_reaction` implies?",
+        "criteria": {
+            "better": "The facts are stronger than the reaction implies: for example guidance raised or growth accelerating while the stock fell, was flat or rose only a little",
+            "in_line": "The reaction is about right for the facts",
+            "worse": "The facts are weaker than the reaction implies: for example guidance cut, growth slowing, margins shrinking or results helped by one-time items while the stock rose, was flat or fell only a little",
+        },
     },
 }
 
@@ -162,6 +181,10 @@ def reaction_request(text: str, reaction_sentence: str) -> tuple[dict, dict]:
     return {"press_release": text, "initial_market_reaction": reaction_sentence}, REACTION_QUESTIONS
 
 
+def primary_request(text: str, reaction_sentence: str) -> tuple[dict, dict]:
+    return {"press_release": text, "initial_market_reaction": reaction_sentence}, PRIMARY_QUESTIONS
+
+
 def probe_request(company: str, ticker: str, event_date: str, reaction_sentence: str) -> tuple[dict, dict]:
     state = {
         "company": f"{company} (ticker {ticker})",
@@ -171,4 +194,5 @@ def probe_request(company: str, ticker: str, event_date: str, reaction_sentence:
     return state, PROBE_QUESTIONS
 
 
-ALL_QUESTION_SETS = {"text": TEXT_QUESTIONS, "reaction": REACTION_QUESTIONS, "probe": PROBE_QUESTIONS}
+ALL_QUESTION_SETS = {"text": TEXT_QUESTIONS, "reaction": REACTION_QUESTIONS,
+                     "primary": PRIMARY_QUESTIONS, "probe": PROBE_QUESTIONS}

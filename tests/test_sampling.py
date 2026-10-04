@@ -35,7 +35,7 @@ def test_raw_variants_only_go_out_for_the_raw_sample():
     assert 0 < len(in_raw) < len(ev)
     for v in RAW_VARIANTS:
         assert by_variant[v] == in_raw
-    for v in ("text_anon", "react_anon", "probe"):
+    for v in ("text_anon", "react_anon", "facts_anon", "probe"):
         assert by_variant[v] == set(ev["accessionNumber"])
 
 
@@ -60,3 +60,13 @@ def test_universe_is_the_fixed_sp100_list_under_any_ticker():
     assert len(config.SP100_DEC_2020) == 101 and len(set(config.SP100_DEC_2020)) == 101
     spells = pd.DataFrame({"ticker": ["FB", "META", "BRK.B", "AAPL", "AAL", "ABNB"]})
     assert restrict_to_sp100(spells)["ticker"].tolist() == ["FB", "META", "BRK.B", "AAPL"]
+
+
+
+def test_primary_signal_is_p_better_minus_p_worse_on_the_facts_question():
+    from decisionsignal.features import PRIMARY_SIGNAL, add_derived
+
+    w = add_derived(pd.DataFrame({"facts_anon__facts_vs_reaction__p_better": [0.7, 0.1],
+                                  "facts_anon__facts_vs_reaction__p_worse": [0.1, 0.6]}))
+    assert PRIMARY_SIGNAL == "facts_anon__fvr"
+    assert w[PRIMARY_SIGNAL].tolist() == pytest.approx([0.6, -0.5])
