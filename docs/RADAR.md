@@ -20,18 +20,31 @@ resultados del S&P 100, convertido en datos y publicado en la web. No predice na
 
 `radar/` está en git, a diferencia de `data/`: es lo que lee el sitio.
 
-## Comandos
+## Todo se ejecuta en local, con `make`
 
-```bash
-uv run decisionsignal radar estimate   # coste de `build`, sin gastar
-uv run decisionsignal radar build      # puntúa la descarga local (data/interim) y escribe radar/
-uv run decisionsignal radar update     # busca en EDGAR lo publicado desde la última vez
-uv run decisionsignal radar summary    # regenera summary.json
-```
+No hay nada en GitHub Actions ni nada programado. El `Makefile` de la raíz orquesta todo y
+cada cosa ocurre solo cuando se lanza a mano:
 
-Todos aceptan `--no-themes`, que omite las preguntas temáticas (un tercio del coste por
-comunicado). `build` reutiliza la caché: los comunicados ya puntuados no se vuelven a pagar.
-Los topes `DECIDER_MAX_USD` y `DECIDER_TOTAL_MAX_USD` siguen aplicando.
+| Comando | Qué hace | Gasta |
+|---|---|---|
+| `make` | Lista los comandos | No |
+| `make check` | Mira en EDGAR si hay comunicados nuevos y cuánto costaría puntuarlos | No |
+| `make update` | Descarga y puntúa los comunicados nuevos y reescribe `radar/` | Sí, hasta `MAX_USD` ($0.25 por defecto) |
+| `make site` | Compila el sitio en `site/dist` | No |
+| `make dev` | Sirve el sitio en local (http://localhost:4321) | No |
+| `make deploy` | Compila el sitio y lo publica (sube `site/dist` a la rama `gh-pages`) | No |
+| `make save` | Hace commit de `radar/` si cambió y sube la rama actual | No |
+| `make publish` | `update` + `save` + `deploy`, en ese orden | Sí |
+| `make test` | Lanza los tests | No |
+| `make install` | Instala dependencias de Python y del sitio | No |
+
+Lo habitual tras una tanda de resultados: `make check` para ver qué hay y cuánto cuesta, y
+`make publish` para actualizar y publicar. El tope se cambia así: `make update MAX_USD=1`.
+
+Los comandos de debajo siguen disponibles: `uv run decisionsignal radar estimate|build|check|update|summary`,
+todos con `--no-themes` para omitir las preguntas temáticas. `build` vuelve a puntuar la
+descarga local completa reutilizando la caché. Los topes `DECIDER_MAX_USD` y
+`DECIDER_TOTAL_MAX_USD` siguen aplicando.
 
 ## El sitio
 
@@ -59,34 +72,20 @@ npm run build                # genera site/dist
 
 ## Publicación y dominio
 
-GitHub Pages sirve la rama `gh-pages`. Hoy el sitio está en
+`make deploy` sube el sitio compilado a la rama `gh-pages`, que es la que sirve GitHub Pages.
+GitHub solo aloja los archivos: no ejecuta nada del proyecto. Hoy el sitio está en
 https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/.
 
 Para pasarlo a un dominio propio comprado en Cloudflare basta un archivo:
 
 1. Crear `site/public/CNAME` con el dominio en una línea (por ejemplo `midominio.com`) y
-   hacer push. `site/astro.config.mjs` lee ese archivo y compila con la raíz `/`; GitHub Pages
-   lo lee para servir el dominio.
+   lanzar `make deploy`. `site/astro.config.mjs` lee ese archivo y compila con la raíz `/`;
+   GitHub Pages lo lee para servir el dominio.
 2. En Cloudflare, DNS del dominio: un registro `CNAME` con nombre `@` y destino
    `alejandrorodriguezalvarez884-dot.github.io`, y otro igual con nombre `www`. Con el proxy
    desactivado ("DNS only") hasta que GitHub emita el certificado.
 3. En GitHub, Settings → Pages: comprobar que aparece el dominio y marcar "Enforce HTTPS".
 4. Cambiar `liveUrl` de la tarjeta en `personal-website/src/data/profile.ts`.
-
-## Actualizaciones: solo a mano
-
-No hay nada programado. Los datos cambian únicamente cuando el usuario lo decide, por una de
-estas dos vías:
-
-- **Desde GitHub** (sirve desde el móvil): Actions → Radar → Run workflow. Busca filings
-  nuevos, los puntúa, hace commit de `radar/` y publica el sitio. Necesita los secretos
-  `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` (Settings → Secrets and variables → Actions); si
-  faltan, se salta la búsqueda y solo republica. Tope por ejecución: $0.25.
-- **Desde este ordenador**: `uv run decisionsignal radar update`, revisar, y hacer commit y
-  push de `radar/`.
-
-Un push a `main` que toque `site/` o `radar/` recompila y publica el sitio, sin buscar nada ni
-gastar en la API.
 
 ## Validación
 

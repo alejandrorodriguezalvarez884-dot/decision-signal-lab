@@ -24,3 +24,6 @@ Thumbs.db
 # Site
 node_modules/
 .astro/
+
+# Scratch copy of the built site used by `make deploy`
+.deploy/

@@ -49,8 +49,9 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--skip-model", action="store_true", help="stop before calling the API")
 
     s = sub.add_parser("radar", help="the public dataset in radar/ (text only, no prices)")
-    s.add_argument("action", choices=["estimate", "build", "update", "summary"],
+    s.add_argument("action", choices=["estimate", "build", "check", "update", "summary"],
                    help="estimate: cost of `build` | build: score the local download | "
+                        "check: list new filings and what scoring them would cost, without spending | "
                         "update: fetch and score filings since the last update | summary: rebuild summary.json")
     s.add_argument("--no-themes", action="store_true", help="skip the theme questions (about a third of the cost)")
 
@@ -86,6 +87,9 @@ def main(argv: list[str] | None = None) -> None:
         from . import radar as R
         if a.action == "estimate":
             print(json.dumps(R.estimate(R.local_filings(), themes=not a.no_themes), indent=2))
+            return
+        if a.action == "check":
+            print(json.dumps(R.check(themes=not a.no_themes), indent=2))
             return
         if a.action == "build":
             R.build(themes=not a.no_themes)

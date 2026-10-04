@@ -15,14 +15,15 @@ Reglas que no se negocian:
   `report --holdout` siguen bloqueados sin `lock`.
 - **El radar solo lee texto.** `radar.py` no usa precios, retornos ni la reacción del mercado, y
   la web no publica nada que sea una predicción o una recomendación.
-- **Nada programado.** Los datos del radar se actualizan solo cuando el usuario lo lanza a
-  mano. No se añaden `schedule`, cron ni tareas periódicas.
+- **Todo en local, nada programado.** No hay GitHub Actions ni tareas periódicas, y no se
+  añaden. Los datos y el sitio cambian solo cuando el usuario lanza un comando del `Makefile`
+  (`make check`, `make update`, `make deploy`, `make publish`).
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.
 - **Los resultados nulos se reportan tal cual.**
 
 Convenciones:
 - Hablar con el usuario en español. Código y comentarios en inglés.
-- Python 3.12 con `uv`. Los tests se lanzan con `uv run pytest`.
+- Python 3.12 con `uv`. Los tests se lanzan con `make test` (o `uv run pytest`).
 - Las preguntas al modelo viven solo en `src/decisionsignal/questions.py` y las constantes del estudio en
   `src/decisionsignal/config.py`.
 - `radar/` (el dataset publicado) y `validation/` están en git. `data/` no.

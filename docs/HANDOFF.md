@@ -16,7 +16,8 @@ Decisiones del usuario ese día:
 - Aprobó lanzar las 4 preguntas temáticas sobre todo el histórico.
 - El foco del sitio es **analizar los últimos resultados de una empresa**. Los agregados y el
   estudio se pueden ver, pero son secundarios.
-- **Sin actualizaciones programadas.** Los datos solo se actualizan cuando él lo lanza a mano.
+- **Sin actualizaciones programadas y sin GitHub Actions.** Todo se ejecuta en local y lo
+  orquesta el `Makefile`: `make check`, `make update`, `make deploy`, `make publish`.
 - Va a comprar un dominio en Cloudflare para el sitio. Aún no lo tiene.
 
 | Hecho | Pendiente |
@@ -29,7 +30,7 @@ Decisiones del usuario ese día:
 | Dataset en `radar/`: 2.238 comunicados de 99 empresas, de 2021-01-13 a 2026-10-01; 79 filings descartados por no ser de resultados y 21 por duplicados | |
 | `radar update` probado contra EDGAR en local: 20 segundos, no encuentra nada nuevo y deja el dataset igual | |
 | Sitio estático en `site/` (Astro, 102 páginas), publicado en https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/. Portada con buscador de empresas; ficha de empresa con el análisis del último comunicado (qué dice, qué ha cambiado, comparación con pares, histórico); agregados en `/trends/`; método y estudio en `/method/`. Revisado en escritorio y móvil | Dominio propio: cuando el usuario lo compre, crear `site/public/CNAME` con el nombre y seguir los pasos de RADAR.md |
-| Workflow `.github/workflows/radar.yml` **sin programación**: se lanza a mano (Run workflow) o al hacer push de `site/` o `radar/` | El usuario tiene que crear los secretos `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` en GitHub para poder actualizar desde allí. La búsqueda en EDGAR no se ha ejecutado nunca desde GitHub |
+| `Makefile` en la raíz: `check` (gratis, mira qué hay nuevo y cuánto costaría), `update`, `site`, `deploy` (sube `site/dist` a `gh-pages`), `save`, `publish`. El workflow de GitHub Actions se eliminó. `make check` y `make deploy` probados el 2026-10-04 | `make update` no se ha probado con comunicados nuevos reales (no había ninguno); la ruta de puntuación es la misma que `build` |
 | | El análisis cubre solo las 99 empresas del universo. Analizar otra empresa exige añadirla a `radar_universe.py` |
 | Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`, campo nuevo `liveUrl`), publicada en alejandrorodriguez.dev/projects/ con enlace al sitio | No se ha añadido a `featuredProjectNames` (la selección de la portada) |
 | | Ampliar al S&P 500 (estimación previa: $8–12, por encima de lo que queda del tope) |

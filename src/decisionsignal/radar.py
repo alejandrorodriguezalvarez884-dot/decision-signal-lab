@@ -220,12 +220,27 @@ def fetch_new_filings(known: set[str], since: date, until: date) -> tuple[pd.Dat
     return pd.DataFrame(rows), skipped
 
 
+def pending(data: dict, today: date | None = None) -> tuple[pd.DataFrame, dict[str, str]]:
+    """Filings on EDGAR that the dataset has not seen yet. Downloads, but does not call the model."""
+    today = today or date.today()
+    known = {r["id"] for r in data["releases"]} | set(data["skipped"])
+    return fetch_new_filings(known, today - timedelta(days=RADAR_LOOKBACK_DAYS), today)
+
+
+def check(today: date | None = None, themes: bool = True, client: DecisionClient | None = None) -> dict:
+    """What `update` would do and cost, without spending anything or writing anything."""
+    filings, skipped = pending(load(), today)
+    new = [{"ticker": TICKER_BY_CIK[int(r["cik"])], "date": pd.Timestamp(r["accepted_et"]).date().isoformat(),
+            "id": r["accessionNumber"]} for r in filings.to_dict("records")]
+    cost = estimate(filings, themes, client) if len(filings) else {"requests": 0, "not_cached": 0, "usd": 0.0}
+    return {"new_filings": new, "without_text_or_exhibit": len(skipped),
+            "requests": cost["requests"], "estimated_usd": cost["usd"]}
+
+
 def update(today: date | None = None, themes: bool = True, client: DecisionClient | None = None) -> list[dict]:
     """Look for filings since the last update, score them and add them. Returns the new releases."""
-    today = today or date.today()
     data = load()
-    known = {r["id"] for r in data["releases"]} | set(data["skipped"])
-    filings, skipped = fetch_new_filings(known, today - timedelta(days=RADAR_LOOKBACK_DAYS), today)
+    filings, skipped = pending(data, today)
     records, refused = score(filings, themes, client) if len(filings) else ([], {})
     keep, left_out = select(records, published=data["releases"])
     data["releases"] += keep

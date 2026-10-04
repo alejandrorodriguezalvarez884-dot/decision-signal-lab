@@ -175,3 +175,21 @@ def test_update_scores_only_unknown_filings_and_appends(radar_dir, monkeypatch):
     data = R.load()
     assert [r["id"] for r in data["releases"]] == ["old", "new-aapl"]
     assert data["skipped"] == {"skip-1": "not_earnings", "no-exhibit": "no_exhibit", "new-msft": "not_earnings"}
+
+
+def test_check_lists_new_filings_without_calling_the_model_or_writing(radar_dir, monkeypatch):
+    R.save({"model": "m", "skipped": {}, "releases": [record("old", "AAPL", "2026-04-30")]})
+    before = R.PATHS.radar_releases.read_text()
+    monkeypatch.setattr(R, "fetch_new_filings", lambda known, since, until: (
+        pd.DataFrame([filing("new-aapl", 320193, "2026-07-30 16:30", text="Revenue grew. " * 2000)]),
+        {"x": "no_exhibit"}))
+
+    def handler(req):
+        raise AssertionError("check must not call the model")
+
+    client = DecisionClient(cache=Cache(radar_dir / "c.sqlite"), transport=httpx.MockTransport(handler),
+                            cap_usd=1.0, api_key="test")
+    out = R.check(today=date(2026, 8, 1), client=client)
+    assert out["new_filings"] == [{"ticker": "AAPL", "date": "2026-07-30", "id": "new-aapl"}]
+    assert out["requests"] == 2 and out["estimated_usd"] > 0 and out["without_text_or_exhibit"] == 1
+    assert R.PATHS.radar_releases.read_text() == before
