@@ -24,9 +24,9 @@ Decisiones del usuario ese día:
 | Preguntas temáticas (aranceles, IA, cadena de suministro, reestructuración) sobre todo el histórico: 2.338 peticiones, $0.99 reales ($1.24 estimados). **Gasto acumulado del proyecto: $4.98 de $10** | |
 | Dataset en `radar/`: 2.238 comunicados de 99 empresas, de 2021-01-13 a 2026-10-01; 79 filings descartados por no ser de resultados y 21 por duplicados | |
 | `radar update` probado contra EDGAR en local: 20 segundos, no encuentra nada nuevo y deja el dataset igual | |
-| Sitio estático en `site/` (Astro, 102 páginas): resumen, empresas, ficha por empresa y método. Revisado en escritorio y móvil | |
-| Workflow `.github/workflows/radar.yml`: actualiza los datos dos veces al día, compila el sitio y lo publica en la rama `gh-pages` | El usuario tiene que crear los secretos `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` en GitHub; sin ellos el sitio se sigue publicando pero no entran comunicados nuevos. Falta comprobar que EDGAR no bloquea las IP de Actions |
-| Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`), con enlace al sitio | |
+| Sitio estático en `site/` (Astro, 102 páginas): resumen, empresas, ficha por empresa y método. Revisado en escritorio y móvil. **Publicado el 2026-10-04** en https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/ (GitHub Pages sirve la rama `gh-pages`; se activó solo al subirla) | Si se quiere un dominio propio, cambiar `site` y `base` en `site/astro.config.mjs` |
+| Workflow `.github/workflows/radar.yml`: actualiza los datos dos veces al día, compila el sitio y lo publica en la rama `gh-pages`. La primera ejecución (por push, sin paso de datos) terminó bien | El usuario tiene que crear los secretos `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` en GitHub; sin ellos el sitio se sigue publicando pero no entran comunicados nuevos. Falta comprobar que EDGAR no bloquea las IP de Actions |
+| Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`, campo nuevo `liveUrl`), publicada en alejandrorodriguez.dev/projects/ con enlace al sitio | No se ha añadido a `featuredProjectNames` (la selección de la portada) |
 | | Ampliar al S&P 500 (estimación previa: $8–12, por encima de lo que queda del tope) |
 
 ## 1. Qué se pidió (resumen del encargo)
