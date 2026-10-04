@@ -63,7 +63,10 @@ en esta acción"). Toda la aritmética se queda en el código.
 
 El texto se limpia antes de enviarlo:
 - Se quitan las tablas financieras y el texto legal (forward-looking statements, non-GAAP,
-  contactos, "About X").
+  contactos, "About X", glosarios).
+- La narrativa termina en el primer estado financiero ("Consolidated Statements of…") o en el
+  `###` de fin de comunicado: lo que sigue son tablas, sus títulos y notas, y conciliaciones.
+- Se quita el mobiliario de página (cabeceras repetidas, "Page N", "(Unaudited)", unidades).
 - Se conservan las frases con cifras.
 - Se recorta a unos 24k caracteres (≈7k tokens). El límite de Perplexity Decider es de 262k
   tokens por petición, muy por encima; el recorte se eligió para dar al modelo solo la narrativa.
@@ -128,7 +131,12 @@ defensas:
   diseño solo se opera después del día 0 completo, así que esto no introduce look-ahead.
 - **Sin consenso de analistas:** no hay "sorpresa" frente a estimaciones (los datos son de pago).
   El modelo y los baselines solo ven el texto y la reacción.
-- **Anonimización parcial:** no oculta productos ni nombres de directivos.
+- **Anonimización parcial:** no oculta productos ni nombres de directivos, y sustituye el
+  nombre de la empresa también dentro de nombres de producto ("the Company Watch").
+- **Comunicados convertidos desde PDF:** algunos (p. ej. las cartas a accionistas de Airbnb)
+  llegan con las líneas partidas y sin títulos reconocibles. La limpieza por secciones no
+  actúa y el texto se corta en el límite de 24k caracteres, que suele caer antes de la parte
+  legal pero no siempre.
 - **Sector por SIC:** es una aproximación gruesa a GICS.
 - **Licencia LM:** el diccionario Loughran-McDonald es gratuito para investigación, pero su uso
   comercial requiere licencia.

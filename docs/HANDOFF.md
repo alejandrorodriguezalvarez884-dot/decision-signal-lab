@@ -40,11 +40,14 @@ inglés.
 | Hecho | Pendiente |
 |---|---|
 | Pipeline completo (`src/decisionsignal/`), CLI `decisionsignal` | Validar el parser de EDGAR con filings **reales** |
-| 33 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Perplexity simulado, estadística y e2e sintético | Primera llamada real a Perplexity: confirmar el formato de respuesta y el `usage` (los tests usan el ejemplo de su documentación) |
+| 36 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Perplexity simulado, estadística y e2e sintético | Primera llamada real a Perplexity: confirmar el formato de respuesta y el `usage` (los tests usan el ejemplo de su documentación) |
 | Descarga de precios (yfinance) probada con datos reales | Piloto con datos reales (~30 eventos de 2024 S2) |
 | Pre-registro **en borrador** (`docs/PREREGISTRATION.md`) | Ajustar preguntas en el split de diseño, cerrar el pre-registro y `decisionsignal lock` |
 | Repo en GitHub: `alejandrorodriguezalvarez884-dot/decision-signal-lab` | Escala completa: requiere **aprobación de coste** del usuario |
 | Cliente adaptado a Perplexity Decider (único proveedor, fijado en `config.py`) | |
+| Piloto sin modelo ejecutado dos veces el 2026-10-04 (14 empresas, 30 filings, 29 eventos de 2024 S2): horas de EDGAR, sesiones y retornos revisados y correctos. Estimación del piloto con modelo: $0.0205 | Piloto con modelo: pedir permiso al usuario con esa estimación |
+| Limpieza de texto corregida tras el primer piloto (`text.py`): la narrativa se corta en el primer estado financiero y se quitan secciones legales con títulos largos, mobiliario de página, contactos y notas de tablas. Texto mediano de 15.4k a 8.1k caracteres; total al 66 % | Anonimización: rompe nombres de producto ("the Company Watch") y deja frases como "the Company CEO". Sin arreglar |
+| | Los 2 comunicados de ABNB (PDF con líneas partidas) siguen llegando al tope de 24k caracteres; uno conserva el inicio de la sección legal |
 
 ### Lo que falta que aporte el usuario
 
