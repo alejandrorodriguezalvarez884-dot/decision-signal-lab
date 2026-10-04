@@ -30,10 +30,17 @@ metodología en ese momento (`ondemand.py`, `api.py`).
    antiguo, hasta 6, buscando el último comunicado de resultados y el anterior.
 3. De cada filing que nadie ha leído aún descarga el comunicado, lo limpia, oculta nombres y
    fechas y le hace al modelo las mismas preguntas que al estudio (texto y temas).
-4. Guarda la lectura. La siguiente petición de esa empresa no gasta nada.
+4. Guarda la lectura, con la hora (`read_utc`). La siguiente petición de ese filing no gasta nada.
 
-Los filings que ya están en `radar/releases.json` (las 99 empresas del estudio) se sirven de
-ahí, sin llamar al modelo.
+**El dataset del estudio no se consulta** (decisión del usuario, 2026-10-04): `radar/` alimenta
+solo las tendencias. Una empresa del estudio se lee en vivo como cualquier otra la primera vez
+que alguien la pide (unos $0.0015) y después sale del almacén de lecturas bajo demanda.
+
+`Analyser.run()` es un generador que emite cada paso real mientras ocurre (`edgar`, `filings`,
+`download`, `model`, `read`, `done`). La API lo sirve en `/api/analysis/{ticker}/stream`, una
+línea JSON por paso, y la página de análisis lo dibuja como un panel "Running live". Entre la
+llamada al modelo y el guardado no hay ningún `yield`: si el visitante se va, la lectura pagada
+se guarda igualmente.
 
 Límites para que nadie gaste de más con tu clave:
 
@@ -49,20 +56,32 @@ Un análisis nuevo cuesta unos $0.0015 (dos comunicados). Al llegar a un tope, l
 leídas siguen funcionando y las nuevas responden con un aviso. El tope total existe para que el
 proyecto no pase de los $10 que fijó el usuario; para subirlo: `RADAR_TOTAL_MAX_USD=8 make deploy`.
 
-API: `GET /api/health`, `GET /api/companies?q=`, `GET /api/analysis/{ticker}`.
+API: `GET /api/health`, `GET /api/companies?q=`, `GET /api/analysis/{ticker}` y
+`GET /api/analysis/{ticker}/stream` (el mismo análisis, paso a paso; es el que usa la web).
 
 ## El sitio
 
 `site/` es un sitio Astro estático que lee `radar/*.json`:
 
-- **Portada (`/`)**: buscador. Las empresas del estudio se filtran al escribir; cualquier otra
-  la sugiere la API y abre el análisis bajo demanda.
-- **Análisis bajo demanda (`/analyze/?ticker=`)**: página vacía que pide el análisis a la API
-  y lo dibuja en el navegador (`site/src/lib/reading.ts` tiene la lógica compartida).
-- **Ficha de empresa del estudio (`/company/<ticker>/`)**: el mismo análisis más el histórico
-  desde 2021 y la comparación con sus pares de sector.
-- **Market trends (`/trends/`)**: los agregados por trimestre y sector de lo ya ejecutado.
-- **Method (`/method/`)**: preguntas exactas, validación y el estudio que salió nulo.
+- **Portada (`/`)**: solo el buscador (`CompanySearch.astro`, con sugerencias de la API para
+  cualquier empresa), ejemplos, los tres pasos y un avance de las tendencias. Todo resultado
+  abre el análisis en vivo.
+- **Análisis en vivo (`/analyze/?ticker=`)**: pide el análisis por streaming, muestra los pasos
+  reales mientras corre y dibuja el resultado: frase resumen, cuatro lecturas con medidor, "What
+  stands out" (seguridad del modelo, posición frente a las 99 empresas, respuestas raras o
+  dudosas), "What changed", probabilidades de guidance, escalas con la lectura anterior y la
+  mediana, y una tarjeta por tema. La lógica de textos está en `site/src/lib/reading.ts`
+  (`headline`, `standouts`, `changesSince`).
+- **Market trends (`/trends/`)**: el único sitio que usa el dataset del estudio. Cifras del
+  último trimestre con su serie, "What stands out" (récords y mayores cambios interanuales,
+  `highlights()` en `radar.ts`), guidance, gráficas grandes por grupo (`SERIES` en `radar.ts`),
+  mapa de calor por sector, quién dijo qué en el trimestre y el listado de las 99 empresas.
+- **Histórico de una empresa del estudio (`/company/<ticker>/`)**: sus comunicados desde 2021
+  (gráficas y tabla) y un botón al análisis en vivo. Cuelga de Market trends.
+- **Method (`/method/`)**: el recorrido del texto, el modelo (qué es, cómo está construido y
+  por qué se usa, con datos de su ficha en Hugging Face) y las preguntas exactas. Por decisión
+  del usuario no explica la validación ni se extiende en los puntos débiles; el estudio nulo
+  queda en un párrafo.
 
 ## Comandos (`make`)
 
@@ -101,8 +120,9 @@ FastAPI, así que web y API comparten origen. `make deploy` ejecuta
 `.gcloudignore` deja fuera `.env` y `data/`. Variables opcionales: `GCP_PROJECT`, `GCP_REGION`,
 `SERVICE_NAME`, `MAX_INSTANCES`, `RADAR_DAILY_MAX_USD`, `RADAR_TOTAL_MAX_USD`.
 
-La imagen lleva dentro `radar/`, así que tras `make update` hay que volver a desplegar para
-que el servicio y las tendencias vean los datos nuevos (`make publish` lo hace todo).
+El sitio se construye con `radar/` dentro, así que tras `make update` hay que volver a
+desplegar para que las tendencias vean los datos nuevos (`make publish` lo hace todo). El
+servicio de análisis ya no lee `radar/`.
 
 **Dominio.** `earningsradar.app` está registrado en Cloudflare (cuenta
 `alejandrorodriguezalvarez884@gmail.com`, renueva el 2027-10-04) y asignado al servicio con un

@@ -1,11 +1,13 @@
 ---
 // The on-demand analysis. The page is an empty shell: the browser asks the API to read the
-// company's latest results release and draws the answer.
+// company's latest results release, shows each step as the server reports it and draws the answer.
 import Page from "../components/Page.astro";
-import { studyBenchmark, summary } from "../lib/radar";
+import CompanySearch from "../components/CompanySearch.astro";
+import { benchmark, summary } from "../lib/radar";
 
 const context = {
-	benchmark: studyBenchmark,
+	benchmark,
+	model: summary.meta.model,
 	study: summary.companies.map((c) => c.ticker),
 };
 ---
@@ -14,17 +16,10 @@ const context = {
 	title="Analyse a company"
 	description="Run the Earnings Radar reading on the latest results release of any company that files with the SEC."
 >
-	<div id="analysis" class="mt-6" data-context={JSON.stringify(context)}>
-		<div id="analysis-status" class="rounded-2xl border border-stone-200 bg-white p-6 text-sm text-stone-600">
-			<p class="font-medium text-stone-900">Reading the latest results release</p>
-			<ol class="mt-3 space-y-1.5">
-				<li data-step="0">Finding the company's results filings on EDGAR</li>
-				<li data-step="1">Downloading the press release</li>
-				<li data-step="2">Asking the model the fixed questions</li>
-			</ol>
-			<p class="mt-4 text-xs text-stone-500">A company nobody has asked about takes a few seconds. After that it is instant.</p>
-		</div>
+	<div class="max-w-xl">
+		<CompanySearch />
 	</div>
+	<div id="analysis" class="mt-8" data-context={JSON.stringify(context)}></div>
 	<noscript><p class="mt-6 text-sm text-stone-600">This page needs JavaScript to run the analysis.</p></noscript>
 </Page>
 
@@ -39,23 +34,39 @@ const context = {
 		companyUrl,
 		flagValue,
 		fmtDate,
+		headline,
 		link,
 		pct,
+		standouts,
+		tidyName,
 		type GuidanceClass,
 		type Peers,
 		type Release,
 	} from "../lib/reading";
 
+	type Read = Release & { read_utc?: string };
 	type Result = {
 		company: { ticker: string; name: string; in_study: boolean };
-		latest: Release;
-		previous: Release | null;
-		read_now: number;
+		latest: Read;
+		previous: Read | null;
+		model: string;
+		questions: number;
+		fresh: string[];
+		seconds: number;
 	};
+	// One line of the stream: what the server is doing right now.
+	type Step =
+		| { step: "edgar"; name: string }
+		| { step: "filings"; count: number; since: string }
+		| { step: "download"; filed: string | null }
+		| { step: "model"; chars: number; questions: number }
+		| { step: "read"; fresh: boolean; release: boolean; skip: string | null; date: string | null; tokens: number | null; read_utc: string | null }
+		| { step: "done"; result: Result }
+		| { step: "error"; detail: string };
 
 	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
 	const root = document.getElementById("analysis")!;
-	const { benchmark, study } = JSON.parse(root.dataset.context!) as { benchmark: Peers; study: string[] };
+	const { benchmark, model, study } = JSON.parse(root.dataset.context!) as { benchmark: Peers; model: string; study: string[] };
 
 	// Everything that comes from the API or the address bar goes in as text, never as markup.
 	function h(tag: string, cls = "", text?: string): HTMLElement {
@@ -64,138 +75,212 @@ const context = {
 		if (text !== undefined) e.textContent = text;
 		return e;
 	}
-	const add = (parent: HTMLElement, ...children: (HTMLElement | string)[]) => (parent.append(...children), parent);
+	const add = <T extends HTMLElement>(parent: T, ...children: (HTMLElement | string)[]) => (parent.append(...children), parent);
 	const a = (href: string, text: string, cls = "underline hover:text-stone-900", external = false) => {
 		const e = h("a", cls, text) as HTMLAnchorElement;
 		e.href = href;
 		if (external) (e.target = "_blank"), (e.rel = "noreferrer");
 		return e;
 	};
-	// SEC lists many names in capitals.
-	const tidy = (name: string) =>
-		name === name.toUpperCase() ? name.toLowerCase().replace(/(^|[\s\-/&.(])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : name;
 	const card = "rounded-2xl border border-stone-200 bg-white p-5 sm:p-6";
+	const cardTitle = (text: string) => h("h2", "font-serif text-lg font-semibold text-stone-900", text);
+	const secs = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
+	const whenFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
 
+	// =========================================================================== the run, live
+	// The panel that shows the analysis being computed: one line per step the server reports.
+	function runPanel(ticker: string) {
+		const began = performance.now();
+		const el = h("section", "run");
+		const dot = h("span", "run-dot");
+		const state = h("span", "run-state", "Running live");
+		const clock = h("span", "run-clock", "0.0 s");
+		const title = h("p", "run-title", `Reading the latest results release of ${ticker}`);
+		const steps = h("ol", "run-steps");
+		const bar = h("div", "run-bar");
+		add(el, add(h("div", "run-head"), add(h("span", "run-live"), dot, state), clock), title, steps, bar);
+
+		const tick = setInterval(() => (clock.textContent = secs(performance.now() - began)), 100);
+		let open: { row: HTMLElement; text: HTMLElement; since: number } | null = null;
+
+		function line(text: string, mark: "busy" | "ok" | "skip") {
+			const row = h("li", `run-step is-${mark}`);
+			const label = h("span", "run-text", text);
+			add(row, h("span", "run-mark"), label, h("span", "run-at", mark === "busy" ? "" : secs(performance.now() - began)));
+			steps.append(row);
+			return { row, text: label, since: performance.now() };
+		}
+		return {
+			el,
+			// How long the step that is running has taken so far.
+			running: () => (open ? performance.now() - open.since : 0),
+			start(text: string) {
+				this.finish();
+				open = line(text, "busy");
+			},
+			finish(text?: string, mark: "ok" | "skip" = "ok") {
+				if (!open) return void (text && line(text, mark));
+				if (text) open.text.textContent = text;
+				open.row.className = `run-step is-${mark}`;
+				open.row.querySelector(".run-at")!.textContent = secs(performance.now() - began);
+				open = null;
+			},
+			// The run is over: the panel folds into a one-line receipt that opens on request.
+			close(summary: string, live: boolean) {
+				this.finish();
+				clearInterval(tick);
+				clock.textContent = secs(performance.now() - began);
+				el.classList.add("is-done", live ? "was-live" : "was-stored");
+				state.textContent = live ? "Read live just now" : "EDGAR checked just now";
+				title.textContent = summary;
+				const toggle = h("button", "run-toggle", "Show the steps") as HTMLButtonElement;
+				toggle.type = "button";
+				toggle.addEventListener("click", () => {
+					const shown = el.classList.toggle("is-open");
+					toggle.textContent = shown ? "Hide the steps" : "Show the steps";
+				});
+				bar.replaceWith(toggle);
+			},
+			stop() {
+				clearInterval(tick);
+			},
+		};
+	}
+
+	const SKIPPED: Record<string, string> = {
+		no_index: "This filing could not be opened on EDGAR: skipped",
+		no_exhibit: "This filing has no press release attached: skipped",
+		no_text: "The press release of this filing has no readable text: skipped",
+		unprocessable: "The model could not process this filing: skipped",
+	};
+
+	// =========================================================================== the result
 	function chip(value: GuidanceClass) {
 		const dot = value === "raised" ? "var(--radar-up)" : value === "lowered" ? "var(--radar-down)" : "var(--radar-axis)";
-		const e = h("span", "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-700");
-		const d = h("span", "h-2 w-2 rounded-full");
+		const e = h("span", "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-800");
+		const d = h("span", "h-2.5 w-2.5 rounded-full");
 		d.style.background = dot;
 		return add(e, d, GUIDANCE_LABEL[value]);
 	}
 
-	function render(r: Result) {
+	function bullets(items: string[]) {
+		const list = h("ul", "mt-4 space-y-2.5 text-sm leading-relaxed text-stone-700");
+		for (const text of items) list.append(add(h("li", "flex gap-3"), h("span", "mt-2 h-1.5 w-1.5 flex-none rounded-full bg-stone-400"), h("span", "", text)));
+		return list;
+	}
+
+	function result(r: Result) {
 		const { latest, previous, company } = r;
 		const out = document.createDocumentFragment();
 
-		const head = h("div");
-		const h1 = h("h1", "font-serif text-3xl font-semibold text-stone-900 sm:text-4xl", `${tidy(company.name)} `);
+		const head = h("div", "mt-8");
+		const h1 = h("h1", "font-serif text-3xl font-semibold text-stone-900 sm:text-4xl", `${tidyName(company.name)} `);
 		h1.append(h("span", "text-xl font-normal text-stone-400", company.ticker));
 		const meta = h("p", "mt-2 text-sm text-stone-500", `Latest results published ${fmtDate(latest.date)} · `);
 		meta.append(a(latest.url, "SEC filing", undefined, true));
-		add(head, h1, meta);
-		if (company.in_study) {
-			const more = h("p", "mt-1 text-sm text-stone-500", "This company is in the study. ");
-			more.append(a(companyUrl(company.ticker), "See its full history since 2021"));
-			head.append(more);
-		}
-		out.append(head);
+		out.append(add(head, h1, meta));
 
-		const tiles = h("section", "mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4");
-		const tile = (label: string, value: HTMLElement | string, sub: string) => {
-			const t = h("div", "rounded-xl border border-stone-200 bg-white p-4");
-			const v = typeof value === "string" ? h("div", "mt-2 text-lg font-semibold leading-tight text-stone-900", value) : add(h("div", "mt-2"), value);
-			return add(t, h("div", "text-xs text-stone-500", label), v, h("div", "mt-1 text-xs text-stone-500", sub));
+		// The reading in one sentence.
+		const verdict = h("section", "verdict mt-6");
+		add(verdict, h("div", "text-xs font-medium uppercase tracking-wide text-stone-500", "The release in one sentence"), h("p", "mt-2 font-serif text-xl leading-snug text-stone-900 sm:text-2xl", headline(latest)));
+		out.append(verdict);
+
+		const tiles = h("section", "mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4");
+		const tile = (label: string, value: HTMLElement, sub: string, meter?: number) => {
+			const t = h("div", "rounded-2xl border border-stone-200 bg-white p-4 sm:p-5");
+			add(t, h("div", "text-xs font-medium uppercase tracking-wide text-stone-500", label), add(h("div", "mt-3"), value));
+			if (meter !== undefined) {
+				const fill = h("span", "meter-fill");
+				fill.style.width = `${Math.max(meter * 100, 2)}%`;
+				t.append(add(h("div", "meter"), fill));
+			}
+			return add(t, h("div", "mt-2 text-xs text-stone-500", sub));
 		};
-		tiles.append(tile("Guidance", chip(latest.guidance), `${pct(latest.guidance_p[latest.guidance])} likely`));
+		tiles.append(tile("Guidance", chip(latest.guidance), `${pct(latest.guidance_p[latest.guidance])} likely${previous ? ` · was ${GUIDANCE_LABEL[previous.guidance].toLowerCase()}` : ""}`));
 		for (const s of SCALES) {
 			const now = s.word(latest[s.key]);
 			const before = previous ? s.word(previous[s.key]) : null;
-			tiles.append(tile(s.label, now, before === null ? "" : before === now ? "same as last time" : `was ${before.toLowerCase()}`));
+			const sub = before === null ? "" : before === now ? "same as last time" : `was ${before.toLowerCase()}`;
+			tiles.append(tile(s.label, h("div", "text-xl font-semibold leading-tight text-stone-900", now), sub, latest[s.key]));
 		}
 		out.append(tiles);
 
-		const changed = h("section", `mt-6 ${card}`);
-		changed.append(h("h2", "font-serif text-xl font-semibold text-stone-900", "What changed"));
-		if (previous) changed.append(h("p", "mt-1 text-sm text-stone-500", `Against the previous release, published ${fmtDate(previous.date)}.`));
-		const list = h("ul", "mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700");
-		for (const c of changesSince(latest, previous ?? undefined)) list.append(h("li", "", c));
-		out.append(add(changed, list));
-
-		const two = h("section", "mt-6 grid gap-6 md:grid-cols-2");
-		const g = h("div", `min-w-0 ${card}`);
-		g.append(
-			h("h2", "font-serif text-lg font-semibold text-stone-900", "Guidance, as the model reads it"),
-			h("p", "mt-1 text-xs text-stone-500", "How likely each answer is, likeliest first."),
+		const insight = h("section", "mt-4 grid gap-4 md:grid-cols-2");
+		const stands = add(h("div", `min-w-0 ${card}`), cardTitle("What stands out"), h("p", "mt-1 text-xs text-stone-500", `Against the latest release of ${benchmark.label}.`), bullets(standouts(latest, benchmark)));
+		const changed = add(
+			h("div", `min-w-0 ${card}`),
+			cardTitle("What changed"),
+			h("p", "mt-1 text-xs text-stone-500", previous ? `Against the previous release, published ${fmtDate(previous.date)}.` : "No earlier release to compare with."),
+			bullets(changesSince(latest, previous ?? undefined)),
 		);
-		const bars = h("div", "mt-4 space-y-2.5");
+		out.append(add(insight, stands, changed));
+
+		const two = h("section", "mt-4 grid gap-4 md:grid-cols-2");
+		const g = add(h("div", `min-w-0 ${card}`), cardTitle("Guidance, as the model reads it"), h("p", "mt-1 text-xs text-stone-500", "The probability of each answer, likeliest first."));
+		const bars = h("div", "mt-5 space-y-3");
 		GUIDANCE_ORDER.map((c) => ({ c, p: latest.guidance_p[c] }))
 			.sort((x, y) => y.p - x.p)
 			.filter((x, i) => i < 3 || x.p >= 0.03)
 			.forEach(({ c, p }) => {
-				const row = h("div", "grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-3 text-sm");
-				const track = h("span", "h-2.5");
+				const row = h("div", "grid grid-cols-[6.5rem_1fr_2.75rem] items-center gap-3 text-sm");
 				const bar = h("span", "block h-full rounded-r");
 				bar.style.width = `${Math.max(p * 100, 1)}%`;
 				bar.style.background = "var(--radar-line)";
-				bars.append(add(row, h("span", "text-stone-600", GUIDANCE_LABEL[c]), add(track, bar), h("span", "text-right tabular-nums text-stone-900", pct(p))));
+				bars.append(add(row, h("span", "text-stone-600", GUIDANCE_LABEL[c]), add(h("span", "h-3"), bar), h("span", "text-right font-medium tabular-nums text-stone-900", pct(p))));
 			});
 		two.append(add(g, bars));
 
-		const peers = h("div", `min-w-0 ${card}`);
-		peers.append(
-			h("h2", "font-serif text-lg font-semibold text-stone-900", "Against the study"),
-			h("p", "mt-1 text-xs text-stone-500", `The dot is this release. The tick is the median of the latest release of ${benchmark.label}.`),
-		);
+		const peers = add(h("div", `min-w-0 ${card}`), cardTitle(`Against ${benchmark.label}`));
+		const key = h("p", "mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-500");
+		add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-dot"), "this release"));
+		if (previous) add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-prev"), "previous release"));
+		add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-tick"), "median company"));
 		const rows = h("div", "mt-3");
 		for (const s of SCALES) {
-			const row = h("div", "scale-row");
 			const track = h("div", "scale-track");
-			const tick = h("span", "scale-peer");
-			tick.style.left = `${benchmark.median[s.key] * 100}%`;
+			const tickMark = h("span", "scale-peer");
+			tickMark.style.left = `${benchmark.median[s.key] * 100}%`;
+			track.append(tickMark);
+			if (previous) {
+				const was = h("span", "scale-prev");
+				was.style.left = `${previous[s.key] * 100}%`;
+				track.append(was);
+			}
 			const dot = h("span", "scale-dot");
 			dot.style.left = `${latest[s.key] * 100}%`;
+			track.append(dot);
 			const ends = add(h("div", "scale-ends"), h("span", "", s.low), h("span", "", s.high));
-			rows.append(add(row, h("div", "scale-label", s.label), add(h("div", "scale-body"), add(track, tick, dot), ends)));
+			rows.append(add(h("div", "scale-row"), h("div", "scale-label", s.label), add(h("div", "scale-body"), track, ends)));
 		}
-		two.append(add(peers, rows));
+		two.append(add(peers, key, rows));
 		out.append(two);
 
-		const tableWrap = h("section", "mt-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white");
-		const table = h("table", "w-full text-sm");
-		const thead = h("tr", "border-b border-stone-200 text-left text-xs text-stone-500");
-		[
-			["Does it say so?", "px-4 py-3 font-medium"],
-			["This release", "px-3 py-3 font-medium"],
-			["How likely", "px-3 py-3 text-right font-medium"],
-			["Study companies that say it", "px-4 py-3 text-right font-medium"],
-		].forEach(([t, c]) => thead.append(h("th", c, t)));
-		const tbody = h("tbody");
+		// Yes/no readings, one card each.
+		const topics = h("section", "mt-10");
+		add(topics, h("h2", "font-serif text-xl font-semibold text-stone-900", "What the release says, topic by topic"), h("p", "mt-1 text-sm text-stone-500", `Each is a yes/no question to the model. The bar is how likely “yes” is; the line marks 50%.`));
+		const grid = h("div", "mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3");
 		for (const f of FLAGS) {
 			const p = flagValue(latest, f.key);
 			if (p === undefined) continue;
-			const tr = h("tr", "border-b border-stone-100 last:border-0");
 			const yes = p >= THRESHOLD;
-			add(
-				tr,
-				h("td", "px-4 py-2.5 text-stone-800", f.label),
-				add(h("td", "px-3 py-2.5"), h("span", yes ? "font-medium text-stone-900" : "text-stone-400", yes ? "Yes" : "No")),
-				h("td", "px-3 py-2.5 text-right tabular-nums text-stone-600", pct(p)),
-				h("td", "px-4 py-2.5 text-right tabular-nums text-stone-600", pct(benchmark.share[f.key])),
-			);
-			tbody.append(tr);
+			const c = h("div", `rounded-2xl border bg-white p-4 ${yes ? "border-stone-400" : "border-stone-200"}`);
+			const top = add(h("div", "flex items-center justify-between gap-3"), h("span", "text-sm font-semibold text-stone-900", f.label), h("span", yes ? "pill pill-yes" : "pill pill-no", yes ? "Yes" : "No"));
+			const fill = h("span", `meter-fill${yes ? "" : " is-muted"}`);
+			fill.style.width = `${Math.max(p * 100, 2)}%`;
+			const meter = add(h("div", "meter has-mid"), fill);
+			const sub = h("div", "mt-2 flex justify-between gap-3 text-xs text-stone-500");
+			add(sub, h("span", "", `${pct(p)} likely`), h("span", "text-right", `${pct(benchmark.share[f.key])} of large companies say it`));
+			grid.append(add(c, top, meter, sub));
 		}
-		out.append(add(tableWrap, add(table, add(h("thead"), thead), tbody)));
+		out.append(add(topics, grid));
 
-		out.append(
-			h(
-				"p",
-				"mt-4 text-xs text-stone-500",
-				r.read_now > 0 ? "Read just now, for this request, and stored so the next visitor gets it at once." : "This release had already been read.",
-			),
-		);
-		root.replaceChildren(out);
-		document.title = `${tidy(company.name)}: latest results — Earnings Radar`;
+		const more = h("p", "mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm");
+		if (company.in_study) more.append(a(companyUrl(company.ticker), `${tidyName(company.name)}'s releases since 2021`, "font-medium text-stone-900 underline underline-offset-4"));
+		more.append(a(link("/method/"), "The questions and the model", "font-medium text-stone-900 underline underline-offset-4"));
+		out.append(more);
+
+		document.title = `${tidyName(company.name)}: latest results — Earnings Radar`;
+		return out;
 	}
 
 	function fail(message: string) {
@@ -207,27 +292,325 @@ const context = {
 	}
 
 	async function run() {
-		const ticker = (new URLSearchParams(location.search).get("ticker") ?? "").trim();
-		if (!/^[A-Za-z][A-Za-z0-9.\-]{0,9}$/.test(ticker)) return fail("No company was given. Search for one from the home page.");
+		const ticker = (new URLSearchParams(location.search).get("ticker") ?? "").trim().toUpperCase();
+		if (!/^[A-Z][A-Z0-9.\-]{0,9}$/.test(ticker)) {
+			return void root.replaceChildren(h("p", "text-sm text-stone-600", "Type a company above to run the analysis on its latest results release."));
+		}
+		const panel = runPanel(ticker);
+		root.replaceChildren(panel.el);
+		let questions = 0;
+		let ended = false;
 
-		// The steps are not reported by the server: they only show that work is under way.
-		const steps = [...root.querySelectorAll<HTMLElement>("[data-step]")];
-		let i = 0;
-		const mark = () => steps.forEach((s, n) => (s.style.color = n < i ? "#a8a29e" : n === i ? "#1c1917" : ""));
-		mark();
-		const timer = setInterval(() => ((i = Math.min(i + 1, steps.length - 1)), mark()), 1500);
+		function on(e: Step) {
+			if (e.step === "edgar") panel.start(`Looking up the results filings of ${tidyName(e.name)} on SEC EDGAR`);
+			else if (e.step === "filings")
+				panel.finish(`Found ${e.count} results ${e.count === 1 ? "filing" : "filings"} (Form 8-K, Item 2.02) on EDGAR since ${fmtDate(e.since)}`);
+			else if (e.step === "download") panel.start(`Downloading the press release${e.filed ? ` filed ${fmtDate(e.filed)}` : ""}`);
+			else if (e.step === "model") {
+				questions = e.questions;
+				panel.finish(`Press release downloaded and cleaned: ${e.chars.toLocaleString("en-US")} characters of narrative`);
+				panel.start(`Asking ${model} ${e.questions} questions about it`);
+			} else if (e.step === "read") {
+				if (e.fresh && e.release) {
+					const tokens = e.tokens ? ` · ${e.tokens.toLocaleString("en-US")} tokens read` : "";
+					panel.finish(`${model} answered ${questions} questions in ${secs(panel.running())}${tokens}`);
+				} else if (e.fresh) {
+					panel.finish(e.skip ? (SKIPPED[e.skip] ?? "This filing was skipped") : "The model reads this filing as something other than a results release: skipped", "skip");
+				} else if (e.release && e.date) {
+					const when = e.read_utc ? `on ${whenFmt.format(new Date(e.read_utc))}` : "earlier";
+					panel.finish(`Release of ${fmtDate(e.date)}: the model read it ${when}, nothing to recompute`);
+				}
+			} else if (e.step === "done") {
+				ended = true;
+				const r = e.result;
+				if (!study.includes(r.company.ticker)) r.company.in_study = false;
+				const read = r.fresh.filter((id) => id === r.latest.id || id === r.previous?.id).length;
+				const live = r.fresh.includes(r.latest.id);
+				const stored = r.latest.read_utc ? `on ${whenFmt.format(new Date(r.latest.read_utc))}` : "earlier";
+				panel.close(
+					live
+						? `${read} ${read === 1 ? "release" : "releases"} read by ${r.model} for this request · ${r.questions} questions each`
+						: `No newer release on EDGAR. This one was read by ${r.model} ${stored}.`,
+					live,
+				);
+				root.append(result(r));
+			} else if (e.step === "error") {
+				ended = true;
+				panel.stop();
+				fail(e.detail);
+			}
+		}
 
 		try {
-			const res = await fetch(`${API}/api/analysis/${encodeURIComponent(ticker.toUpperCase())}`);
-			const body = await res.json().catch(() => ({}));
-			if (!res.ok) return fail(typeof body.detail === "string" ? body.detail : "The service did not answer. Try again in a moment.");
-			if (!study.includes(body.company.ticker)) body.company.in_study = false;
-			render(body as Result);
+			const res = await fetch(`${API}/api/analysis/${encodeURIComponent(ticker)}/stream`);
+			if (!res.ok || !res.body) {
+				const body = await res.json().catch(() => ({}));
+				panel.stop();
+				return fail(typeof body.detail === "string" ? body.detail : "The service did not answer. Try again in a moment.");
+			}
+			const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+			let buffer = "";
+			for (;;) {
+				const { value, done } = await reader.read();
+				if (done) break;
+				buffer += value;
+				for (let cut = buffer.indexOf("\n"); cut >= 0; cut = buffer.indexOf("\n")) {
+					const text = buffer.slice(0, cut);
+					buffer = buffer.slice(cut + 1);
+					if (text.trim()) on(JSON.parse(text) as Step);
+				}
+			}
+			if (!ended) throw new Error("the stream ended early");
 		} catch {
-			fail("The service could not be reached. Try again in a moment.");
-		} finally {
-			clearInterval(timer);
+			panel.stop();
+			fail("The connection to the service was lost. Try again in a moment.");
 		}
 	}
 	run();
 </script>
+
+<style is:global>
+	/* The run panel. Dark while the analysis is being computed, a light receipt once it is done. */
+	.run {
+		border-radius: 16px;
+		padding: 20px 22px 0;
+		background: #1c1917;
+		color: #e7e5e4;
+		overflow: hidden;
+	}
+	.run-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.run-live {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #fafaf9;
+	}
+	.run-dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: #3987e5;
+		animation: run-pulse 1.4s infinite;
+	}
+	.run-clock {
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		color: #a8a29e;
+	}
+	.run-title {
+		margin-top: 10px;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #fafaf9;
+	}
+	.run-steps {
+		margin-top: 14px;
+		display: grid;
+		gap: 8px;
+		font-size: 14px;
+		line-height: 1.45;
+	}
+	.run-step {
+		display: grid;
+		grid-template-columns: 18px 1fr auto;
+		gap: 10px;
+		align-items: start;
+		animation: run-in 0.25s ease-out;
+	}
+	.run-step.is-busy {
+		color: #fafaf9;
+	}
+	.run-step.is-ok,
+	.run-step.is-skip {
+		color: #a8a29e;
+	}
+	.run-mark {
+		width: 14px;
+		height: 14px;
+		margin-top: 3px;
+		border-radius: 50%;
+	}
+	.is-busy > .run-mark {
+		border: 2px solid rgba(250, 250, 249, 0.25);
+		border-top-color: #3987e5;
+		animation: run-spin 0.7s linear infinite;
+	}
+	.is-ok > .run-mark {
+		background: #3987e5 center / 9px no-repeat
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 5.2 4.2 7.4 8 3'/%3E%3C/svg%3E");
+	}
+	.is-skip > .run-mark {
+		border: 2px solid #78716c;
+	}
+	.run-at {
+		font-size: 12px;
+		font-variant-numeric: tabular-nums;
+		color: #78716c;
+	}
+	.run-bar {
+		position: relative;
+		height: 3px;
+		margin: 18px -22px 0;
+		background: rgba(250, 250, 249, 0.08);
+		overflow: hidden;
+	}
+	.run-bar::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		width: 35%;
+		background: #3987e5;
+		animation: run-slide 1.2s ease-in-out infinite;
+	}
+	.run-toggle {
+		display: block;
+		margin: 12px 0 16px;
+		font-size: 12px;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		color: var(--radar-muted);
+		cursor: pointer;
+	}
+	.run-toggle:hover {
+		color: var(--radar-ink);
+	}
+	.run.is-done {
+		background: #fff;
+		border: 1px solid var(--radar-grid);
+		color: var(--radar-ink-2);
+		transition: background 0.3s;
+	}
+	.run.is-done .run-live {
+		color: var(--radar-ink);
+	}
+	.run.is-done .run-dot {
+		animation: none;
+	}
+	.run.was-stored .run-dot {
+		background: var(--radar-neutral);
+	}
+	.run.is-done .run-title {
+		font-size: 0.9375rem;
+		font-weight: 400;
+		color: var(--radar-ink-2);
+	}
+	.run.is-done .run-steps {
+		display: none;
+	}
+	.run.is-done.is-open .run-steps {
+		display: grid;
+	}
+	.run.is-done .run-step,
+	.run.is-done .run-at {
+		color: var(--radar-muted);
+	}
+	@keyframes run-pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(57, 135, 229, 0.6);
+		}
+		70%,
+		100% {
+			box-shadow: 0 0 0 8px rgba(57, 135, 229, 0);
+		}
+	}
+	@keyframes run-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	@keyframes run-slide {
+		from {
+			transform: translateX(-100%);
+		}
+		to {
+			transform: translateX(290%);
+		}
+	}
+	@keyframes run-in {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.run-dot,
+		.run-step,
+		.run-bar::after,
+		.is-busy > .run-mark {
+			animation: none;
+		}
+	}
+
+	.verdict {
+		border-radius: 16px;
+		border: 1px solid var(--radar-grid);
+		border-left: 4px solid var(--radar-line);
+		background: #fff;
+		padding: 20px 24px;
+	}
+	.meter {
+		position: relative;
+		height: 6px;
+		margin-top: 12px;
+		border-radius: 3px;
+		background: #e7e5e4;
+	}
+	.meter-fill {
+		display: block;
+		height: 100%;
+		border-radius: 3px;
+		background: var(--radar-line);
+	}
+	.meter-fill.is-muted {
+		background: var(--radar-neutral);
+	}
+	.meter.has-mid::after {
+		content: "";
+		position: absolute;
+		left: 50%;
+		top: -3px;
+		width: 2px;
+		height: 12px;
+		margin-left: -1px;
+		background: var(--radar-ink-2);
+	}
+	.pill {
+		border-radius: 999px;
+		padding: 2px 10px;
+		font-size: 12px;
+		font-weight: 600;
+	}
+	.pill-yes {
+		background: #1c1917;
+		color: #fff;
+	}
+	.pill-no {
+		background: #f5f5f4;
+		color: var(--radar-muted);
+	}
+	.key-dot,
+	.key-prev {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--radar-line);
+	}
+	.key-prev {
+		background: #fff;
+		border: 2px solid var(--radar-line);
+	}
+	.key-tick {
+		width: 2px;
+		height: 12px;
+		background: var(--radar-ink-2);
+	}
+</style>

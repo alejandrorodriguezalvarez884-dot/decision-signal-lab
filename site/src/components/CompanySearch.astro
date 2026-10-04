@@ -1,0 +1,174 @@
+---
+// The search box that starts an analysis. Suggestions come from the API's company search, which
+// covers every SEC registrant; choosing one opens the analysis page for it.
+import { link } from "../lib/reading";
+
+interface Props {
+	large?: boolean;
+	autofocus?: boolean;
+}
+const { large = false, autofocus = false } = Astro.props;
+---
+
+<form class="company-search relative" role="search" data-analyse={link("/analyze/")}>
+	<label class="sr-only" for="company-search-input">Company name or ticker</label>
+	<div
+		class:list={[
+			"flex items-center gap-2 rounded-2xl border border-stone-300 bg-white shadow-sm transition focus-within:border-stone-500 focus-within:ring-4 focus-within:ring-stone-200/70",
+			large ? "p-2 pl-5" : "p-1.5 pl-4",
+		]}
+	>
+		<svg class="h-5 w-5 flex-none text-stone-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+			<circle cx="9" cy="9" r="6"></circle>
+			<path d="m14 14 4 4" stroke-linecap="round"></path>
+		</svg>
+		<input
+			id="company-search-input"
+			type="search"
+			autocomplete="off"
+			spellcheck="false"
+			autofocus={autofocus}
+			placeholder="Company name or ticker"
+			class:list={["min-w-0 flex-1 bg-transparent text-stone-900 placeholder:text-stone-400 focus:outline-none", large ? "py-2 text-lg" : "py-1.5 text-base"]}
+		/>
+		<button
+			type="submit"
+			class:list={[
+				"flex-none rounded-xl bg-stone-900 font-medium text-white transition-colors hover:bg-stone-700",
+				large ? "px-5 py-2.5 text-base" : "px-4 py-2 text-sm",
+			]}
+		>
+			Analyse
+		</button>
+	</div>
+	<ul class="search-list" role="listbox" hidden></ul>
+	<p class="search-note mt-2 text-sm text-stone-500" hidden></p>
+</form>
+
+<script>
+	import { tidyName } from "../lib/reading";
+
+	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
+	type Found = { ticker: string; name: string };
+
+	for (const form of document.querySelectorAll<HTMLFormElement>(".company-search")) {
+		const input = form.querySelector("input")!;
+		const list = form.querySelector<HTMLElement>(".search-list")!;
+		const note = form.querySelector<HTMLElement>(".search-note")!;
+		const go = (ticker: string) => (window.location.href = `${form.dataset.analyse}?ticker=${encodeURIComponent(ticker)}`);
+
+		let found: Found[] = [];
+		let answered = ""; // the query `found` answers
+		let active = -1;
+		let seq = 0;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+
+		function draw() {
+			list.replaceChildren(
+				...found.map((c, i) => {
+					const li = document.createElement("li");
+					li.setAttribute("role", "option");
+					li.setAttribute("aria-selected", String(i === active));
+					const name = document.createElement("span");
+					name.className = "min-w-0 truncate font-medium text-stone-900";
+					name.textContent = tidyName(c.name);
+					const ticker = document.createElement("span");
+					ticker.className = "flex-none text-xs tabular-nums text-stone-400";
+					ticker.textContent = c.ticker;
+					li.append(name, ticker);
+					li.addEventListener("pointerdown", (e) => (e.preventDefault(), go(c.ticker)));
+					return li;
+				}),
+			);
+			list.hidden = found.length === 0;
+		}
+
+		function say(text: string) {
+			note.textContent = text;
+			note.hidden = !text;
+		}
+
+		async function search(q: string) {
+			const mine = ++seq;
+			if (!q) {
+				found = [];
+				answered = "";
+				say("");
+				return draw();
+			}
+			let next: Found[] = [];
+			let message = "";
+			try {
+				const res = await fetch(`${API}/api/companies?q=${encodeURIComponent(q)}`);
+				if (!res.ok) throw new Error(String(res.status));
+				next = (await res.json()).companies;
+				if (!next.length) message = "No company with that name or ticker files with the SEC.";
+			} catch {
+				message = "The company search is not available right now. You can still type a ticker and press Analyse.";
+			}
+			if (mine !== seq) return; // a newer keystroke already answered
+			found = next;
+			answered = q;
+			active = -1;
+			say(message);
+			draw();
+		}
+
+		input.addEventListener("input", () => {
+			clearTimeout(timer);
+			timer = setTimeout(() => search(input.value.trim()), 200);
+		});
+		input.addEventListener("keydown", (e) => {
+			if (e.key === "Escape") return void (list.hidden = true);
+			if ((e.key !== "ArrowDown" && e.key !== "ArrowUp") || !found.length) return;
+			e.preventDefault();
+			active = (active + (e.key === "ArrowDown" ? 1 : -1) + found.length) % found.length;
+			draw();
+		});
+		input.addEventListener("focus", () => (list.hidden = found.length === 0));
+		input.addEventListener("blur", () => (list.hidden = true));
+
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			const q = input.value.trim();
+			if (!q) return input.focus();
+			clearTimeout(timer);
+			if (answered !== q) await search(q); // Enter came before the suggestions did
+			const pick = found[Math.max(active, 0)];
+			if (pick) go(pick.ticker);
+			else if (/^[A-Za-z][A-Za-z0-9.\-]{0,9}$/.test(q)) go(q.toUpperCase());
+		});
+	}
+</script>
+
+<style is:global>
+	.search-list {
+		position: absolute;
+		z-index: 40;
+		left: 0;
+		right: 0;
+		margin-top: 6px;
+		padding: 6px;
+		border-radius: 16px;
+		border: 1px solid #d6d3d1;
+		background: #fff;
+		box-shadow: 0 12px 32px rgba(28, 25, 23, 0.12);
+	}
+	.search-list[hidden] {
+		display: none;
+	}
+	.search-list li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 9px 12px;
+		border-radius: 10px;
+		font-size: 0.9375rem;
+		cursor: pointer;
+	}
+	.search-list li:hover,
+	.search-list li[aria-selected="true"] {
+		background: #f5f5f4;
+	}
+</style>

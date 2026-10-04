@@ -1,7 +1,18 @@
 // Data and helpers. The site reads the dataset straight from radar/ at the repository root.
 import releasesFile from "../../../radar/releases.json";
 import summaryFile from "../../../radar/summary.json";
-import { FLAGS, SCALES, THRESHOLD, says, type GuidanceClass, type Peers, type Release, type ScaleKey } from "./reading";
+import {
+  FLAGS,
+  SCALES,
+  THEME_LABEL,
+  THRESHOLD,
+  pct,
+  says,
+  type GuidanceClass,
+  type Peers,
+  type Release,
+  type ScaleKey,
+} from "./reading";
 
 export * from "./reading";
 
@@ -104,8 +115,6 @@ export type Tip = { title: string; rows: [string, string, string?][] };
 export const tip = (t: Tip) => JSON.stringify(t);
 
 // =========================================================================== one company
-// Everything the company page says about a release: its history, the previous release and
-// what other companies' latest releases look like.
 const byTicker = new Map<string, Release[]>();
 for (const r of releases) {
   if (!byTicker.has(r.ticker)) byTicker.set(r.ticker, []);
@@ -120,27 +129,90 @@ const median = (xs: number[]) => {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
 
-const benchmark = (set: Release[], label: string): Peers => ({
-  label,
-  n: set.length,
-  median: Object.fromEntries(SCALES.map((s) => [s.key, median(set.map((r) => r[s.key]))])) as Record<ScaleKey, number>,
-  share: Object.fromEntries(FLAGS.map((f) => [f.key, set.filter((r) => says(r, f.key)).length / set.length])),
-});
+// What the on-demand analysis is set against: the latest release of every company in the dataset.
+const latestAll = summary.companies.map((c) => latestOf(c.ticker));
+export const benchmark: Peers = {
+  label: `${summary.companies.length} large US companies`,
+  n: latestAll.length,
+  median: Object.fromEntries(SCALES.map((s) => [s.key, median(latestAll.map((r) => r[s.key]))])) as Record<ScaleKey, number>,
+  values: Object.fromEntries(
+    SCALES.map((s) => [s.key, latestAll.map((r) => r[s.key]).sort((a, b) => a - b)]),
+  ) as Record<ScaleKey, number[]>,
+  share: Object.fromEntries(FLAGS.map((f) => [f.key, latestAll.filter((r) => says(r, f.key)).length / latestAll.length])),
+};
 
-// The latest release of every other company in the sector, or of every other company when the
-// sector is too small for a median to mean anything.
-export function peersOf(company: Company): Peers {
-  const others = summary.companies.filter((c) => c.ticker !== company.ticker);
-  const sector = others.filter((c) => c.sector === company.sector);
-  const useSector = sector.length + 1 >= SMALL_SECTOR;
-  return benchmark(
-    (useSector ? sector : others).map((c) => latestOf(c.ticker)),
-    useSector ? `${company.sector} peers` : "all other companies",
-  );
+// =========================================================================== trends
+// Every series of the trends page: a share of the releases published in a quarter.
+const byQuarter = new Map<string, Release[]>();
+for (const r of releases) {
+  if (!byQuarter.has(r.quarter)) byQuarter.set(r.quarter, []);
+  byQuarter.get(r.quarter)!.push(r);
 }
+export const releasesIn = (quarter: string) => byQuarter.get(quarter) ?? [];
+const shareOf = (q: Quarter, test: (r: Release) => boolean) => releasesIn(q.quarter).filter(test).length / q.n;
 
-// What a company outside the study is set against: the latest release of every study company.
-export const studyBenchmark = benchmark(
-  summary.companies.map((c) => latestOf(c.ticker)),
-  `the ${summary.companies.length} S&P 100 companies of the study`,
-);
+const THEME_NOTE: Record<string, string> = {
+  tariffs: "Releases that say tariffs or trade restrictions affect the business",
+  ai: "Releases that present AI as a driver of demand, revenue or investment",
+  supply_chain: "Releases that say supply chain problems hurt results or the outlook",
+  restructuring: "Releases that report job cuts or restructuring",
+};
+
+export type Series = {
+  key: string;
+  title: string;
+  note: string;
+  group: "guidance" | "tone" | "pressure" | "theme";
+  value: (q: Quarter) => number;
+};
+export const SERIES: Series[] = [
+  { key: "raised", group: "guidance", title: "Raised guidance", note: "Releases that raise guidance for at least one key metric and lower none", value: (q) => q.guidance.raised },
+  { key: "lowered", group: "guidance", title: "Lowered guidance", note: "Releases that lower guidance for at least one key metric and raise none", value: (q) => q.guidance.lowered },
+  // The top level of the results scale, and its two bottom levels.
+  { key: "strong", group: "tone", title: "Clearly strong results", note: "Releases that report broad growth or records on the key metrics", value: (q) => shareOf(q, (r) => r.results_strength >= 0.875) },
+  { key: "weak", group: "tone", title: "Weak results", note: "Releases whose results read as somewhat or clearly weak", value: (q) => shareOf(q, (r) => r.results_strength < 0.375) },
+  { key: "margin_pressure", group: "pressure", title: "Margin pressure", note: "Releases that describe declining or pressured margins", value: (q) => q.flags.margin_pressure },
+  { key: "demand_weakness", group: "pressure", title: "Weakening demand", note: "Releases that describe weaker demand, orders or bookings", value: (q) => q.flags.demand_weakness },
+  { key: "uncertainty", group: "pressure", title: "Caution", note: "Releases where management voices at least moderate uncertainty", value: (q) => q.flags.uncertainty },
+  // Below the two positive levels of the outlook scale.
+  { key: "guarded", group: "pressure", title: "Guarded outlook", note: "Releases whose outlook is neutral or negative, or that give none", value: (q) => shareOf(q, (r) => r.outlook_tone < 0.625) },
+  ...(summary.meta.has_themes ? Object.keys(summary.meta.theme_questions) : []).map(
+    (k): Series => ({
+      key: k,
+      group: "theme",
+      title: THEME_LABEL[k] ?? k,
+      note: THEME_NOTE[k] ?? "",
+      value: (q) => q.themes[k] ?? 0,
+    }),
+  ),
+];
+
+const points = (d: number) => `${Math.abs(d)} ${Math.abs(d) === 1 ? "pt" : "pts"}`;
+// Change in whole percentage points, as the rounded figures on the page show it.
+export const ptsChange = (now: number, before: number) => Math.round(now * 100) - Math.round(before * 100);
+export const deltaText = (now: number, before: number, against: string) => {
+  const d = ptsChange(now, before);
+  return d === 0 ? `same as ${against}` : `${d > 0 ? "+" : "−"}${points(d)} vs ${against}`;
+};
+
+// What is unusual about the last full quarter: records since the dataset starts and the
+// largest moves against the same quarter a year before.
+export function highlights(max = 5): string[] {
+  const full = summary.quarters.filter((q) => !q.partial);
+  const prev = yearBefore(lastFull);
+  const since = full[0].quarter.slice(0, 4);
+  const found = SERIES.map((s) => {
+    const now = s.value(lastFull);
+    const others = full.filter((q) => q !== lastFull).map(s.value);
+    const record = now > Math.max(...others) ? "highest" : now < Math.min(...others) ? "lowest" : null;
+    const d = prev ? ptsChange(now, s.value(prev)) : 0;
+    return { s, now, record, d };
+  })
+    .filter((x) => x.record || Math.abs(x.d) >= 5)
+    .sort((a, b) => Number(!!b.record) - Number(!!a.record) || Math.abs(b.d) - Math.abs(a.d));
+  return found.slice(0, max).map(({ s, now, record, d }) => {
+    const change = prev && d !== 0 ? `${d > 0 ? "up" : "down"} ${points(d)} from ${quarterLabel(prev.quarter)}` : "";
+    if (record) return `${s.title}: ${pct(now)} of releases, the ${record} of any quarter since ${since}${change ? `, ${change}` : ""}.`;
+    return `${s.title}: ${pct(now)} of releases, ${change}.`;
+  });
+}

@@ -19,11 +19,11 @@ const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
 ---
 
 <figure class="radar">
-	<div class="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-600">
+	<div class="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-stone-600">
 		<span><span class="radar-key" style="background: var(--radar-up)"></span>Raised guidance</span>
 		<span><span class="radar-key" style="background: var(--radar-down)"></span>Lowered guidance</span>
 	</div>
-	<div class="radar-plot" style="height: 260px">
+	<div class="radar-plot" style="height: 360px">
 		{
 			ticks.map((v) => (
 				<div class:list={["radar-gridline", { "is-axis": v === 0 }]} style={`top: ${y(v)}`}>
@@ -113,8 +113,8 @@ const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
 	.gbar-label {
 		position: absolute;
 		left: 50%;
-		transform: translate(-50%, -19px);
-		font-size: 11px;
+		transform: translate(-50%, -20px);
+		font-size: 12px;
 		font-weight: 600;
 		line-height: 16px;
 		color: var(--radar-ink);

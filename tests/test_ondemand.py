@@ -75,7 +75,7 @@ def edgar_stub(monkeypatch):
              "raised. " + "More detail. " * 40 + "</p>"))
 
 
-def _analyser(tmp_path, store, calls, known=None, daily=1.0, total=100.0):
+def _analyser(tmp_path, store, calls, daily=1.0, total=100.0):
     def handler(req):
         body = json.loads(req.content)
         calls.append(body)
@@ -88,7 +88,7 @@ def _analyser(tmp_path, store, calls, known=None, daily=1.0, total=100.0):
         return DecisionClient(cache=Cache(tmp_path / "c.sqlite"), transport=httpx.MockTransport(handler),
                               cap_usd=1.0, api_key="test")
 
-    return O.Analyser(store, known=known or {}, client_factory=factory, daily_max_usd=daily, total_max_usd=total)
+    return O.Analyser(store, client_factory=factory, daily_max_usd=daily, total_max_usd=total)
 
 
 def test_analyse_finds_latest_and_previous_and_reads_each_filing_once(tmp_path, edgar_stub):
@@ -99,6 +99,8 @@ def test_analyse_finds_latest_and_previous_and_reads_each_filing_once(tmp_path, 
     assert out["latest"]["id"] == "f-aug" and out["previous"]["id"] == "f-may"
     assert out["latest"]["ticker"] == "ZETA" and out["latest"]["themes"]["ai"] == 0.8
     assert out["read_now"] == 3 and out["spent_usd"] > 0  # slides, August, May; February never needed
+    assert out["fresh"] == ["f-aug-slides", "f-aug", "f-may"] and out["questions"] == 12
+    assert out["latest"]["read_utc"].startswith("20")
     assert len(calls) == 6
     for body in calls:  # text only, identity masked
         assert set(body["state"]) == {"press_release"} and "Zeta" not in body["state"]["press_release"]
@@ -108,16 +110,47 @@ def test_analyse_finds_latest_and_previous_and_reads_each_filing_once(tmp_path, 
 
     again = a.analyse(ZETA, today=date(2026, 10, 4))
     assert again["latest"]["id"] == "f-aug" and again["read_now"] == 0 and again["spent_usd"] == 0
+    assert again["fresh"] == [] and again["latest"]["read_utc"] == out["latest"]["read_utc"]
     assert len(calls) == 6
 
 
-def test_analyse_uses_the_published_dataset_without_calling_the_model(tmp_path, edgar_stub):
-    known = {"f-aug": {"id": "f-aug", "accepted": "2026-08-05T16:10:00-04:00", "is_earnings": 0.99},
-             "f-aug-slides": {"skip": "not_earnings"},
-             "f-may": {"id": "f-may", "accepted": "2026-05-06T16:10:00-04:00", "is_earnings": 0.99}}
+def test_a_study_company_is_read_by_the_model_like_any_other(tmp_path, edgar_stub):
+    apple = O.CompanyRef("AAPL", 320193, "Apple Inc.")
     calls = []
-    out = _analyser(tmp_path, MemoryStore(), calls, known=known).analyse(ZETA, today=date(2026, 10, 4))
-    assert (out["latest"]["id"], out["previous"]["id"], out["read_now"], calls) == ("f-aug", "f-may", 0, [])
+    out = _analyser(tmp_path, MemoryStore(), calls).analyse(apple, today=date(2026, 10, 4))
+    assert out["company"]["in_study"] is True and out["company"]["name"] == "Apple"
+    assert out["read_now"] == 3 and len(calls) == 6  # the published dataset is not consulted
+
+
+def test_run_reports_each_step_as_it_happens(tmp_path, edgar_stub):
+    store, calls = MemoryStore(), []
+    a = _analyser(tmp_path, store, calls)
+    events = list(a.run(ZETA, today=date(2026, 10, 4)))
+    assert [e["step"] for e in events] == [
+        "edgar", "filings",
+        "download", "model", "read",  # the slides: read, and found not to be a results release
+        "download", "model", "read",
+        "download", "model", "read",
+        "done"]
+    assert events[1]["count"] == 4 and events[1]["since"] == "2025-07-31"
+    assert events[3]["questions"] == 12 and events[3]["chars"] > 0
+    reads = [e for e in events if e["step"] == "read"]
+    assert [(e["id"], e["fresh"], e["release"]) for e in reads] == [
+        ("f-aug-slides", True, False), ("f-aug", True, True), ("f-may", True, True)]
+    assert events[-1]["result"]["latest"]["id"] == "f-aug"
+
+    again = list(a.run(ZETA, today=date(2026, 10, 4)))
+    assert [e["step"] for e in again] == ["edgar", "filings", "read", "read", "read", "done"]
+    assert not any(e["fresh"] for e in again if e["step"] == "read")
+
+
+def test_a_visitor_who_leaves_before_the_model_is_asked_costs_nothing(tmp_path, edgar_stub):
+    store, calls = MemoryStore(), []
+    steps = _analyser(tmp_path, store, calls).run(ZETA, today=date(2026, 10, 4))
+    while next(steps)["step"] != "model":
+        pass
+    steps.close()
+    assert calls == [] and store.data == {}
 
 
 def test_analyse_stops_at_the_daily_budget_but_serves_what_is_stored(tmp_path, edgar_stub):
@@ -134,7 +167,7 @@ def test_analyse_stops_at_the_daily_budget_but_serves_what_is_stored(tmp_path, e
 def test_analyse_stops_at_the_lifetime_budget(tmp_path, edgar_stub):
     store, calls = MemoryStore(), []
     store.put("spend/total", {"usd": 4.0})
-    a = O.Analyser(store, known={}, client_factory=lambda: None, daily_max_usd=1.0, total_max_usd=4.0)
+    a = O.Analyser(store, client_factory=lambda: None, daily_max_usd=1.0, total_max_usd=4.0)
     with pytest.raises(O.DailyBudgetReached):
         a.analyse(ZETA, today=date(2026, 10, 9))
     assert calls == []
@@ -171,5 +204,17 @@ def test_api_routes(tmp_path, edgar_stub, directory):
     ok = c.get("/api/analysis/zeta")
     assert ok.status_code == 200 and ok.json()["latest"]["id"] == "f-aug"
     assert c.get("/api/analysis/NOPE").status_code == 404
+    assert c.get("/api/analysis/NOPE/stream").status_code == 404
+    stream = c.get("/api/analysis/zeta/stream")
+    events = [json.loads(line) for line in stream.text.splitlines()]
+    assert stream.status_code == 200 and events[0]["step"] == "edgar"
+    assert events[-1]["step"] == "done" and events[-1]["result"]["latest"]["id"] == "f-aug"
     assert "home" in c.get("/").text and "trends" in c.get("/trends/").text
     assert c.get("/openapi.json").status_code == 404
+
+
+def test_api_stream_ends_with_the_reason_when_the_analysis_fails(tmp_path, monkeypatch, directory):
+    monkeypatch.setattr(O.edgar, "list_item_202_filings", lambda *a, **k: pd.DataFrame())
+    app = create_app(analyser=_analyser(tmp_path, MemoryStore(), []), directory=directory)
+    last = json.loads(TestClient(app).get("/api/analysis/zeta/stream").text.splitlines()[-1])
+    assert last["step"] == "error" and last["status"] == 404 and "No results release" in last["detail"]

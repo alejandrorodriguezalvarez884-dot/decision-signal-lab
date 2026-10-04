@@ -17,8 +17,6 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY src/ ./src/
-# The dataset: releases the study already read are served from it, at no cost.
-COPY radar/ ./radar/
 COPY --from=web /repo/site/dist ./static
 ENV PATH="/app/.venv/bin:$PATH" PYTHONPATH=/app/src \
     RADAR_STATIC_DIR=/app/static DECISIONSIGNAL_HTTP_CACHE=off

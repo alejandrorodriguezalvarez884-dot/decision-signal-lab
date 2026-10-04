@@ -16,6 +16,10 @@
 		--radar-down: #e34948;
 		--radar-neutral: #a8a29e;
 		--radar-line: #2a78d6;
+		--radar-gutter: 40px; /* room for the value labels left of a plot */
+	}
+	.radar-words {
+		--radar-gutter: 52px; /* for axes labelled with words */
 	}
 	.radar-key {
 		display: inline-block;
@@ -27,7 +31,7 @@
 	}
 	.radar-plot {
 		position: relative;
-		margin-left: 34px;
+		margin-left: var(--radar-gutter);
 	}
 	.radar-gridline {
 		position: absolute;
@@ -41,11 +45,11 @@
 	}
 	.radar-gridline span {
 		position: absolute;
-		left: -34px;
+		left: calc(-1 * var(--radar-gutter));
 		top: -8px;
-		width: 28px;
+		width: calc(var(--radar-gutter) - 8px);
 		text-align: right;
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 16px;
 		color: var(--radar-muted);
 		font-variant-numeric: tabular-nums;
@@ -65,18 +69,66 @@
 		background: rgba(28, 25, 23, 0.04);
 	}
 	.radar-years {
-		margin-left: 34px;
+		margin-left: var(--radar-gutter);
 		display: grid;
 		grid-auto-flow: column;
-		font-size: 11px;
+		grid-auto-columns: 1fr;
+		font-size: 12px;
 		line-height: 16px;
 		color: var(--radar-muted);
-		padding-top: 4px;
+		padding-top: 6px;
 	}
 	.radar-years > div {
 		border-left: 1px solid var(--radar-axis);
 		padding-left: 4px;
 		overflow: hidden;
+		white-space: nowrap;
+	}
+	.radar-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+	}
+	/* A long caption beside the figure: on a narrow screen the figure goes under it. */
+	@media (max-width: 639px) {
+		.radar-head.is-stacked {
+			flex-direction: column;
+			gap: 0.75rem;
+		}
+		.radar-head.is-stacked .radar-now {
+			text-align: left;
+		}
+	}
+	.radar-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--radar-ink);
+	}
+	.radar-note {
+		margin-top: 2px;
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		color: var(--radar-muted);
+	}
+	.radar-now {
+		flex: none;
+		text-align: right;
+	}
+	.radar-now b {
+		display: block;
+		font-size: 1.75rem;
+		font-weight: 600;
+		line-height: 1;
+		color: var(--radar-ink);
+		font-variant-numeric: tabular-nums;
+	}
+	.radar-now span {
+		display: block;
+		margin-top: 4px;
+		font-size: 0.75rem;
+		color: var(--radar-muted);
 		white-space: nowrap;
 	}
 	.radar-table summary {
@@ -134,6 +186,17 @@
 		border-radius: 50%;
 		background: var(--radar-line);
 		border: 2px solid var(--radar-surface);
+	}
+	/* Where the previous release sat: the same dot, hollow. */
+	.scale-prev {
+		position: absolute;
+		top: 50%;
+		width: 12px;
+		height: 12px;
+		margin: -6px 0 0 -6px;
+		border-radius: 50%;
+		background: var(--radar-surface);
+		border: 2px solid var(--radar-line);
 	}
 	.scale-peer {
 		position: absolute;

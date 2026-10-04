@@ -1,6 +1,6 @@
 # Estado del proyecto y cómo continuar
 
-Última actualización: 2026-10-04 (tarde). Este documento basta para retomar el trabajo en otro
+Última actualización: 2026-10-04 (noche). Este documento basta para retomar el trabajo en otro
 ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
@@ -24,6 +24,11 @@ Decisiones del usuario ese día:
   demanda, descargando el comunicado en ese momento. Lo ya ejecutado alimenta las tendencias.
 - Alojado en **Cloud Run**, con el mismo patrón que `lease-lens` (un contenedor con web y API,
   `make deploy`).
+- **Rediseño del sitio (2026-10-04, noche):** el análisis en vivo no usa el dataset del estudio,
+  que queda solo para Market trends; se tiene que ver que el cálculo ocurre en el momento;
+  gráficas de tendencias más grandes y más insights; Method habla del modelo de Perplexity (qué
+  es, cómo está construido, por qué se usa), sin la validación y con poco espacio para los puntos
+  débiles.
 
 | Hecho | Pendiente |
 |---|---|
@@ -37,6 +42,8 @@ Decisiones del usuario ese día:
 | Análisis bajo demanda (`ondemand.py`, `api.py`, 13 tests): busca los últimos Item 2.02 de cualquier empresa, lee el último comunicado de resultados y el anterior, y guarda cada lectura. Probado en local con AMD el 2026-10-04: 1,9 s y $0.0016 | Solo empresas que presentan resultados en un 8-K (quedan fuera casi todas las extranjeras). La comparación de una empresa de fuera del estudio es contra las 99 del estudio, no contra su sector |
 | Topes del servicio: $0.25 al día, $4 en total, $0.03 por petición, 30 análisis por IP y hora, 2 instancias | El límite por IP vive en la memoria de cada instancia; el que protege de verdad es el tope diario, que se guarda en el bucket |
 | Sitio Astro (103 páginas): portada con buscador de cualquier empresa, `/analyze/`, fichas del estudio, `/trends/`, `/method/` | |
+| Rediseño del 2026-10-04 (noche), **sin desplegar**: `Analyser.run()` emite los pasos reales y la API los sirve en `/api/analysis/{ticker}/stream`; el análisis ya no consulta `radar/`; portada reducida al buscador; página de análisis con panel en vivo, frase resumen y "What stands out"; tendencias con gráficas grandes, destacados automáticos, mapa de calor por sector y "quién dijo qué"; ficha de empresa convertida en histórico; Method reescrito con el modelo. 69 tests en verde, sitio compilado y revisado en el navegador con un sustituto del modelo (EDGAR real, gasto cero) | `make deploy` para publicarlo. El flujo en vivo con el modelo real no se ha probado tras el cambio (cuesta ≈ $0.0015 por empresa nueva). Las razones de "Why this model" en Method las redactó el agente: que el usuario las revise |
+| | Con el cambio, cada empresa del estudio cuesta ≈ $0.0015 la primera vez que alguien la pide (antes salía gratis del dataset): como mucho ≈ $0.15 por las 99, dentro de los topes, que no se han tocado |
 | `Makefile`: `api`, `dev`, `serve`, `deploy` (Cloud Run), `check`, `update`, `save`, `publish`. Sin GitHub Actions | `make update` no se ha probado con comunicados nuevos reales |
 | **Desplegado el 2026-10-04** en Cloud Run: https://earnings-radar-3qwezbjyfq-ew.a.run.app (proyecto `arctic-robot-474306-g3`, `europe-west1`, servicio `earnings-radar`, bucket `arctic-robot-474306-g3-earnings-radar`, secreto `earnings-radar-perplexity-api-key`). Comprobado en producción: páginas, búsqueda, análisis de AMD en 3 s por $0.0016 y segunda petición servida desde el bucket | Dominio `earningsradar.app` asignado (8 registros DNS en Cloudflare, solo DNS). `www` sin configurar |
 | | Las lecturas bajo demanda se quedan en el bucket; no entran en `radar/` ni en las tendencias |

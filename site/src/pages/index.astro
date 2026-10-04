@@ -1,189 +1,159 @@
 ---
 import Page from "../components/Page.astro";
-import GuidanceChip from "../components/GuidanceChip.astro";
-import { companyUrl, fmtDate, latestOf, link, strengthWord, summary } from "../lib/radar";
+import CompanySearch from "../components/CompanySearch.astro";
+import { SERIES, deltaText, lastFull, link, pct, quarterLabel, summary, yearBefore } from "../lib/radar";
 
-const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
-const recent = summary.latest.slice(0, 6);
+const m = summary.meta;
+const analyse = (ticker: string) => `${link("/analyze/")}?ticker=${ticker}`;
+const examples = [
+	{ ticker: "AAPL", name: "Apple" },
+	{ ticker: "NVDA", name: "Nvidia" },
+	{ ticker: "AMD", name: "AMD" },
+	{ ticker: "NFLX", name: "Netflix" },
+	{ ticker: "UBER", name: "Uber" },
+	{ ticker: "COST", name: "Costco" },
+];
+const steps = [
+	{
+		title: "Fetch",
+		text: "The company's latest results filing is looked up on SEC EDGAR at that moment, and its press release downloaded.",
+	},
+	{
+		title: "Read",
+		text: "Tables and legal boilerplate are removed. Names and dates are masked, so the model judges the text and not the company.",
+	},
+	{
+		title: "Answer",
+		text: "A decision model answers the same fixed questions for every company and returns a probability for each answer.",
+	},
+];
+const gets = [
+	["A one-line verdict", "What the release says, in a sentence."],
+	["Guidance", "Raised, lowered, reaffirmed or new, with the probability of each."],
+	["What changed", "The same reading of the previous release, side by side."],
+	["What stands out", `Where it sits among the latest releases of ${m.companies} large US companies.`],
+	["Topics", "Margin pressure, weakening demand, tariffs, AI, supply chain, restructuring."],
+];
+
+const prev = yearBefore(lastFull);
+const teaser = ["raised", "strong", "margin_pressure", "tariffs"]
+	.map((k) => SERIES.find((s) => s.key === k))
+	.filter((s) => s !== undefined);
 ---
 
 <Page
 	title="Analyse a company's latest results"
-	description="Run a fixed reading on the latest results release of any company that files with the SEC: guidance, results, outlook, margins and demand, read by a decision model and set against its previous release."
+	description="Type any company that files with the SEC. Its latest results release is fetched from EDGAR and read on the spot by a decision model: guidance, results, outlook, margins, demand and themes, as probabilities."
 >
-	<Fragment slot="header">
-		<h1 class="mt-3 font-serif text-3xl font-semibold leading-tight text-stone-900 sm:text-4xl">
-			What did the company say in its latest results?
-		</h1>
-		<p class="mt-4 max-w-2xl text-base leading-relaxed text-stone-600">
-			Type any company that files with the SEC. The tool fetches its latest results release from EDGAR and a
-			decision model answers the same fixed questions it answers for every company: did guidance go up or down,
-			how strong are the results, are margins under pressure, is demand weakening. You get the answers, what
-			changed since the previous release and how it compares with {summary.meta.companies} large companies.
+	<section class="mx-auto max-w-3xl pt-4 text-center sm:pt-10">
+		<p class="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-stone-600">
+			<span class="live-dot" aria-hidden="true"></span>Runs live on the latest SEC filing
 		</p>
-		<div class="mt-6 max-w-xl">
-			<label for="company-search" class="sr-only">Search a company by name or ticker</label>
-			<input
-				id="company-search"
-				type="search"
-				autocomplete="off"
-				placeholder="Name or ticker, for example AMD or Uber"
-				class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200"
-			/>
-			<div id="remote" class="mt-3" hidden>
-				<p class="text-sm font-medium text-stone-500">Run the analysis now</p>
-				<div id="remote-list" class="mt-2 grid gap-2 sm:grid-cols-2"></div>
-				<p id="remote-note" class="mt-2 text-xs text-stone-500"></p>
-			</div>
+		<h1 class="mt-5 font-serif text-4xl font-semibold leading-tight text-stone-900 sm:text-5xl">
+			What did the company just say in its results?
+		</h1>
+		<p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-stone-600">
+			Type any company that reports to the SEC. Its latest results release is fetched from EDGAR and read on the
+			spot by a decision model that answers fixed questions with probabilities.
+		</p>
+		<div class="mx-auto mt-8 max-w-2xl text-left">
+			<CompanySearch large autofocus />
 		</div>
-	</Fragment>
-
-	<section id="recent" class="mt-10">
-		<h2 class="text-sm font-medium text-stone-500">Latest results published</h2>
-		<div class="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+		<p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-stone-500">
+			<span>Try</span>
 			{
-				recent.map((r) => (
+				examples.map((e) => (
 					<a
-						href={companyUrl(r.ticker)}
-						class="rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-stone-400"
+						href={analyse(e.ticker)}
+						class="rounded-full border border-stone-200 bg-white px-3 py-1 text-stone-700 transition-colors hover:border-stone-400 hover:text-stone-900"
 					>
-						<div class="flex items-baseline justify-between gap-3">
-							<span class="font-medium text-stone-900">{r.name}</span>
-							<span class="shrink-0 text-xs tabular-nums text-stone-400">{fmtDate(r.date)}</span>
-						</div>
-						<div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-stone-600">
-							<GuidanceChip value={r.guidance} />
-							<span>Results: {strengthWord(latestOf(r.ticker).results_strength).toLowerCase()}</span>
-						</div>
+						{e.name}
 					</a>
 				))
 			}
-		</div>
+		</p>
 	</section>
 
-	<section class="mt-12">
-		<h2 class="font-serif text-xl font-semibold text-stone-900">Already analysed, with history</h2>
-		<p class="mt-1 text-sm text-stone-500">
-			The {summary.meta.companies} companies of the study, every release since 2021. The label is what each one said about
-			guidance in its latest release.
-		</p>
+	<section class="mt-16 grid gap-4 sm:mt-20 sm:grid-cols-3">
 		{
-			sectors.map((sector) => (
-				<div class="company-group mt-6">
-					<h3 class="text-sm font-medium text-stone-500">{sector}</h3>
-					<div class="mt-2 grid gap-2 sm:grid-cols-2">
-						{summary.companies
-							.filter((c) => c.sector === sector)
-							.map((c) => (
-								<a
-									href={companyUrl(c.ticker)}
-									data-company={`${c.name} ${c.ticker}`.toLowerCase()}
-									class="company-item flex items-center justify-between gap-3 rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm transition-colors hover:border-stone-400"
-								>
-									<span class="min-w-0 truncate">
-										<span class="font-medium text-stone-900">{c.name}</span>
-										<span class="ml-1.5 text-xs text-stone-400">{c.ticker}</span>
-									</span>
-									<GuidanceChip value={c.last_guidance} />
-								</a>
-							))}
-					</div>
+			steps.map((s, i) => (
+				<div class="rounded-2xl border border-stone-200 bg-white p-6">
+					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-sm font-semibold text-white">{i + 1}</div>
+					<h2 class="mt-4 font-serif text-xl font-semibold text-stone-900">{s.title}</h2>
+					<p class="mt-2 text-sm leading-relaxed text-stone-600">{s.text}</p>
 				</div>
 			))
 		}
 	</section>
 
-	<section class="mt-14 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
-		<h2 class="font-serif text-lg font-semibold text-stone-900">Across all companies</h2>
-		<p class="mt-1 max-w-2xl text-sm leading-relaxed text-stone-600">
-			The same readings added up over {summary.meta.releases.toLocaleString("en-US")} releases since 2021: how many
-			companies raise or lower guidance each quarter, margin pressure, tariffs, AI. And the study this tool came
-			from, including what did not work.
-		</p>
-		<p class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm font-medium">
-			<a href={link("/trends/")} class="text-stone-900 underline underline-offset-4 hover:text-emerald-700">Market trends</a>
-			<a href={link("/method/")} class="text-stone-900 underline underline-offset-4 hover:text-emerald-700">Method and study</a>
-		</p>
+	<section class="mt-6 rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">What you get</h2>
+		<dl class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				gets.map(([title, text]) => (
+					<div class="border-l-2 border-stone-200 pl-4">
+						<dt class="text-sm font-semibold text-stone-900">{title}</dt>
+						<dd class="mt-1 text-sm leading-relaxed text-stone-600">{text}</dd>
+					</div>
+				))
+			}
+			<div class="border-l-2 border-stone-200 pl-4">
+				<dt class="text-sm font-semibold text-stone-900">How it was done</dt>
+				<dd class="mt-1 text-sm leading-relaxed text-stone-600">
+					Every step of the run as it happens, and the questions word for word on the{" "}
+					<a href={link("/method/")} class="underline hover:text-stone-900">method page</a>.
+				</dd>
+			</div>
+		</dl>
+	</section>
+
+	<section class="mt-6 rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+		<div class="flex flex-wrap items-end justify-between gap-3">
+			<div>
+				<h2 class="font-serif text-xl font-semibold text-stone-900">Market trends</h2>
+				<p class="mt-1 text-sm text-stone-500">
+					The same reading over {m.releases.toLocaleString("en-US")} releases from {m.companies} large companies since 2021.
+					Releases published in {quarterLabel(lastFull.quarter)}:
+				</p>
+			</div>
+			<a href={link("/trends/")} class="text-sm font-medium text-stone-900 underline underline-offset-4 hover:text-stone-600">
+				See all trends
+			</a>
+		</div>
+		<div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+			{
+				teaser.map((s) => (
+					<a href={link("/trends/")} class="rounded-xl border border-stone-200 p-4 transition-colors hover:border-stone-400">
+						<div class="text-xs leading-snug text-stone-500">{s.title}</div>
+						<div class="mt-2 text-3xl font-semibold tabular-nums text-stone-900">{pct(s.value(lastFull))}</div>
+						{prev && <div class="mt-1 text-xs text-stone-500">{deltaText(s.value(lastFull), s.value(prev), quarterLabel(prev.quarter))}</div>}
+					</a>
+				))
+			}
+		</div>
 	</section>
 </Page>
 
-<script>
-	// The list of study companies filters as the visitor types. Any other company comes from
-	// the API's search and opens the on-demand analysis.
-	import { link } from "../lib/reading";
-
-	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
-	const input = document.getElementById("company-search") as HTMLInputElement;
-	const items = [...document.querySelectorAll<HTMLAnchorElement>(".company-item")];
-	const groups = [...document.querySelectorAll<HTMLElement>(".company-group")];
-	const recent = document.getElementById("recent")!;
-	const remote = document.getElementById("remote")!;
-	const remoteList = document.getElementById("remote-list")!;
-	const remoteNote = document.getElementById("remote-note")!;
-	const analyseUrl = (ticker: string) => `${link("/analyze/")}?ticker=${encodeURIComponent(ticker)}`;
-	const tidy = (name: string) =>
-		name === name.toUpperCase() ? name.toLowerCase().replace(/(^|[\s\-/&.(])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : name;
-
-	let seq = 0;
-	let timer: ReturnType<typeof setTimeout> | undefined;
-
-	function filterLocal(q: string) {
-		for (const item of items) item.hidden = !!q && !item.dataset.company!.includes(q);
-		for (const g of groups) g.hidden = !g.querySelector(".company-item:not([hidden])");
-		recent.hidden = q.length > 0;
-	}
-
-	async function searchRemote(q: string) {
-		const mine = ++seq;
-		if (!q) return void (remote.hidden = true);
-		let found: { ticker: string; name: string }[] = [];
-		let note = "";
-		try {
-			const res = await fetch(`${API}/api/companies?q=${encodeURIComponent(q)}`);
-			if (!res.ok) throw new Error(String(res.status));
-			found = (await res.json()).companies;
-			if (!found.length) note = "No company with that name or ticker files with the SEC.";
-		} catch {
-			note = "The company search is not available right now.";
-		}
-		if (mine !== seq) return; // a newer keystroke already answered
-		remoteList.replaceChildren(
-			...found.map((c) => {
-				const a = document.createElement("a");
-				a.href = analyseUrl(c.ticker);
-				a.className =
-					"remote-item flex items-center justify-between gap-3 rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm transition-colors hover:border-stone-500";
-				const name = document.createElement("span");
-				name.className = "min-w-0 truncate font-medium text-stone-900";
-				name.textContent = tidy(c.name);
-				const ticker = document.createElement("span");
-				ticker.className = "shrink-0 text-xs text-stone-400";
-				ticker.textContent = c.ticker;
-				a.append(name, ticker);
-				return a;
-			}),
-		);
-		remoteNote.textContent = note;
-		remoteNote.hidden = !note;
-		remote.hidden = false;
-	}
-
-	input.addEventListener("input", () => {
-		const q = input.value.trim().toLowerCase();
-		filterLocal(q);
-		clearTimeout(timer);
-		timer = setTimeout(() => searchRemote(q), 250);
-	});
-	input.addEventListener("keydown", (e) => {
-		if (e.key !== "Enter" || !input.value.trim()) return;
-		const first = remoteList.querySelector<HTMLAnchorElement>(".remote-item") ?? items.find((i) => !i.hidden);
-		window.location.href = first ? first.href : analyseUrl(input.value.trim());
-	});
-</script>
-
 <style>
-	/* `hidden` must win over the flex and grid display set by the utility classes. */
-	[hidden] {
-		display: none !important;
+	.live-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #2a78d6;
+		box-shadow: 0 0 0 0 rgba(42, 120, 214, 0.5);
+		animation: live-pulse 1.8s infinite;
+	}
+	@keyframes live-pulse {
+		70% {
+			box-shadow: 0 0 0 7px rgba(42, 120, 214, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(42, 120, 214, 0);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.live-dot {
+			animation: none;
+		}
 	}
 </style>

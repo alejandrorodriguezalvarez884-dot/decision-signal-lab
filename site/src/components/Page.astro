@@ -2,38 +2,40 @@
 // Shell shared by every page: header with the navigation, the page body and the footer.
 import Layout from "../layouts/Layout.astro";
 import RadarStyles from "./RadarStyles.astro";
-import { AUTHOR_URL, REPO_URL, fmtDate, link, summary } from "../lib/radar";
+import { AUTHOR_URL, REPO_URL, link } from "../lib/reading";
 
 interface Props {
 	title: string;
 	description: string;
 }
 const { title, description } = Astro.props;
-const m = summary.meta;
 
-const links = [
-	{ href: link("/"), label: "Companies" },
-	{ href: link("/trends/"), label: "Market trends" },
-	{ href: link("/method/"), label: "Method" },
-];
 const path = Astro.url.pathname;
-const isActive = (href: string) =>
-	href === link("/") ? path === href || path.startsWith(link("/company/")) : path.startsWith(href);
+const under = (...roots: string[]) => roots.some((r) => path.startsWith(link(r)));
+const links = [
+	{ href: link("/"), label: "Analyse a company", short: "Analyse", active: path === link("/") || under("/analyze/") },
+	{ href: link("/trends/"), label: "Market trends", short: "Market trends", active: under("/trends/", "/company/") },
+	{ href: link("/method/"), label: "Method", short: "Method", active: under("/method/") },
+];
 ---
 
 <Layout title={`${title} — Earnings Radar`} description={description}>
 	<header class="sticky top-0 z-50 border-b border-stone-200/80 bg-stone-50/80 backdrop-blur">
-		<nav class="mx-auto flex max-w-4xl flex-col gap-2 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
-			<a href={link("/")} class="font-serif text-lg font-semibold tracking-tight text-stone-900">Earnings Radar</a>
-			<ul class="flex items-center gap-5 text-sm sm:gap-6">
+		<nav class="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
+			<a href={link("/")} class="flex items-center gap-2 font-serif text-lg font-semibold tracking-tight text-stone-900">
+				<span class="brand-mark" aria-hidden="true"></span>Earnings Radar
+			</a>
+			<ul class="-ml-3 flex items-center gap-1 text-sm sm:ml-0">
 				{
 					links.map((l) => (
 						<li>
 							<a
 								href={l.href}
-								class={`transition-colors hover:text-stone-900 ${isActive(l.href) ? "font-medium text-stone-900" : "text-stone-600"}`}
+								aria-current={l.active ? "page" : undefined}
+								class={`whitespace-nowrap rounded-full px-3 py-1.5 transition-colors hover:text-stone-900 ${l.active ? "bg-stone-200/70 font-medium text-stone-900" : "text-stone-600"}`}
 							>
-								{l.label}
+								<span class="sm:hidden">{l.short}</span>
+								<span class="hidden sm:inline">{l.label}</span>
 							</a>
 						</li>
 					))
@@ -41,23 +43,31 @@ const isActive = (href: string) =>
 			</ul>
 		</nav>
 	</header>
-	<main class="radar mx-auto max-w-4xl px-6 pb-20 pt-10 sm:pt-14">
-		<p class="text-sm text-stone-500">
-			{m.releases.toLocaleString("en-US")} releases from {m.companies} companies · updated {fmtDate(m.last_date)}
-		</p>
+	<main class="radar mx-auto max-w-5xl px-6 pb-20 pt-10 sm:pt-14">
 		<slot name="header" />
 		<slot />
 		<p class="mt-16 border-t border-stone-200 pt-6 text-xs leading-relaxed text-stone-500">
-			A description of what company press releases say, produced by a language model. It can be wrong, it is
-			not a forecast of anything and it is not investment advice. Source text: SEC EDGAR.{" "}
-			<a href={link("/method/")} class="underline hover:text-stone-900">How it works and how often it is right</a>.
+			A description of what company press releases say, produced by a decision model. It is not a forecast of
+			anything and it is not investment advice. Source text: SEC EDGAR.{" "}
+			<a href={link("/method/")} class="underline hover:text-stone-900">How it works</a>.
 		</p>
 	</main>
 	<footer class="border-t border-stone-200">
-		<div class="mx-auto max-w-4xl px-6 py-8 text-center text-sm text-stone-400">
+		<div class="mx-auto max-w-5xl px-6 py-8 text-center text-sm text-stone-400">
 			Built by <a href={AUTHOR_URL} class="underline hover:text-stone-700">Alejandro Rodríguez Álvarez</a> ·{" "}
 			<a href={REPO_URL} class="underline hover:text-stone-700">Source and data on GitHub</a>
 		</div>
 	</footer>
 	<RadarStyles />
 </Layout>
+
+<style>
+	/* Two rings and a dot: the radar. */
+	.brand-mark {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		border: 2px solid #1c1917;
+		background: radial-gradient(circle, #2a78d6 0 3px, transparent 3.5px);
+	}
+</style>

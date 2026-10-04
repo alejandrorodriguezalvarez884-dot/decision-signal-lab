@@ -1,12 +1,8 @@
 ---
 import Page from "../components/Page.astro";
-import { GUIDANCE_LABEL, REPO_URL, THEME_LABEL, fmtDate, releases, summary, type GuidanceClass } from "../lib/radar";
+import { GUIDANCE_LABEL, REPO_URL, THEME_LABEL, fmtDate, link, summary, type GuidanceClass } from "../lib/radar";
 
 const m = summary.meta;
-const v = m.validation;
-const share = (a: number, b: number) => `${Math.round((a / b) * 100)}%`;
-const urlOf = (id: string) => releases.find((r) => r.id === id)?.url;
-const lowered = v?.by_model_class.lowered ?? { n: 0, agree_strict: 0, agree_lenient: 0 };
 const perRelease = ((m.api_cost_usd / m.releases) * 100).toFixed(2);
 const QUESTION_LABEL: Record<string, string> = {
 	guidance: "Guidance",
@@ -16,41 +12,229 @@ const QUESTION_LABEL: Record<string, string> = {
 	demand_weakness: "Weakening demand",
 	margin_pressure: "Margin pressure",
 };
+const published = Object.keys(m.questions).length + Object.keys(m.theme_questions).length;
+
+// Source for everything below: the model's card and repository on Hugging Face (its NOTICE,
+// decision_config.json, source/configs/training.json and source/src/autojev/model.py) and
+// Perplexity's Decisions API documentation, as read on 2026-10-04.
+const MODEL_CARD = "https://huggingface.co/perplexity-ai/pplx-decider-v1-27b";
+const API_DOCS = "https://docs.perplexity.ai/docs/decisions/quickstart";
+const facts = [
+	["Base model", "Qwen3.8-27B, an open language model"],
+	["Size", "27 billion parameters, 64 layers"],
+	["Output layer", "A decision readout with 255 option slots, in place of the layer that generates text"],
+	["Training", "Supervised fine-tuning of the whole network on a curated set of 73,000 decision examples"],
+	["Calibration", "One temperature (2.21), fitted on a separate set of 3,500 examples"],
+	["Released", "1 October 2026; weights and training code are public (Apache 2.0)"],
+	["Served by", "Perplexity's Decisions API, at $0.04 per million input tokens"],
+];
+const flow = [
+	{ title: "Input", text: "The press release, one question and its answer options. Each option is tagged with a letter: A, B, C…" },
+	{ title: "Backbone", text: "The 27-billion-parameter network reads all of it in a single pass. It writes nothing." },
+	{ title: "Readout", text: "One linear layer turns the network's final state into a score for each option letter." },
+	{ title: "Calibration", text: "The scores are divided by the fitted temperature and turned into probabilities that add up to 1." },
+];
+const example = [
+	["Raised", 0.81],
+	["Reaffirmed", 0.12],
+	["New period", 0.04],
+	["Other answers", 0.03],
+] as const;
+const benchmarks = [
+	["FinancialPhraseBank", "the sentiment of sentences from financial news", "75.7%", "84.2%"],
+	["RAGTruth", "whether a statement is supported by a source text", "61.5%", "88.8%"],
+	["TabFact", "whether a statement agrees with a table", "78.6%", "90.6%"],
+	["ContractNLI", "what a contract does and does not say", "80.8%", "80.8%"],
+	["Average of 11 benchmarks", "", "74.8%", "85.7%"],
+];
 ---
 
 <Page
 	title="Method"
-	description="How the Earnings Radar reads results releases: the source, the exact questions asked to the model, how often it is right and what it cannot do."
+	description="How the Earnings Radar reads results releases: the source text, the decision model behind it, how that model is built, why it was chosen and the exact questions it answers."
 >
 	<Fragment slot="header">
-		<h1 class="mt-3 font-serif text-3xl font-semibold text-stone-900">How it works, and how far to trust it</h1>
+		<h1 class="font-serif text-3xl font-semibold text-stone-900 sm:text-4xl">How it works</h1>
+		<p class="mt-4 max-w-2xl text-lg leading-relaxed text-stone-600">
+			A results press release goes in. A decision model answers a fixed set of questions about it. The answers come
+			out as probabilities, which is what makes one release comparable with the next.
+		</p>
 	</Fragment>
 
-	<div class="method mt-8 max-w-2xl text-base leading-relaxed text-stone-700">
-		<h2>The text</h2>
+	<div class="method mt-4 max-w-3xl text-base leading-relaxed text-stone-700">
+		<h2>From filing to reading</h2>
+		<ol class="steps">
+			<li>
+				<b>The text.</b> When a US company reports results it files a Form 8-K with the SEC under Item 2.02, with
+				the press release attached. That press release is taken from EDGAR.
+			</li>
+			<li>
+				<b>Cleaning.</b> Financial tables and legal boilerplate are removed: the narrative is what gets read. Company
+				names, tickers and dates are masked, so the model judges what the text says and not which company says it.
+			</li>
+			<li>
+				<b>The questions.</b> The model is asked {published} fixed questions, the same for every company and every
+				quarter. They are listed below, word for word.
+			</li>
+			<li>
+				<b>The answers.</b> Each answer is a probability: how likely it is that guidance was raised, that margins are
+				described as under pressure, that tariffs are said to affect the business.
+			</li>
+		</ol>
+
+		<h2>The model</h2>
 		<p>
-			When a US company reports results it files a Form 8-K with the SEC under Item 2.02, with the press release
-			attached. The radar takes that press release from EDGAR for {m.companies} companies of the S&P 100 (the list
-			as of December 2020, fixed in advance), from {fmtDate(m.first_date)} onwards: {m.releases.toLocaleString("en-US")} releases so far.
-			Tables and legal boilerplate are removed; the narrative is what the model reads. When a company files a
-			second Item 2.02 within 20 days, only the first counts.
+			The reader is <a href={MODEL_CARD}><code>{m.model}</code></a>, Perplexity's Decider. It is a{" "}
+			<em>decision model</em>, a different kind of tool from a chat model. A chat model is given a prompt and
+			writes text. A decision model is given a text and a typed question, with the possible answers spelled out,
+			and returns a probability for each of them. It cannot ramble, change the subject or invent a sentence,
+			because it has no way to produce one.
 		</p>
 
-		<h2>On demand</h2>
+		<h3>How it is built</h3>
 		<p>
-			Any other company is read when someone asks for it. The service looks up the company's Item 2.02 filings
-			on EDGAR, takes the newest one the model reads as a results release and the one before it, and asks the
-			same questions. Each filing is read once and stored, so the same company is instant afterwards. It works
-			for companies that report results in a Form 8-K, which leaves out most foreign companies. The service has
-			a spending limit; when it is reached, companies already read keep working and new ones have to wait.
+			It starts from Qwen3.8-27B, an open general-purpose language model, and changes it in three ways.
+		</p>
+		<ol class="steps">
+			<li>
+				<b>The output layer is replaced.</b> A language model ends in a layer that picks the next word out of a
+				vocabulary of some 250,000 tokens. Here that layer is taken out and a small <em>decision readout</em> put
+				in its place: a single linear layer with 255 outputs, one per possible answer option. It starts as a copy
+				of the rows the original layer used for the option letters, so the model begins from what it already knew
+				about answering multiple-choice questions.
+			</li>
+			<li>
+				<b>The whole network is fine-tuned on decisions.</b> The backbone and the readout were trained together,
+				with supervised learning, on a curated set of 73,000 examples of a text, a question and the right answer.
+				The released weights are the checkpoint taken after about 51,000 of them.
+			</li>
+			<li>
+				<b>The probabilities are calibrated.</b> A raw network tends to be overconfident. A single number, the
+				temperature, was fitted on a separate set of examples and divides the scores before they become
+				probabilities. The aim is that answers given at 80% turn out right about 80% of the time.
+			</li>
+		</ol>
+
+		<h3>What happens on each question</h3>
+		<div class="not-prose flow">
+			{
+				flow.map((f, i) => (
+					<div class="flow-step">
+						<div class="flow-n">{i + 1}</div>
+						<div class="flow-title">{f.title}</div>
+						<p>{f.text}</p>
+					</div>
+				))
+			}
+			<div class="flow-step flow-out">
+				<div class="flow-n">5</div>
+				<div class="flow-title">Answer</div>
+				<div class="mt-2 space-y-1.5">
+					{
+						example.map(([label, p]) => (
+							<div class="grid grid-cols-[5.5rem_1fr_2.25rem] items-center gap-2 text-xs">
+								<span>{label}</span>
+								<span class="h-2"><span class="block h-full rounded-r" style={`width: ${p * 100}%; background: var(--radar-line)`} /></span>
+								<span class="text-right tabular-nums">{Math.round(p * 100)}%</span>
+							</div>
+						))
+					}
+				</div>
+				<p class="mt-2 text-[11px] text-stone-400">Illustration, not a real release.</p>
+			</div>
+		</div>
+		<p>
+			Every question is its own pass through the network, with no text generated at any point, which is why an
+			analysis takes seconds. There are three kinds of question:
+		</p>
+		<dl>
+			<dt>Yes or no</dt>
+			<dd>Returns the probability of “yes”. Margin pressure, weakening demand and the themes are asked this way.</dd>
+			<dt>Choice</dt>
+			<dd>Returns a probability for each option. Guidance is a choice among seven answers; the likeliest is the one shown.</dd>
+			<dt>Score</dt>
+			<dd>
+				Returns a probability for each level of an ordered scale, and their weighted average. That is why a reading
+				can sit between “mixed” and “somewhat strong”. Results, outlook and caution are scores.
+			</dd>
+		</dl>
+
+		<div class="not-prose my-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+			<table class="w-full text-sm">
+				<tbody>
+					{
+						facts.map(([k, v]) => (
+							<tr class="border-b border-stone-100 last:border-0">
+								<th class="whitespace-nowrap px-4 py-2.5 text-left align-top text-xs font-medium text-stone-500">{k}</th>
+								<td class="px-4 py-2.5 text-stone-800">{v}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Why this model</h2>
+		<ul>
+			<li>
+				<b>It answers instead of writing.</b> Asking a chat model about 2,000 releases gives 2,000 paragraphs that
+				then have to be interpreted. Typed answers can be counted: so many companies raised guidance this quarter,
+				so many describe pressured margins. Every chart on this site is such a count.
+			</li>
+			<li>
+				<b>It is consistent.</b> The same text and the same question give the same numbers, give or take a
+				rounding difference, and the model version is pinned. Every release is measured with the same ruler.
+			</li>
+			<li>
+				<b>Its probabilities mean something.</b> Because they are calibrated, the site can say that a reading is a
+				close call when it is one, instead of hiding the doubt behind a confident sentence.
+			</li>
+			<li>
+				<b>It is good at this kind of reading.</b> On its model card it beats the model it was built from on nine
+				of eleven benchmarks and ties on one, with clear gains on the tasks closest to this one: financial text,
+				and checking a statement against a source.
+			</li>
+			<li>
+				<b>It is fast and cheap enough to run for anyone.</b> A release costs about {perRelease} cents to read and
+				takes a few seconds, which is what makes an analysis on demand possible.
+			</li>
+			<li>
+				<b>It is open.</b> The weights and the training code are public, so the reading can be checked and
+				reproduced without depending on a closed service.
+			</li>
+		</ul>
+		<div class="not-prose my-6 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+			<table class="w-full text-sm tabular-nums">
+				<thead>
+					<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
+						<th class="px-4 py-2.5 font-medium">Benchmark (accuracy)</th>
+						<th class="px-3 py-2.5 text-right font-medium">Qwen3.8-27B</th>
+						<th class="px-4 py-2.5 text-right font-medium">{m.model}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						benchmarks.map(([name, what, base, decider], i) => (
+							<tr class={`border-b border-stone-100 last:border-0 ${i === benchmarks.length - 1 ? "font-semibold text-stone-900" : "text-stone-800"}`}>
+								<td class="px-4 py-2.5">
+									{name}
+									{what && <span class="block text-xs font-normal text-stone-500">{what}</span>}
+								</td>
+								<td class="px-3 py-2.5 text-right align-top">{base}</td>
+								<td class="px-4 py-2.5 text-right align-top">{decider}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+		<p class="text-sm text-stone-500">
+			Figures published by Perplexity on the <a href={MODEL_CARD}>model card</a>, which has all eleven benchmarks.
+			The API is described in <a href={API_DOCS}>its documentation</a>.
 		</p>
 
 		<h2>The questions</h2>
-		<p>
-			The reader is a decision model (<code>{m.model}</code>). Unlike a chat model it does not write: it takes a
-			text and a fixed set of typed questions and returns a probability for each answer. Company names, tickers
-			and dates are masked before it reads. These are the questions, word for word:
-		</p>
+		<p>These are the questions, word for word.</p>
 		<dl>
 			{
 				Object.entries(m.questions).map(([k, q]) => (
@@ -87,137 +271,77 @@ const QUESTION_LABEL: Record<string, string> = {
 				</>
 			)
 		}
+		<p>
+			Two more questions are asked and not shown. One checks that the filing is a results release at all, which
+			decides whether it is used. The other is a reference question kept from the project's first study.
+		</p>
+
+		<h2>Two ways it runs</h2>
+		<dl>
+			<dt>Live, for one company</dt>
+			<dd>
+				<a href={link("/")}>Type a company</a> and the service looks up its Item 2.02 filings on EDGAR at that
+				moment, takes the newest one the model reads as a results release and the one before it, and asks the
+				questions. The steps shown while it runs are the real ones, reported by the server as they happen. Each
+				filing is read once and stored, so asking again for the same release is instant; a new filing is read
+				when the next person asks. It works for companies that report results in a Form 8-K, which leaves out
+				most foreign companies.
+			</dd>
+			<dt>Over time, for the market</dt>
+			<dd>
+				<a href={link("/trends/")}>Market trends</a> adds up the same reading over {m.releases.toLocaleString("en-US")} releases
+				of {m.companies} companies of the S&P 100 (the list as of December 2020, fixed in advance), from{" "}
+				{fmtDate(m.first_date)} to {fmtDate(m.last_date)}. When a company files a second Item 2.02 within 20 days,
+				only the first counts.
+			</dd>
+		</dl>
 
 		<h2>The numbers on the charts</h2>
 		<p>
 			A release counts under the guidance answer the model finds most likely. It counts as describing margin
-			pressure, weakening demand or caution when the model's answer is at or past the midpoint of the scale.
-			Quarters are quarters of publication: a release that comes out in February counts in the first quarter,
-			whatever fiscal period it reports. A share over roughly 97 companies moves by one point with each company,
-			so differences of two or three points mean little.
+			pressure, weakening demand, caution or a theme when the model's answer is at or past the midpoint of the
+			scale. Quarters are quarters of publication: a release that comes out in February counts in the first
+			quarter, whatever fiscal period it reports.
 		</p>
 
-		{
-			v && (
-				<>
-					<h2>How often it is right</h2>
-					<p>
-						I checked the guidance answer on {v.labelled + v.unclear.length} releases, chosen so that every answer was
-						covered. A second reader labelled them from the text without seeing what the model had said. That reader
-						was Claude, another AI model, not a human analyst, so this is agreement between two readers and not a
-						score against a ground truth.
-					</p>
-					<ul>
-						<li>
-							On {v.unclear.length} of them the release announces new ranges without saying whether they are higher or
-							lower, so the text alone cannot settle it. They are left out of the counts below.
-						</li>
-						<li>
-							On the other {v.labelled}, both readers gave the same answer on {v.agree_strict} ({share(v.agree_strict, v.labelled)}),
-							or {v.agree_lenient} ({share(v.agree_lenient, v.labelled)}) counting cases with two defensible answers, such as a
-							range narrowed around the same midpoint.
-						</li>
-						<li>
-							On raised, lowered or neither, which is what the main chart uses, they agreed on {v.agree_direction}{" "}
-							({share(v.agree_direction, v.labelled)}).
-						</li>
-					</ul>
-					<div class="not-prose my-5 overflow-x-auto rounded-xl border border-stone-200 bg-white">
-						<table class="w-full text-sm tabular-nums">
-							<thead>
-								<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
-									<th class="px-4 py-2.5 font-medium">The model said</th>
-									<th class="px-3 py-2.5 text-right font-medium">Releases</th>
-									<th class="px-4 py-2.5 text-right font-medium">Second reader agreed</th>
-								</tr>
-							</thead>
-							<tbody>
-								{Object.entries(v.by_model_class).map(([k, c]) => (
-									<tr class="border-b border-stone-100 last:border-0">
-										<td class="px-4 py-2">{GUIDANCE_LABEL[k as GuidanceClass]}</td>
-										<td class="px-3 py-2 text-right">{c.n}</td>
-										<td class="px-4 py-2 text-right">{c.agree_lenient}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-					<p>
-						The weak spot is "lowered": {lowered.n - lowered.agree_lenient} of the {lowered.n} releases the model
-						marked as lowered were not. The disagreements, each with its filing:
-					</p>
-					<ul>
-						{v.disagreements.map((d) => (
-							<li>
-								Model: {GUIDANCE_LABEL[d.model as GuidanceClass].toLowerCase()}. Reader:{" "}
-								{GUIDANCE_LABEL[d.reader as GuidanceClass].toLowerCase()} ({d.note}).{" "}
-								{urlOf(d.accessionNumber) && (
-									<a href={urlOf(d.accessionNumber)} target="_blank" rel="noreferrer">
-										Filing
-									</a>
-								)}
-							</li>
-						))}
-					</ul>
-					<p>
-						The sample is small and it measures how often the model is right when it gives an answer, not how many
-						releases of each kind it misses. The other questions have not been checked this way.
-					</p>
-				</>
-			)
-		}
-
-		<h2>What it does not do</h2>
+		<h2>Keep in mind</h2>
 		<ul>
-			<li>It does not predict prices or returns, and nothing here is investment advice.</li>
-			<li>
-				It reads the press release only. The numbers in the financial tables, the conference call and the slides
-				are not in it, and many releases state a new range without the old one.
-			</li>
-			<li>Press releases are written by the company and are upbeat almost without exception. Tone is not fact.</li>
-			<li>
-				{m.companies} very large companies are not the market. Sectors with two or four of them are shown, but one
-				release moves them a lot.
-			</li>
+			<li>It reads the press release only: not the financial tables, the conference call or the slides.</li>
+			<li>A press release is written by the company. The reading says what the text says, not whether it is true.</li>
+			<li>It describes; it does not predict prices or returns, and nothing here is investment advice.</li>
 		</ul>
 
-		<h2>The experiment that did not work</h2>
+		<h2>Where it comes from, cost and code</h2>
 		<p>
-			This started as a different question: once the price has reacted to a results release, can the model tell
-			whether the news is better or worse than that reaction implies, and so predict the following weeks? On
-			1,529 releases from 2021 to 2024 it could not. Its judgement had no relation to the abnormal return of the
-			next 20 sessions (weekly rank correlation −0.05, p = 0.11, with the wrong sign), and it was mostly the
-			first-day move restated: it leaned "better" after a fall and "worse" after a rise (rank correlation −0.70
-			with the reaction). Three rewordings of the question did no better. The releases from 2025 on, set aside
-			for a confirmation test, were never used for one because there was nothing to confirm.
+			The project began as an experiment: whether the model's reading of a release could predict the stock's
+			return over the following weeks. It could not, and the experiment was closed with that result. What the
+			model did well was read, and that became this site.
 		</p>
 		<p>
-			What the model did do well was read. The same answers that failed as a trading signal traced the margin
-			squeeze of 2022 and its fading, quarter by quarter. That is what this page publishes.
-		</p>
-
-		<h2>Cost and code</h2>
-		<p>
-			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls, and a new release costs
-			about {perRelease} cents. The study's data is updated by hand, so the history shown for its companies
-			runs to {fmtDate(m.last_date)}; the on-demand analysis always looks at EDGAR at the moment you ask.
-			The pipeline, the questions, the validation sample and the dataset are in{" "}
-			<a href={REPO_URL}>the repository</a>.
+			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls. The pipeline, the questions
+			and the dataset are in <a href={REPO_URL}>the repository</a>.
 		</p>
 	</div>
 </Page>
 
 <style>
 	.method :global(h2) {
-		margin-top: 2.5rem;
+		margin-top: 3rem;
 		margin-bottom: 0.75rem;
 		font-family: "Source Serif 4", Georgia, serif;
-		font-size: 1.25rem;
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #1c1917;
+	}
+	.method :global(h3) {
+		margin-top: 1.75rem;
+		font-size: 1rem;
 		font-weight: 600;
 		color: #1c1917;
 	}
 	.method :global(p),
 	.method :global(ul),
+	.method :global(ol),
 	.method :global(dl) {
 		margin-top: 0.75rem;
 	}
@@ -226,7 +350,37 @@ const QUESTION_LABEL: Record<string, string> = {
 		padding-left: 1.25rem;
 	}
 	.method :global(li) {
-		margin-top: 0.4rem;
+		margin-top: 0.6rem;
+	}
+	.method :global(b) {
+		font-weight: 600;
+		color: #1c1917;
+	}
+	.method .steps {
+		list-style: none;
+		counter-reset: step;
+	}
+	.method .steps > li {
+		position: relative;
+		counter-increment: step;
+		padding-left: 2.5rem;
+		margin-top: 0.9rem;
+	}
+	.method .steps > li::before {
+		content: counter(step);
+		position: absolute;
+		left: 0;
+		top: 0.1rem;
+		width: 1.6rem;
+		height: 1.6rem;
+		border-radius: 50%;
+		background: #1c1917;
+		color: #fff;
+		font-size: 0.8rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	.method :global(dt) {
 		margin-top: 0.75rem;
@@ -249,5 +403,62 @@ const QUESTION_LABEL: Record<string, string> = {
 		background: #f5f5f4;
 		padding: 0.1em 0.35em;
 		border-radius: 4px;
+	}
+	/* The path of one question through the model: five boxes joined by arrows. */
+	.flow {
+		margin: 1.25rem 0;
+		display: grid;
+		gap: 1.25rem;
+	}
+	.flow-step {
+		position: relative;
+		border: 1px solid #e7e5e4;
+		border-radius: 14px;
+		background: #fff;
+		padding: 14px 16px;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: #57534e;
+	}
+	.flow-step p {
+		margin-top: 4px;
+	}
+	.flow-n {
+		font-size: 11px;
+		font-weight: 600;
+		color: #a8a29e;
+	}
+	.flow-title {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: #1c1917;
+	}
+	.flow-out {
+		border-color: #1c1917;
+	}
+	.flow-step:not(:last-child)::after {
+		content: "↓";
+		position: absolute;
+		left: 50%;
+		bottom: -1.2rem;
+		transform: translateX(-50%);
+		color: #a8a29e;
+		font-size: 14px;
+		line-height: 1;
+	}
+	/* On a wide screen the boxes sit in one row, which runs past the text column. */
+	@media (min-width: 1024px) {
+		.flow {
+			grid-template-columns: repeat(4, 1fr) 1.25fr;
+			width: calc(100% + 13rem);
+		}
+		.flow-step:not(:last-child)::after {
+			content: "→";
+			left: auto;
+			right: -1rem;
+			bottom: auto;
+			top: 50%;
+			transform: translateY(-50%);
+		}
 	}
 </style>
