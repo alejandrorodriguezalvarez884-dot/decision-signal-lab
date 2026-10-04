@@ -3,9 +3,9 @@ import json
 import httpx
 import pytest
 
-from jevsignal.jev import BudgetExceeded, Cache, JevClient, payload, request_key
-from jevsignal.questions import REACTION_QUESTIONS
-from jevsignal.score import flatten_answer
+from decisionsignal.client import BudgetExceeded, Cache, DecisionClient, payload, request_key
+from decisionsignal.questions import REACTION_QUESTIONS
+from decisionsignal.score import flatten_answer
 
 ANSWER = {
     "model": "pplx-decider-v1-27b",
@@ -38,7 +38,7 @@ PPLX_DOCS_RESPONSE = {
 
 
 def _client(tmp_path, handler, cap=1.0):
-    return JevClient(cache=Cache(tmp_path / "c.sqlite"), transport=httpx.MockTransport(handler),
+    return DecisionClient(cache=Cache(tmp_path / "c.sqlite"), transport=httpx.MockTransport(handler),
                      cap_usd=cap, api_key="test")
 
 

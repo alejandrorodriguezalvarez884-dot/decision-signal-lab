@@ -9,8 +9,8 @@ Reglas que no se negocian:
 - **Cero look-ahead.** Cualquier cambio en `events.py` se acompaña de su test en
   `tests/test_events.py`.
 - **Antes de gastar en la API de Perplexity o de descargar volúmenes grandes,**
-  se pide permiso al usuario con una estimación (`uv run jevsignal estimate …`).
-- **El holdout (eventos desde 2025-01-01) está sellado** hasta `jevsignal lock`. No se ajustan
+  se pide permiso al usuario con una estimación (`uv run decisionsignal estimate …`).
+- **El holdout (eventos desde 2025-01-01) está sellado** hasta `decisionsignal lock`. No se ajustan
   preguntas mirando el holdout.
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.
 - **Los resultados nulos se reportan tal cual.**
@@ -18,6 +18,6 @@ Reglas que no se negocian:
 Convenciones:
 - Hablar con el usuario en español. Código y comentarios en inglés.
 - Python 3.12 con `uv`. Los tests se lanzan con `uv run pytest`.
-- Las preguntas a Jev viven solo en `src/jevsignal/questions.py` y las constantes del estudio en
-  `src/jevsignal/config.py`.
+- Las preguntas al modelo viven solo en `src/decisionsignal/questions.py` y las constantes del estudio en
+  `src/decisionsignal/config.py`.
 - Al terminar una tarea relevante, actualizar el apartado "Dónde estamos" de `docs/HANDOFF.md`.

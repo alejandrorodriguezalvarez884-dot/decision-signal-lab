@@ -1,8 +1,7 @@
-"""Every question sent to Jev, in one place, so the design can be reviewed and frozen.
+"""Every question sent to the decision model, in one place, so the design can be reviewed and frozen.
 
-Questions are in English (Jev's primary training language) and written to be atomic and direct,
-following the TypeSafe guidance. Numbers are converted to words in code before Jev sees them
-(Jev is weak at numeric comparison), see ``describe_reaction``.
+Questions are in English and written to be atomic and direct. Numbers are converted to words in
+code before the model sees them, see ``describe_reaction``.
 
 Changing anything in this file after the pre-registration lock changes its hash, and the
 pipeline then refuses to score holdout events (see ``prereg.py``).
@@ -13,7 +12,7 @@ from __future__ import annotations
 import math
 
 # =========================================================================== variant: text only
-# State: {"press_release": <narrative text>}. Jev never sees prices here.
+# State: {"press_release": <narrative text>}. The model never sees prices here.
 TEXT_QUESTIONS: dict[str, dict] = {
     "is_earnings_release": {
         "type": "noul",
@@ -150,7 +149,7 @@ def _size_label(z: float) -> str:
 
 
 def describe_reaction(r0_abn: float, r0_z: float) -> str:
-    """Sentence describing the day-0 abnormal return, in words Jev handles well.
+    """Sentence describing the day-0 abnormal return, in words rather than bare numbers.
 
     ``r0_z`` scales the move by the stock's own pre-event volatility, so a 4% move reads as large
     for a utility and small for a volatile tech stock.

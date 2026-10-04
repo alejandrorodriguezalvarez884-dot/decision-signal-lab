@@ -188,6 +188,53 @@ wheels = [
 ]
 
 [[package]]
+name = "decisionsignal"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "exchange-calendars" },
+    { name = "httpx" },
+    { name = "lxml" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "pyarrow" },
+    { name = "pysentiment2" },
+    { name = "python-dotenv" },
+    { name = "scipy" },
+    { name = "statsmodels" },
+    { name = "tqdm" },
+    { name = "yfinance" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "exchange-calendars", specifier = ">=4.5" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "lxml", specifier = ">=5.2" },
+    { name = "matplotlib", specifier = ">=3.8" },
+    { name = "numpy", specifier = ">=1.26" },
+    { name = "pandas", specifier = ">=2.2" },
+    { name = "pyarrow", specifier = ">=15" },
+    { name = "pysentiment2", specifier = ">=0.1.1" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "scipy", specifier = ">=1.12" },
+    { name = "statsmodels", specifier = ">=0.14" },
+    { name = "tqdm", specifier = ">=4.66" },
+    { name = "yfinance", specifier = ">=0.2.40" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8" }]
+
+[[package]]
 name = "defusedxml"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -311,53 +358,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/28/5b/202a48a1ccdef721a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/d3/20a61a248feb1249cd81f83ce731f0bdf5170ed96a08a298f7081cda9e90/interface_meta-2.0.1-py3-none-any.whl", hash = "sha256:f38016bef9a4429b6d0792d809be7b65e9781820c674bf7f463999086b6e6323", size = 15330, upload-time = "2026-04-30T22:35:35.201Z" },
 ]
-
-[[package]]
-name = "jevsignal"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "exchange-calendars" },
-    { name = "httpx" },
-    { name = "lxml" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "pyarrow" },
-    { name = "pysentiment2" },
-    { name = "python-dotenv" },
-    { name = "scipy" },
-    { name = "statsmodels" },
-    { name = "tqdm" },
-    { name = "yfinance" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.12" },
-    { name = "exchange-calendars", specifier = ">=4.5" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "lxml", specifier = ">=5.2" },
-    { name = "matplotlib", specifier = ">=3.8" },
-    { name = "numpy", specifier = ">=1.26" },
-    { name = "pandas", specifier = ">=2.2" },
-    { name = "pyarrow", specifier = ">=15" },
-    { name = "pysentiment2", specifier = ">=0.1.1" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "scipy", specifier = ">=1.12" },
-    { name = "statsmodels", specifier = ">=0.14" },
-    { name = "tqdm", specifier = ">=4.66" },
-    { name = "yfinance", specifier = ">=0.2.40" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8" }]
 
 [[package]]
 name = "joblib"

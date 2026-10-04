@@ -7,11 +7,9 @@ información que el precio **todavía no** ha incorporado tras la reacción inic
 no un sistema de trading: aquí no hay código que envíe órdenes ni que se conecte a un broker, y
 todas las carteras son de papel.
 
-> **Modelo:** desde el 2026-10-04 el estudio se ejecuta solo sobre **Perplexity Decider v1 27B**
-> (`pplx-decider-v1-27b`, Decisions API de Perplexity), un modelo de decisión con el mismo formato
-> de preguntas que Jev (TypeSafe System One). El proyecto nació para Jev y conserva ese nombre
-> en el código y en estos documentos: donde pone "Jev" se entiende "Perplexity Decider". El
-> código ya no puede llamar a la API de TypeSafe.
+> **Modelo:** el estudio se ejecuta sobre **Perplexity Decider v1 27B** (`pplx-decider-v1-27b`,
+> Decisions API de Perplexity), un modelo de decisión: recibe un texto y preguntas tipadas y
+> devuelve probabilidades en lugar de texto. En estos documentos, "el modelo" es ese.
 
 ## Datos
 
@@ -47,19 +45,19 @@ cierre base ── publicación t ── [sesión día 0: reacción R0] ── n
 Los tests (`tests/test_events.py`) cubren los casos límite: comunicados antes de la apertura,
 durante la sesión, después del cierre y en fin de semana, y la media sesión de Acción de Gracias.
 
-## Qué hace Jev
+## Qué hace el modelo
 
 Por cada evento se hacen cinco variantes, cada una en una sola llamada con todas sus preguntas
-(definidas en `src/jevsignal/questions.py`):
+(definidas en `src/decisionsignal/questions.py`):
 
-| Variante | Qué ve Jev | Para qué |
+| Variante | Qué ve el modelo | Para qué |
 |---|---|---|
 | `text_raw` / `text_anon` | Solo el comunicado | Rasgos del texto: guidance, tono, demanda, márgenes, extraordinarios… |
 | `react_raw` / `react_anon` | Comunicado + frase con la reacción | **Juicio principal:** ¿la noticia es mejor o peor de lo que refleja el precio? |
 | `probe` | Empresa, fecha y reacción, **sin comunicado** | Sonda de memoria |
-| `cf_*` (submuestra) | Comunicado anonimizado + reacciones inventadas | ¿Usa Jev realmente la reacción? |
+| `cf_*` (submuestra) | Comunicado anonimizado + reacciones inventadas | ¿Usa el modelo realmente la reacción? |
 
-Jev razona mal con números y fechas (docs, "jaggedness"), así que el código traduce la reacción a
+Al modelo se le pregunta por lenguaje, no por aritmética, así que el código traduce la reacción a
 palabras ("cerró un 7.1 % por debajo del mercado: un movimiento negativo grande para lo habitual
 en esta acción"). Toda la aritmética se queda en el código.
 
@@ -68,14 +66,14 @@ El texto se limpia antes de enviarlo:
   contactos, "About X").
 - Se conservan las frases con cifras.
 - Se recorta a unos 24k caracteres (≈7k tokens). El límite de Perplexity Decider es de 262k
-  tokens por petición, muy por encima; el recorte se mantiene tal como se diseñó para Jev (32k).
+  tokens por petición, muy por encima; el recorte se eligió para dar al modelo solo la narrativa.
 
 ## Enfoques comparados
 
-- **A:** Jev ve el texto y la reacción y emite el veredicto directamente (`react_anon__nvr`).
-- **B:** Jev solo lee el texto. El código calcula la parte del tono que la reacción no explica
+- **A:** el modelo ve el texto y la reacción y emite el veredicto directamente (`react_anon__nvr`).
+- **B:** el modelo solo lee el texto. El código calcula la parte del tono que la reacción no explica
   (`text_anon__mismatch`).
-- **Sin Jev:** lo mismo con el diccionario LM (`base__lm_mismatch`), además de la continuación
+- **Sin modelo:** lo mismo con el diccionario LM (`base__lm_mismatch`), además de la continuación
   pura (PEAD), la reversión y el momentum.
 
 ## Estadística
@@ -99,7 +97,7 @@ modelo en Hugging Face); la fecha de corte de sus datos no está publicada.
 Como salió después de todo el periodo de holdout, pudo ver esos eventos al entrenarse. Hay tres
 defensas:
 1. El holdout más reciente posible. Los eventos posteriores a la fecha de lanzamiento del
-   modelo (`JEV_RELEASE_DATE`) se reportan aparte.
+   modelo (`DECIDER_RELEASE_DATE`) se reportan aparte.
 2. La anonimización del nombre, el ticker, las fechas y los años. La variante principal es la
    anonimizada.
 3. La sonda sin texto. Si predice retornos, el modelo recuerda.
@@ -111,10 +109,10 @@ defensas:
 - **Escala completa:** ~11k eventos × 5 variantes × ~7k tokens ≈ 300–400M tokens ≈ **$12–16**,
   más una submuestra contrafactual.
 - **Controles:**
-  - `jevsignal estimate` da el coste antes de gastar nada.
-  - `JEV_MAX_USD` es un tope duro: el cliente rechaza el lote si la estimación lo supera y se
+  - `decisionsignal estimate` da el coste antes de gastar nada.
+  - `DECIDER_MAX_USD` es un tope duro: el cliente rechaza el lote si la estimación lo supera y se
     detiene si el gasto real lo cruza.
-  - Toda respuesta se guarda en `data/cache/jev_cache.sqlite` y nunca se paga dos veces.
+  - Toda respuesta se guarda en `data/cache/decision_cache.sqlite` y nunca se paga dos veces.
 - **Versión del modelo:** fijada en el código en `pplx-decider-v1-27b`, el único modelo que
   sirve la Decisions API (no hay alias móvil ni otro proveedor configurable), para que no cambie
   a mitad del estudio.
@@ -129,11 +127,11 @@ defensas:
 - **Hora del 8-K, no del newswire:** la reacción puede empezar antes de la hora de EDGAR. Por
   diseño solo se opera después del día 0 completo, así que esto no introduce look-ahead.
 - **Sin consenso de analistas:** no hay "sorpresa" frente a estimaciones (los datos son de pago).
-  Jev y los baselines solo ven el texto y la reacción.
+  El modelo y los baselines solo ven el texto y la reacción.
 - **Anonimización parcial:** no oculta productos ni nombres de directivos.
 - **Sector por SIC:** es una aproximación gruesa a GICS.
 - **Licencia LM:** el diccionario Loughran-McDonald es gratuito para investigación, pero su uso
   comercial requiere licencia.
 - **Potencia:** solo se detectan IC de ≈ 0.06 o más (ver el pre-registro).
-- **Variabilidad del modelo:** las respuestas de Jev pueden variar algo entre llamadas idénticas.
+- **Variabilidad del modelo:** las respuestas del modelo pueden variar algo entre llamadas idénticas.
   La caché fija la respuesta usada, pero no mide esa variabilidad.

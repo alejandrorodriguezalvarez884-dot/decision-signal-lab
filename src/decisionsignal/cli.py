@@ -1,4 +1,4 @@
-"""Command line: `uv run jevsignal <step>`. Run `uv run jevsignal -h` for the list."""
+"""Command line: `uv run decisionsignal <step>`. Run `uv run decisionsignal -h` for the list."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ def _d(s: str) -> date:
 
 
 def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(prog="jevsignal", description=__doc__)
+    ap = argparse.ArgumentParser(prog="decisionsignal", description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("universe", help="point-in-time S&P 500 spells + CIK map")
@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--ciks", type=int, default=15)
     s.add_argument("--start", type=_d, default=date(2024, 7, 1))
     s.add_argument("--end", type=_d, default=date(2024, 12, 31))
-    s.add_argument("--skip-jev", action="store_true", help="stop before calling the API")
+    s.add_argument("--skip-model", action="store_true", help="stop before calling the API")
 
     a = ap.parse_args(argv)
     from . import pipeline as P
@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> None:
         P.step_prices(date.today())
         P.step_events()
         P.step_estimate("design", None, n_cf=10)
-        if a.skip_jev:
+        if a.skip_model:
             return
         P.step_score("design", None, n_cf=10)
         from .report import run

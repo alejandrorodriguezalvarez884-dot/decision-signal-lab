@@ -1,7 +1,7 @@
-"""Turn an EX-99 press-release HTML into the narrative text Jev reads.
+"""Turn an EX-99 press-release HTML into the narrative text the model reads.
 
-Jev is weak at numeric tables and degrades with irrelevant context (docs: "Jev 1.13
-jaggedness"), so the cleaner keeps the narrative (headline, highlights, management commentary,
+The model is asked about language, not arithmetic, and irrelevant context only adds noise and
+cost, so the cleaner keeps the narrative (headline, highlights, management commentary,
 outlook) and drops financial tables and legal boilerplate. Numbers inside sentences are kept:
 "revenue grew 12%" is language, a 40-row income statement is not.
 """

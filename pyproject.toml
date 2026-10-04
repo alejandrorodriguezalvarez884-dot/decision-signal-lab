@@ -1,5 +1,5 @@
 [project]
-name = "jevsignal"
+name = "decisionsignal"
 version = "0.1.0"
 description = "Research: do decision-model judgments (Perplexity Decider) on earnings releases predict post-reaction stock returns?"
 readme = "README.md"
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-jevsignal = "jevsignal.cli:main"
+decisionsignal = "decisionsignal.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8"]
@@ -32,7 +32,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/jevsignal"]
+packages = ["src/decisionsignal"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -12,7 +12,7 @@ from tqdm import tqdm
 from . import edgar
 from .config import PATHS, RESULTS, STUDY_START
 from .events import build_events, dedupe_quarterly
-from .jev import estimate_usd
+from .client import estimate_usd
 from .prices import build_prices
 from .score import CF_VARIANTS, MAIN_VARIANTS, build_payloads, counterfactual_sample, score_events
 from .text import looks_like_earnings_release, narrative_text

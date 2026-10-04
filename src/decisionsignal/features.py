@@ -1,4 +1,4 @@
-"""Turn Jev's long-form answers into one row of numeric signals per event.
+"""Turn the model's long-form answers into one row of numeric signals per event.
 
 Sign convention for every *signal*: higher value = expect HIGHER forward abnormal return.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-# Guidance option -> direction. Expected value under Jev's probabilities.
+# Guidance option -> direction. Expected value under the model's probabilities.
 GUIDANCE_DIRECTION = {
     "raised": 1.0,
     "lowered": -1.0,
@@ -68,7 +68,7 @@ def add_derived(w: pd.DataFrame) -> pd.DataFrame:
 
 
 def event_signals(panel: pd.DataFrame) -> pd.DataFrame:
-    """Signals that combine Jev answers with event data (reaction). Panel = events + features."""
+    """Signals that combine model answers with event data (reaction). Panel = events + features."""
     p = panel.copy()
     design = p["split"] == "design"
     for v in ("react_raw", "react_anon"):

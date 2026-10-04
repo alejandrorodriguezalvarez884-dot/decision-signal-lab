@@ -143,7 +143,7 @@ def holm(pvals: dict[str, float]) -> dict[str, float]:
 
 
 def sensitivity_to_reaction(features: pd.DataFrame) -> dict:
-    """Does Jev's verdict move when only the reaction changes? It should fall as the move rises."""
+    """Does the model's verdict move when only the reaction changes? It should fall as the move rises."""
     cols = ["cf_strong_neg__nvr", "cf_flat__nvr", "cf_strong_pos__nvr"]
     if not all(c in features for c in cols):
         return {}

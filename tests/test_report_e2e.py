@@ -6,10 +6,10 @@ import json
 import numpy as np
 import pandas as pd
 
-from jevsignal import questions as Q
-from jevsignal import report
-from jevsignal.config import PATHS
-from jevsignal.score import CF_VARIANTS, MAIN_VARIANTS, flatten_answer
+from decisionsignal import questions as Q
+from decisionsignal import report
+from decisionsignal.config import PATHS
+from decisionsignal.score import CF_VARIANTS, MAIN_VARIANTS, flatten_answer
 
 TEXT = "The Company reported third quarter results. Revenue grew strongly and we raised our outlook."
 

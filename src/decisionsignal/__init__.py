@@ -1,4 +1,4 @@
-"""Research pipeline: Jev judgments on earnings releases vs. post-reaction stock returns.
+"""Research pipeline: decision-model judgments on earnings releases vs. post-reaction stock returns.
 
 This package never places orders or connects to a broker. All portfolios are on paper.
 """

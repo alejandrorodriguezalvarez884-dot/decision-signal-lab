@@ -1,4 +1,4 @@
-"""Pre-registration lock: freeze the design before any holdout event is sent to Jev.
+"""Pre-registration lock: freeze the design before any holdout event is sent to the model.
 
 ``lock()`` hashes the files that define the questions, signals and primary test. Holdout scoring
 and holdout analysis call ``assert_locked()``, which fails if any of those files changed since.
@@ -16,9 +16,9 @@ from datetime import datetime, timezone
 from .config import DOCS, PATHS, ROOT
 
 LOCKED_FILES = (
-    "src/jevsignal/questions.py",
-    "src/jevsignal/features.py",
-    "src/jevsignal/config.py",
+    "src/decisionsignal/questions.py",
+    "src/decisionsignal/features.py",
+    "src/decisionsignal/config.py",
     "docs/PREREGISTRATION.md",
 )
 
@@ -57,7 +57,7 @@ def is_locked() -> bool:
 def assert_locked() -> None:
     if not is_locked():
         raise RuntimeError(
-            "Holdout is sealed: run `jevsignal lock` (after finalizing questions on the design "
+            "Holdout is sealed: run `decisionsignal lock` (after finalizing questions on the design "
             "split and committing docs/PREREGISTRATION.md) before touching holdout events."
         )
     locked = json.loads(PATHS.lock.read_text())["files"]

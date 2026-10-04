@@ -1,7 +1,7 @@
-from jevsignal.anonymize import anonymize, name_variants
-from jevsignal.edgar import parse_index_page
-from jevsignal.questions import describe_reaction
-from jevsignal.text import looks_like_earnings_release, narrative_text
+from decisionsignal.anonymize import anonymize, name_variants
+from decisionsignal.edgar import parse_index_page
+from decisionsignal.questions import describe_reaction
+from decisionsignal.text import looks_like_earnings_release, narrative_text
 
 RELEASE = """
 <html><body>

@@ -3,9 +3,9 @@ import dataclasses
 import pandas as pd
 import pytest
 
-from jevsignal import prereg
-from jevsignal.config import PATHS
-from jevsignal.score import score_events
+from decisionsignal import prereg
+from decisionsignal.config import PATHS
+from decisionsignal.score import score_events
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def tmp_lock(tmp_path, monkeypatch):
 
 
 def test_holdout_sealed_without_lock(tmp_lock, monkeypatch):
-    monkeypatch.setattr("jevsignal.score.assert_locked", prereg.assert_locked)
+    monkeypatch.setattr("decisionsignal.score.assert_locked", prereg.assert_locked)
     ev = pd.DataFrame({"split": ["holdout"]})
     with pytest.raises(RuntimeError, match="sealed"):
         score_events(ev, ("text_raw",), client=object())

@@ -9,7 +9,7 @@ For a release accepted by EDGAR at time ``t`` (US Eastern):
                      full day-0 reaction is known; no price at or before day-0 close is "traded")
     forward h      = close(entry + h - 1) / open(entry) - 1, minus the benchmark over the same window
 
-Everything used to describe the event to Jev (R0, its size relative to the stock's normal
+Everything used to describe the event to the model (R0, its size relative to the stock's normal
 volatility, momentum) ends at day-0 close, strictly before entry.
 """
 

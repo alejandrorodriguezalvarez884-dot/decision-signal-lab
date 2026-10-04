@@ -1,6 +1,6 @@
-"""Mask identity and calendar cues so Jev cannot look up what happened next from memory.
+"""Mask identity and calendar cues so the model cannot look up what happened next from memory.
 
-Jev is built on a pretrained language model with an undisclosed knowledge cutoff, so for older
+The model is built on a pretrained language model with an undisclosed knowledge cutoff, so for older
 events it may "remember" the stock's subsequent path. If the raw text predicts returns much better
 than the masked text in the older period, memorization (not reading) is the likely source.
 

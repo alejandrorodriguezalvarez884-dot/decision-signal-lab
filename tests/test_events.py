@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from jevsignal.events import build_events, locate_sessions, nyse_schedule
+from decisionsignal.events import build_events, locate_sessions, nyse_schedule
 
 NY = "America/New_York"
 

@@ -7,10 +7,10 @@ import pandas as pd
 
 from . import questions as Q
 from .anonymize import anonymize
-from .jev import JevClient, payload
+from .client import DecisionClient, payload
 from .prereg import assert_locked
 
-# Variant name -> what Jev sees.
+# Variant name -> what the model sees.
 #   text_raw / text_anon       press release only (raw or identity-masked)
 #   react_raw / react_anon     press release + day-0 reaction sentence     <- react_anon is PRIMARY
 #   probe                      company, date and reaction, NO press release (memorization probe)
@@ -76,10 +76,10 @@ def flatten_answer(accession: str, variant: str, resp: dict) -> list[dict]:
     return rows
 
 
-def score_events(events: pd.DataFrame, variants: tuple[str, ...], client: JevClient | None = None) -> pd.DataFrame:
+def score_events(events: pd.DataFrame, variants: tuple[str, ...], client: DecisionClient | None = None) -> pd.DataFrame:
     if (events["split"] == "holdout").any():
         assert_locked()
-    client = client or JevClient()
+    client = client or DecisionClient()
     triples = build_payloads(events, variants)
     responses = client.call_many([p for _, _, p in triples], desc=f"Decider {'/'.join(variants)}")
     rows = []

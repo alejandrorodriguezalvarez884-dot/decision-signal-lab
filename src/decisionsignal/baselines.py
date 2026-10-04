@@ -1,4 +1,4 @@
-"""Signals that do not use Jev. Jev only earns credit for what it adds beyond these.
+"""Signals that do not use the decision model. The model only earns credit for what it adds beyond these.
 
 Loughran-McDonald dictionary: free for academic research; commercial use needs a license from
 the authors (relevant if this becomes a product; see docs/METHODOLOGY.md).
@@ -35,7 +35,7 @@ def add_baselines(panel: pd.DataFrame) -> pd.DataFrame:
     p["base__continuation"] = p["r0_z"]
     # Short-term reversal of the day-0 move.
     p["base__reversal"] = -p["r0_z"]
-    # Approach B without Jev: dictionary tone not explained by the reaction.
+    # Approach B without the model: dictionary tone not explained by the reaction.
     p["base__lm_mismatch"] = mismatch_signal(p["base__lm_tone"], p["r0_z"], design)
     p["base__momentum"] = p["momentum"]
     return p

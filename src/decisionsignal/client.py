@@ -50,7 +50,7 @@ def estimate_usd(payloads: list[dict]) -> float:
 
 
 class Cache:
-    def __init__(self, path=PATHS.jev_cache):
+    def __init__(self, path=PATHS.decision_cache):
         self._lock = threading.Lock()
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.execute(
@@ -109,7 +109,7 @@ class Spend:
         self.check()
 
 
-class JevClient:
+class DecisionClient:
     def __init__(self, cache: Cache | None = None, transport: httpx.BaseTransport | None = None,
                  cap_usd: float | None = None, api_key: str | None = None):
         self.cache = cache or Cache()
@@ -156,14 +156,14 @@ class JevClient:
             return data
         return {"error": "retries_exhausted"}
 
-    def call_many(self, payloads: list[dict], desc: str = "Jev") -> list[dict]:
+    def call_many(self, payloads: list[dict], desc: str = "Decider") -> list[dict]:
         todo = [p for p in payloads if self.cache.get(request_key(p)) is None]
         est = estimate_usd(todo)
         print(f"{desc}: {len(payloads)} requests, {len(todo)} not cached, estimated ${est:.4f} "
               f"(cap ${self.spend.cap_usd:.2f})")
         if est > self.spend.cap_usd:
             raise BudgetExceeded(
-                f"estimated ${est:.4f} exceeds JEV_MAX_USD=${self.spend.cap_usd:.2f}; raise the cap "
+                f"estimated ${est:.4f} exceeds DECIDER_MAX_USD=${self.spend.cap_usd:.2f}; raise the cap "
                 "explicitly after approving the cost"
             )
         results: list[dict | None] = [None] * len(payloads)

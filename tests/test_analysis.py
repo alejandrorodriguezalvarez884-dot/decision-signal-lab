@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from jevsignal import analysis as A
+from decisionsignal import analysis as A
 
 
 def _panel(beta: float, n_weeks=120, per_week=25, seed=0):

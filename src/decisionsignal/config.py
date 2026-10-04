@@ -95,12 +95,12 @@ def perplexity_api_key() -> str:
 def model_release_date() -> date | None:
     """Release date of the pinned model (from its model card); events after it are reported
     separately because the model cannot have seen their outcomes."""
-    v = os.environ.get("JEV_RELEASE_DATE", "").strip()
+    v = os.environ.get("DECIDER_RELEASE_DATE", "").strip()
     return date.fromisoformat(v) if v else None
 
 
 def max_usd() -> float:
-    return float(os.environ.get("JEV_MAX_USD", "1.00"))
+    return float(os.environ.get("DECIDER_MAX_USD", "1.00"))
 
 
 # --------------------------------------------------------------------------- SEC
@@ -112,7 +112,7 @@ def sec_user_agent() -> str:
     if not ua or "@" not in ua:
         raise RuntimeError(
             "SEC_USER_AGENT is not set. EDGAR requires a descriptive User-Agent with a contact "
-            "email, e.g. 'JevSignalDecisor research you@example.com'. Set it in .env."
+            "email, e.g. 'DecisionSignalLab research you@example.com'. Set it in .env."
         )
     return ua
 
@@ -128,7 +128,7 @@ class Paths:
     events: Path = INTERIM / "events.parquet"
     answers: Path = INTERIM / "answers.parquet"
     features: Path = INTERIM / "features.parquet"
-    jev_cache: Path = CACHE / "jev_cache.sqlite"
+    decision_cache: Path = CACHE / "decision_cache.sqlite"
     http_cache: Path = CACHE / "http"
     lock: Path = DOCS / "PREREGISTRATION.lock.json"
 

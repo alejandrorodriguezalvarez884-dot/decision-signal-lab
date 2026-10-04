@@ -1,14 +1,12 @@
-# JevSignalDecisor
+# DecisionSignalLab
 
 Proyecto de investigación. Pregunta: **cuando sale un comunicado de resultados y el precio ya ha
 reaccionado, ¿sabe un modelo de decisión si la noticia es mejor o peor de lo que esa reacción
 descuenta?** Si lo sabe, su juicio debería predecir el retorno anormal de las semanas siguientes.
 
-> **Modelo:** desde el 2026-10-04 el estudio se ejecuta solo sobre **Perplexity Decider v1 27B**
-> (`pplx-decider-v1-27b`, Decisions API de Perplexity), un modelo de decisión con el mismo formato
-> de preguntas que Jev (TypeSafe System One). El proyecto nació para Jev y conserva ese nombre
-> en el código y en estos documentos: donde pone "Jev" se entiende "Perplexity Decider". El
-> código ya no puede llamar a la API de TypeSafe.
+> **Modelo:** el estudio se ejecuta sobre **Perplexity Decider v1 27B** (`pplx-decider-v1-27b`,
+> Decisions API de Perplexity), un modelo de decisión: recibe un texto y preguntas tipadas y
+> devuelve probabilidades en lugar de texto. En estos documentos, "el modelo" es ese.
 
 Si el resultado es "no hay señal", se dirá así.
 
@@ -21,9 +19,9 @@ Si el resultado es "no hay señal", se dirá así.
    2021, sacados de EDGAR con su hora exacta de aceptación.
 2. **Reacción:** retorno anormal del día 0 (primera sesión completa tras la publicación) frente
    a SPY, escalado por la volatilidad normal de la acción.
-3. **Jev:** lee el comunicado (anonimizado) y una frase con la reacción, y responde preguntas
+3. **Modelo de decisión:** lee el comunicado (anonimizado) y una frase con la reacción, y responde preguntas
    tipadas. La principal es *¿la noticia es mejor, igual o peor de lo que la reacción implica?*
-   Todas las preguntas están en [`src/jevsignal/questions.py`](src/jevsignal/questions.py).
+   Todas las preguntas están en [`src/decisionsignal/questions.py`](src/decisionsignal/questions.py).
 4. **Retorno a predecir:** desde la apertura del día siguiente al día 0 hasta 1, 5, 20 o 60
    sesiones, menos SPY.
 5. **Evaluación:** IC semanal, placebo, quintiles y regresión incremental frente a baselines
@@ -50,25 +48,25 @@ Las claves solo viven en `.env`, que git ignora, o en variables de entorno. Nunc
 ## Uso
 
 ```bash
-uv run jevsignal pilot --skip-jev       # piloto con datos reales sin llamar al modelo (~30 eventos de 2024 S2)
-uv run jevsignal pilot                  # piloto completo (< $0.10 de API)
+uv run decisionsignal pilot --skip-model   # piloto con datos reales sin llamar al modelo (~30 eventos de 2024 S2)
+uv run decisionsignal pilot                # piloto completo (< $0.10 de API)
 ```
 
 Escala completa, paso a paso (cada paso escribe en `data/interim/` y se puede repetir):
 
 ```bash
-uv run jevsignal universe
-uv run jevsignal filings                # ~1-2 GB de EDGAR en caché, a <= 8 peticiones/s
-uv run jevsignal texts
-uv run jevsignal prices
-uv run jevsignal events
-uv run jevsignal estimate --split design --n-cf 300   # coste ANTES de gastar
-uv run jevsignal score    --split design --n-cf 300   # respeta el tope JEV_MAX_USD
-uv run jevsignal report                                # solo diseño (exploratorio)
+uv run decisionsignal universe
+uv run decisionsignal filings              # ~1-2 GB de EDGAR en caché, a <= 8 peticiones/s
+uv run decisionsignal texts
+uv run decisionsignal prices
+uv run decisionsignal events
+uv run decisionsignal estimate --split design --n-cf 300   # coste ANTES de gastar
+uv run decisionsignal score    --split design --n-cf 300   # respeta el tope DECIDER_MAX_USD
+uv run decisionsignal report                                # solo diseño (exploratorio)
 # afinar preguntas en el split de diseño -> cerrar docs/PREREGISTRATION.md -> commit
-uv run jevsignal lock
-uv run jevsignal score  --split holdout
-uv run jevsignal report --holdout                      # resultado confirmatorio, una sola vez
+uv run decisionsignal lock
+uv run decisionsignal score  --split holdout
+uv run decisionsignal report --holdout                      # resultado confirmatorio, una sola vez
 ```
 
 Los resultados van a `results/`: `report.md`, `results.json`, figuras e informes de cobertura.
@@ -76,7 +74,7 @@ Los resultados van a `results/`: `report.md`, `results.json`, figuras e informes
 ## Estructura
 
 ```
-src/jevsignal/
+src/decisionsignal/
   config.py      constantes del estudio (fechas, horizontes, precios, límites)
   universe.py    S&P 500 en cada fecha + CIK
   edgar.py       8-K Item 2.02, hora de aceptación, EX-99
@@ -84,11 +82,11 @@ src/jevsignal/
   anonymize.py   oculta empresa, ticker y fechas
   prices.py      precios diarios ajustados
   events.py      cronología del evento, reacción y retornos (cero look-ahead)
-  questions.py   TODAS las preguntas a Jev + traducción de números a palabras
-  jev.py         cliente HTTP de Perplexity Decider con caché permanente y tope de gasto
+  questions.py   TODAS las preguntas al modelo + traducción de números a palabras
+  client.py      cliente HTTP de Perplexity Decider con caché permanente y tope de gasto
   score.py       variantes de petición por evento
   features.py    respuestas -> señales
-  baselines.py   señales sin Jev
+  baselines.py   señales sin el modelo
   analysis.py    estadística
   prereg.py      sello del holdout
   report.py      informe
