@@ -2,10 +2,16 @@
 
 ## Objetivo
 
-Averiguar si Jev (TypeSafe, modelo "System One") extrae del texto de un comunicado de resultados
+Averiguar si un modelo de decisión extrae del texto de un comunicado de resultados
 información que el precio **todavía no** ha incorporado tras la reacción inicial. Es investigación,
 no un sistema de trading: aquí no hay código que envíe órdenes ni que se conecte a un broker, y
 todas las carteras son de papel.
+
+> **Modelo:** desde el 2026-10-04 el estudio se ejecuta solo sobre **Perplexity Decider v1 27B**
+> (`pplx-decider-v1-27b`, Decisions API de Perplexity), un modelo de decisión con el mismo formato
+> de preguntas que Jev (TypeSafe System One). El proyecto nació para Jev y conserva ese nombre
+> en el código y en estos documentos: donde pone "Jev" se entiende "Perplexity Decider". El
+> código ya no puede llamar a la API de TypeSafe.
 
 ## Datos
 
@@ -61,8 +67,8 @@ El texto se limpia antes de enviarlo:
 - Se quitan las tablas financieras y el texto legal (forward-looking statements, non-GAAP,
   contactos, "About X").
 - Se conservan las frases con cifras.
-- Se recorta a unos 24k caracteres (≈7k tokens). El límite de Jev es 32k tokens para el estado
-  más la pregunta más larga.
+- Se recorta a unos 24k caracteres (≈7k tokens). El límite de Perplexity Decider es de 262k
+  tokens por petición, muy por encima; el recorte se mantiene tal como se diseñó para Jev (32k).
 
 ## Enfoques comparados
 
@@ -88,25 +94,29 @@ Todo está detallado en `docs/PREREGISTRATION.md`.
 
 ## Contaminación por entrenamiento
 
-Jev se construye sobre un modelo preentrenado cuya fecha de corte no está publicada. Hay tres
+Perplexity Decider v1 27B es un ajuste fino de Qwen3.8-27B publicado el 2026-10-01 (ficha del
+modelo en Hugging Face); la fecha de corte de sus datos no está publicada.
+Como salió después de todo el periodo de holdout, pudo ver esos eventos al entrenarse. Hay tres
 defensas:
-1. El holdout más reciente posible. `jevsignal models` da la fecha de lanzamiento de la versión
-   fijada, y los eventos posteriores a ella se reportan aparte.
+1. El holdout más reciente posible. Los eventos posteriores a la fecha de lanzamiento del
+   modelo (`JEV_RELEASE_DATE`) se reportan aparte.
 2. La anonimización del nombre, el ticker, las fechas y los años. La variante principal es la
    anonimizada.
 3. La sonda sin texto. Si predice retornos, el modelo recuerda.
 
 ## Coste y control de gasto
 
-- **Precio:** $0.042 por millón de tokens de entrada; la salida no se cobra (docs, 2026-10).
-- **Escala completa:** ~11k eventos × 5 variantes × ~7k tokens ≈ 300–400M tokens ≈ **$13–17**,
+- **Precio:** $0.04 por millón de tokens de entrada; la salida no se cobra (docs de Perplexity,
+  2026-10).
+- **Escala completa:** ~11k eventos × 5 variantes × ~7k tokens ≈ 300–400M tokens ≈ **$12–16**,
   más una submuestra contrafactual.
 - **Controles:**
   - `jevsignal estimate` da el coste antes de gastar nada.
   - `JEV_MAX_USD` es un tope duro: el cliente rechaza el lote si la estimación lo supera y se
     detiene si el gasto real lo cruza.
   - Toda respuesta se guarda en `data/cache/jev_cache.sqlite` y nunca se paga dos veces.
-- **Versión del modelo:** fijada en `jev-1.13.0`, no el alias `jev-latest`, para que no cambie
+- **Versión del modelo:** fijada en el código en `pplx-decider-v1-27b`, el único modelo que
+  sirve la Decisions API (no hay alias móvil ni otro proveedor configurable), para que no cambie
   a mitad del estudio.
 
 ## Limitaciones conocidas

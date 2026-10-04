@@ -33,12 +33,11 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("events", help="event timing, day-0 reaction, forward returns")
 
     for name in ("estimate", "score"):
-        s = sub.add_parser(name, help="estimate cost" if name == "estimate" else "call Jev (cached)")
+        s = sub.add_parser(name, help="estimate cost" if name == "estimate" else "call the decision model (cached)")
         s.add_argument("--split", choices=["design", "holdout", "all"], default="design")
         s.add_argument("--limit", type=int, help="first N events only")
         s.add_argument("--n-cf", type=int, default=0, help="events for the counterfactual-reaction check")
 
-    sub.add_parser("models", help="list Jev models and release dates")
     sub.add_parser("lock", help="freeze questions/signals before touching the holdout")
     s = sub.add_parser("report", help="run statistics and write results/")
     s.add_argument("--holdout", action="store_true", help="include holdout (requires lock)")
@@ -66,9 +65,6 @@ def main(argv: list[str] | None = None) -> None:
         P.step_estimate(a.split, a.limit, a.n_cf)
     elif a.cmd == "score":
         P.step_score(a.split, a.limit, a.n_cf)
-    elif a.cmd == "models":
-        from .jev import JevClient
-        print(json.dumps(JevClient().list_models(), indent=2))
     elif a.cmd == "lock":
         from .prereg import lock
         print(json.dumps(lock(), indent=2))

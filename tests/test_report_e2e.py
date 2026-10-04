@@ -28,7 +28,7 @@ def _fake_response(qs: dict, rng) -> dict:
             else:
                 a["score"] = float(sum(i * pi for i, pi in enumerate(p)))
             ans[qid] = a
-    return {"model": "jev-1.13.0", "answers": ans, "usage": {"input_tokens": 100}}
+    return {"model": "pplx-decider-v1-27b", "answers": ans, "usage": {"input_tokens": 100}}
 
 
 def test_report_runs_end_to_end(tmp_path, monkeypatch):

@@ -8,8 +8,8 @@ Reglas que no se negocian:
   no se usa ningún conector de broker (IBKR u otro), ni siquiera para descargar precios.
 - **Cero look-ahead.** Cualquier cambio en `events.py` se acompaña de su test en
   `tests/test_events.py`.
-- **Antes de gastar en la API de Jev o de descargar volúmenes grandes,** se pide permiso al
-  usuario con una estimación (`uv run jevsignal estimate …`).
+- **Antes de gastar en la API de Perplexity o de descargar volúmenes grandes,**
+  se pide permiso al usuario con una estimación (`uv run jevsignal estimate …`).
 - **El holdout (eventos desde 2025-01-01) está sellado** hasta `jevsignal lock`. No se ajustan
   preguntas mirando el holdout.
 - **Claves solo en `.env` o en el entorno.** Nunca en el repo, en logs ni en commits.

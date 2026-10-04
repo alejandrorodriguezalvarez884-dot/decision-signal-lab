@@ -1,7 +1,7 @@
 [project]
 name = "jevsignal"
 version = "0.1.0"
-description = "Research: do Jev (TypeSafe System One) judgments on earnings releases predict post-reaction stock returns?"
+description = "Research: do decision-model judgments (Perplexity Decider) on earnings releases predict post-reaction stock returns?"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [

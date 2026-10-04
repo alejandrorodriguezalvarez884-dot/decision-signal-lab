@@ -1,6 +1,6 @@
 # Estado del proyecto y cómo continuar
 
-Última actualización: 2026-10-02. Este documento basta para retomar el trabajo en otro
+Última actualización: 2026-10-04. Este documento basta para retomar el trabajo en otro
 ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 1. Qué se pidió (resumen del encargo)
@@ -13,6 +13,11 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   principal es "¿la noticia es mejor o peor de lo que implica la reacción del día 0?".
 - **Fin último:** que la investigación respalde después un producto usable y publicable en
   internet.
+- **Cambio de modelo (2026-10-04):** el pago de créditos en TypeSafe no funcionó, así que el
+  estudio pasa a **Perplexity Decider v1 27B** (`pplx-decider-v1-27b`), un modelo de decisión
+  con el mismo formato de preguntas y respuestas. En este documento "Jev" designa a Perplexity
+  Decider. Por decisión del usuario el proveedor **no es configurable**: el código solo llama a
+  Perplexity y ya no puede llamar a TypeSafe.
 
 ### Reglas no negociables
 
@@ -34,18 +39,23 @@ inglés.
 | Hecho | Pendiente |
 |---|---|
 | Pipeline completo (`src/jevsignal/`), CLI `jevsignal` | Validar el parser de EDGAR con filings **reales** |
-| 28 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Jev simulado, estadística y e2e sintético | Primera llamada real a Jev: confirmar el formato de respuesta y el `usage` |
+| 33 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Perplexity simulado, estadística y e2e sintético | Primera llamada real a Perplexity: confirmar el formato de respuesta y el `usage` (los tests usan el ejemplo de su documentación) |
 | Descarga de precios (yfinance) probada con datos reales | Piloto con datos reales (~30 eventos de 2024 S2) |
 | Pre-registro **en borrador** (`docs/PREREGISTRATION.md`) | Ajustar preguntas en el split de diseño, cerrar el pre-registro y `jevsignal lock` |
 | Repo en GitHub: `alejandrorodriguezalvarez884-dot/jev-signal-lab` | Escala completa: requiere **aprobación de coste** del usuario |
+| Cliente adaptado a Perplexity Decider (único proveedor, fijado en `config.py`) | |
 
 ### Lo que falta que aporte el usuario
 
-- `TYPESAFE_API_KEY`, la clave de Jev.
-- `SEC_USER_AGENT`, un texto con email de contacto, p. ej. `JevSignalDecisor research tu@email.com`.
-  Hay que confirmar qué email usar.
-- ¿Email de los commits? Ahora mismo se usa la configuración global de git del portátil de
-  trabajo (email de Solera). Falta saber si el usuario prefiere su gmail en este repo.
+- `PERPLEXITY_API_KEY`, la clave de la API de Perplexity (https://console.perplexity.ai/project/keys).
+  Requiere saldo de API en Perplexity.
+- `JEV_RELEASE_DATE` en `.env`. Para `pplx-decider-v1-27b` es 2026-10-01 (fecha de publicación de
+  su ficha en Hugging Face); falta que el usuario la confirme y la anote.
+- `SEC_USER_AGENT` ya está en el `.env` del Mac personal, con el gmail del usuario. En otro
+  equipo hay que volver a ponerlo.
+- ¿Email de los commits? Los dos primeros commits llevan el email de Solera (configuración
+  global del portátil de trabajo). En el Mac personal el repo usa la dirección `noreply` de la
+  cuenta de GitHub (configuración local del repo). Falta que el usuario confirme si lo prefiere así.
 
 ## 3. Puesta en marcha en un ordenador nuevo
 
@@ -53,7 +63,7 @@ inglés.
 git clone git@github.com:alejandrorodriguezalvarez884-dot/jev-signal-lab.git
 cd jev-signal-lab
 uv sync                 # instala Python 3.12 y las dependencias desde uv.lock
-cp .env.example .env    # rellenar TYPESAFE_API_KEY, SEC_USER_AGENT (y JEV_MAX_USD)
+cp .env.example .env    # rellenar PERPLEXITY_API_KEY, SEC_USER_AGENT (y JEV_MAX_USD)
 uv run pytest           # debe salir todo en verde
 ```
 
@@ -87,18 +97,19 @@ uv run pytest           # debe salir todo en verde
    ```bash
    uv run jevsignal pilot
    ```
-   Hay que revisar en `data/interim/answers.parquet` que no hay errores 422 y que las
-   probabilidades tienen sentido. Con unos 30 eventos la estadística **no significa nada**: solo
+   Hay que revisar en `data/interim/answers.parquet` que no hay filas con `error` (Perplexity
+   rechaza una petición mal formada con 400) y que las probabilidades tienen sentido. Con unos 30 eventos la estadística **no significa nada**: solo
    valida el pipeline.
-3. Anotar en `.env` la fecha de lanzamiento del modelo, que da `uv run jevsignal models`, como
-   `JEV_RELEASE_DATE`.
+3. Anotar en `.env` la fecha de lanzamiento del modelo como `JEV_RELEASE_DATE`. Sale de la
+   ficha del modelo en Hugging Face; el comando `jevsignal models` ya no existe porque
+   Perplexity no tiene endpoint de modelos.
 4. **Escala completa del split de diseño (2021–2024):**
    1. `universe`, `filings`, `texts`, `prices`, `events`.
    2. `uv run jevsignal estimate --split design --n-cf 300`.
    3. **Enseñar la estimación al usuario y esperar su aprobación.**
    4. Subir `JEV_MAX_USD` a lo aprobado y lanzar `score --split design --n-cf 300`.
    5. `report`.
-   - Coste esperado de todo el estudio: unos $13–17 de Jev y 1–2 GB de EDGAR. La descarga de
+   - Coste esperado de todo el estudio: unos $12–16 de API y 1–2 GB de EDGAR. La descarga de
      EDGAR también requiere el visto bueno del usuario.
 5. Iterar las preguntas **solo** con datos del split de diseño. Después:
    1. Cerrar `docs/PREREGISTRATION.md` (quitar "BORRADOR").
@@ -124,7 +135,7 @@ Detalle completo en [METHODOLOGY.md](METHODOLOGY.md).
   - Todo lo que ve Jev termina en el cierre del día 0.
 - **Universo:** S&P 500 histórico (fja05680/sp500, licencia MIT). Riesgo de supervivencia:
   medido, no eliminado.
-- **Modelo:** fijado en `jev-1.13.0`, nunca el alias `jev-latest`.
+- **Modelo:** fijado en `pplx-decider-v1-27b` (Perplexity), sin alternativa configurable.
 - **Señal principal:** `react_anon__nvr` = P(better) − P(worse), con texto anonimizado más la
   reacción, frente a `fwd_abn_20`.
 - **Enfoque A frente a B:**

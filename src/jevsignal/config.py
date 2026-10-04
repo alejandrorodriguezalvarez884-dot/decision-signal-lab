@@ -70,22 +70,30 @@ SIC_TO_SECTOR_ETF: tuple[tuple[int, int, str], ...] = (
     (7000, 8999, "XLY"),  # services
 )
 
-# --------------------------------------------------------------------------- Jev
-JEV_URL = "https://api.typesafe.ai/v1/systemone"
-JEV_MODELS_URL = "https://api.typesafe.ai/v1/models"
-# Pinned on purpose: the alias jev-latest can move mid-study and change answers.
-JEV_MODEL = os.environ.get("JEV_MODEL", "jev-1.13.0")
-# USD per input token (output tokens are free). Source: docs.typesafe.ai/models, 2026-10.
-JEV_PRICE_PER_INPUT_TOKEN = 0.042 / 1_000_000
-# Docs: 32k tokens for state + longest question. Keep a wide margin; tokens estimated as chars/3.5.
+# --------------------------------------------------------------------------- decision model
+# Perplexity Decisions API. Source for the numbers below: docs.perplexity.ai/docs/decisions/quickstart,
+# 2026-10.
+DECIDER_URL = "https://api.perplexity.ai/v1/decisions"
+# The only model the Decisions API serves; there is no moving alias.
+DECIDER_MODEL = "pplx-decider-v1-27b"
+# USD per input token (output tokens are free).
+DECIDER_PRICE_PER_INPUT_TOKEN = 0.04 / 1_000_000
+# Docs: under 262,144 input tokens per request. Keep a wide margin; tokens estimated as chars/3.5.
 MAX_STATE_CHARS = 60_000
 CHARS_PER_TOKEN_ESTIMATE = 3.5
-JEV_CONCURRENCY = 8
-JEV_MAX_RPS = 30  # documented limit is 40 rps; stay below it
+DECIDER_CONCURRENCY = 8
+DECIDER_MAX_RPS = 8  # documented limit is 10 rps per organization; stay below it
+
+
+def perplexity_api_key() -> str:
+    key = os.environ.get("PERPLEXITY_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("PERPLEXITY_API_KEY is not set. Put it in .env or export it.")
+    return key
 
 
 def model_release_date() -> date | None:
-    """Release date of the pinned model (from `jevsignal models`); events after it are reported
+    """Release date of the pinned model (from its model card); events after it are reported
     separately because the model cannot have seen their outcomes."""
     v = os.environ.get("JEV_RELEASE_DATE", "").strip()
     return date.fromisoformat(v) if v else None
@@ -107,13 +115,6 @@ def sec_user_agent() -> str:
             "email, e.g. 'JevSignalDecisor research you@example.com'. Set it in .env."
         )
     return ua
-
-
-def typesafe_api_key() -> str:
-    key = os.environ.get("TYPESAFE_API_KEY", "").strip()
-    if not key:
-        raise RuntimeError("TYPESAFE_API_KEY is not set. Put it in .env or export it.")
-    return key
 
 
 @dataclass(frozen=True)

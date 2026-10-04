@@ -1,4 +1,4 @@
-"""Build Jev requests for each event and variant, call the API, and store answers in long form."""
+"""Build decision-model requests for each event and variant, call the API, and store answers in long form."""
 
 from __future__ import annotations
 
@@ -81,7 +81,7 @@ def score_events(events: pd.DataFrame, variants: tuple[str, ...], client: JevCli
         assert_locked()
     client = client or JevClient()
     triples = build_payloads(events, variants)
-    responses = client.call_many([p for _, _, p in triples], desc=f"Jev {'/'.join(variants)}")
+    responses = client.call_many([p for _, _, p in triples], desc=f"Decider {'/'.join(variants)}")
     rows = []
     for (acc, v, _), resp in zip(triples, responses):
         rows.extend(flatten_answer(acc, v, resp))

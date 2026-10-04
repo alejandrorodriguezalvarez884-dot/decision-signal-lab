@@ -12,6 +12,15 @@ S&P 500 en el momento del evento. Una vez conocida la reacción del precio en la
 (día 0), ¿sabe Jev decir si la noticia es mejor o peor de lo que esa reacción descuenta?
 Si lo sabe, su juicio debería predecir el retorno anormal posterior.
 
+## Modelo
+
+El modelo evaluado es **Perplexity Decider v1 27B** (`pplx-decider-v1-27b`, Decisions API de
+Perplexity), fijado en `src/jevsignal/config.py`. En el resto de este documento "Jev" designa a
+ese modelo: el borrador se escribió para Jev (TypeSafe System One, `jev-1.13.0`) y el 2026-10-04,
+antes de cualquier llamada real y antes del sello, se cambió de modelo porque no fue posible
+contratar la API de TypeSafe. Preguntas, señales y reglas no cambian. Todas las respuestas del
+estudio, en diseño y en holdout, deben venir de este mismo modelo.
+
 ## Hipótesis principal (H1)
 
 - **Señal:** `react_anon__nvr` = P(`better`) − P(`worse`) de la pregunta `news_vs_reaction`.

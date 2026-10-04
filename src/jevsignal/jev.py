@@ -1,8 +1,8 @@
-"""Minimal TypeSafe System One client with a permanent on-disk cache and a hard spending cap.
+"""Minimal Perplexity Decisions API client with a permanent on-disk cache and a hard spending cap.
 
-Direct HTTP (POST /v1/systemone) instead of the SDK so the exact payload is visible and logged.
+Direct HTTP (POST /v1/decisions) instead of an SDK so the exact payload is visible and logged.
 Every request is cached by a hash of (model, state, questions): re-running analysis never pays
-twice, and the cache doubles as the audit trail of what Jev was asked.
+twice, and the cache doubles as the audit trail of what the model was asked.
 """
 
 from __future__ import annotations
@@ -20,20 +20,19 @@ from tqdm import tqdm
 
 from .config import (
     CHARS_PER_TOKEN_ESTIMATE,
-    JEV_CONCURRENCY,
-    JEV_MAX_RPS,
-    JEV_MODEL,
-    JEV_MODELS_URL,
-    JEV_PRICE_PER_INPUT_TOKEN,
-    JEV_URL,
+    DECIDER_CONCURRENCY,
+    DECIDER_MAX_RPS,
+    DECIDER_MODEL,
+    DECIDER_PRICE_PER_INPUT_TOKEN,
+    DECIDER_URL,
     PATHS,
     max_usd,
-    typesafe_api_key,
+    perplexity_api_key,
 )
 from .http import RateLimiter
 
 
-def payload(state, questions: dict, model: str = JEV_MODEL) -> dict:
+def payload(state, questions: dict, model: str = DECIDER_MODEL) -> dict:
     return {"model": model, "state": state, "questions": questions}
 
 
@@ -47,7 +46,7 @@ def estimate_tokens(p: dict) -> int:
 
 
 def estimate_usd(payloads: list[dict]) -> float:
-    return sum(estimate_tokens(p) for p in payloads) * JEV_PRICE_PER_INPUT_TOKEN
+    return sum(estimate_tokens(p) for p in payloads) * DECIDER_PRICE_PER_INPUT_TOKEN
 
 
 class Cache:
@@ -98,7 +97,7 @@ class Spend:
 
     @property
     def usd(self) -> float:
-        return self.input_tokens * JEV_PRICE_PER_INPUT_TOKEN
+        return self.input_tokens * DECIDER_PRICE_PER_INPUT_TOKEN
 
     def check(self) -> None:
         if self.usd > self.cap_usd:
@@ -117,13 +116,13 @@ class JevClient:
         self._api_key = api_key
         self._transport = transport
         self._http: httpx.Client | None = None
-        self.limiter = RateLimiter(JEV_MAX_RPS)
+        self.limiter = RateLimiter(DECIDER_MAX_RPS)
         self.spend = Spend(cap_usd if cap_usd is not None else max_usd())
 
     @property
     def http(self) -> httpx.Client:
         if self._http is None:
-            key = self._api_key or typesafe_api_key()
+            key = self._api_key or perplexity_api_key()
             self._http = httpx.Client(
                 timeout=120,
                 transport=self._transport,
@@ -140,14 +139,15 @@ class JevClient:
         for attempt in range(retries):
             self.limiter.wait()
             try:
-                resp = self.http.post(JEV_URL, json=p)
+                resp = self.http.post(DECIDER_URL, json=p)
             except httpx.TransportError:
                 time.sleep(min(60, 2**attempt))
                 continue
             if resp.status_code in (429, 500, 502, 503, 504, 529):
                 time.sleep(float(resp.headers.get("retry-after", min(60, 2**attempt))))
                 continue
-            if resp.status_code == 422:
+            # The API rejected this request itself: malformed or over a limit (400), body too big (413).
+            if resp.status_code in (400, 413):
                 return {"error": "unprocessable", "detail": resp.text[:2000]}
             resp.raise_for_status()
             data = resp.json()
@@ -167,7 +167,7 @@ class JevClient:
                 "explicitly after approving the cost"
             )
         results: list[dict | None] = [None] * len(payloads)
-        pool = ThreadPoolExecutor(JEV_CONCURRENCY)
+        pool = ThreadPoolExecutor(DECIDER_CONCURRENCY)
         try:
             futs = {pool.submit(self.call, p): i for i, p in enumerate(payloads)}
             for fut in tqdm(as_completed(futs), total=len(futs), desc=desc):
@@ -178,8 +178,3 @@ class JevClient:
         pool.shutdown()
         print(f"{desc}: actual new spend ${self.spend.usd:.4f} ({self.spend.input_tokens} input tokens)")
         return results  # type: ignore[return-value]
-
-    def list_models(self) -> dict:
-        resp = self.http.get(JEV_MODELS_URL)
-        resp.raise_for_status()
-        return resp.json()

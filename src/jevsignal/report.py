@@ -197,7 +197,7 @@ def render_markdown(res: dict) -> str:
         L.append("")
     s = res.get("sensitivity_to_reaction") or {}
     if s:
-        L.append(f"## Does Jev use the reaction?\n\nSame masked text, three made-up reactions (n={s['n']}). "
+        L.append(f"## Does the model use the reaction?\n\nSame masked text, three made-up reactions (n={s['n']}). "
                  f"Mean P(better)−P(worse): {', '.join(f'{k.split(chr(95)*2)[0]} {v:.3f}' for k, v in s['mean_nvr'].items())}. "
                  f"Monotone in the expected direction: {s['share_monotone']:.0%}. Essentially unchanged: {s['share_insensitive']:.0%}.")
     return "\n".join(L) + "\n"
