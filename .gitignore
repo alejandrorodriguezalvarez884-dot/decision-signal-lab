@@ -20,3 +20,7 @@ dist/
 Thumbs.db
 .vscode/
 .idea/
+
+# Site
+node_modules/
+.astro/

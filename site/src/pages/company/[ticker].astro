@@ -1,0 +1,145 @@
+---
+import Page from "../../components/Page.astro";
+import GuidanceChip from "../../components/GuidanceChip.astro";
+import TrendChart from "../../components/TrendChart.astro";
+import {
+	GUIDANCE_LABEL,
+	THEME_WORD,
+	cautionWord,
+	fmtDate,
+	outlookWord,
+	pct,
+	releases,
+	slug,
+	strengthWord,
+	summary,
+	type Company,
+} from "../../lib/radar";
+
+export function getStaticPaths() {
+	return summary.companies.map((company) => ({ params: { ticker: slug(company.ticker) }, props: { company } }));
+}
+
+interface Props {
+	company: Company;
+}
+const { company } = Astro.props;
+const history = releases.filter((r) => r.ticker === company.ticker); // oldest first
+const rows = [...history].reverse();
+const latest = rows[0];
+const threshold = summary.meta.theme_threshold;
+
+const series = (key: "results_strength" | "uncertainty") =>
+	history.map((r) => ({ label: fmtDate(r.date), year: r.date.slice(0, 4), value: r[key] }));
+const strengthTicks = [
+	{ v: 0, label: "weak" },
+	{ v: 0.5, label: "mixed" },
+	{ v: 1, label: "strong" },
+];
+const cautionTicks = [
+	{ v: 0, label: "none" },
+	{ v: 0.5, label: "some" },
+	{ v: 1, label: "a lot" },
+];
+---
+
+<Page
+	title={company.name}
+	description={`What ${company.name} said in each of its ${company.n} results releases since 2021: guidance, results, outlook, demand and margins.`}
+>
+	<Fragment slot="header">
+		<h1 class="mt-3 font-serif text-3xl font-semibold text-stone-900">
+			{company.name} <span class="text-xl font-normal text-stone-400">{company.ticker}</span>
+		</h1>
+		<p class="mt-2 text-sm text-stone-500">{company.sector} · {company.n} results releases since 2021</p>
+	</Fragment>
+
+	<section class="mt-8 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+		<div class="text-xs text-stone-500">Latest release, {fmtDate(latest.date)}</div>
+		<div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-stone-700">
+			<span class="flex items-center gap-2">
+				Guidance <GuidanceChip value={latest.guidance} />
+				<span class="text-xs text-stone-400">{pct(latest.guidance_p[latest.guidance])} sure</span>
+			</span>
+			<span>Results: <span class="font-medium text-stone-900">{strengthWord(latest.results_strength).toLowerCase()}</span></span>
+			<span>Outlook: <span class="font-medium text-stone-900">{outlookWord(latest.outlook_tone).toLowerCase()}</span></span>
+			<span>Caution: <span class="font-medium text-stone-900">{cautionWord(latest.uncertainty).toLowerCase()}</span></span>
+		</div>
+	</section>
+
+	<section class="mt-6 grid gap-6 sm:grid-cols-2">
+		<div class="rounded-2xl border border-stone-200 bg-white p-5">
+			<TrendChart
+				title="Strength of reported results"
+				note="How the release describes the quarter"
+				points={series("results_strength")}
+				max={1}
+				ticks={strengthTicks}
+				format={strengthWord}
+				what="results"
+				height={130}
+				endLabel={false}
+			/>
+		</div>
+		<div class="rounded-2xl border border-stone-200 bg-white p-5">
+			<TrendChart
+				title="Caution about the future"
+				note="How much uncertainty management voices"
+				points={series("uncertainty")}
+				max={1}
+				ticks={cautionTicks}
+				format={cautionWord}
+				what="caution"
+				height={130}
+				endLabel={false}
+			/>
+		</div>
+	</section>
+
+	<section class="mt-10">
+		<h2 class="font-serif text-xl font-semibold text-stone-900">Every release</h2>
+		<div class="mt-4 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
+						<th class="px-4 py-3 font-medium">Published</th>
+						<th class="px-3 py-3 font-medium">Guidance</th>
+						<th class="px-3 py-3 font-medium">Results</th>
+						<th class="px-3 py-3 font-medium">Outlook</th>
+						<th class="px-3 py-3 font-medium">Also says</th>
+						<th class="px-4 py-3 text-right font-medium">Filing</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						rows.map((r) => {
+							const says = [
+								r.margin_pressure >= 0.5 && "margin pressure",
+								r.demand_weakness >= 0.5 && "weak demand",
+								...Object.entries(r.themes)
+									.filter(([, p]) => p >= threshold)
+									.map(([k]) => THEME_WORD[k] ?? k),
+							].filter(Boolean);
+							return (
+								<tr class="border-b border-stone-100 last:border-0">
+									<td class="whitespace-nowrap px-4 py-2.5 tabular-nums text-stone-500">{fmtDate(r.date)}</td>
+									<td class="px-3 py-2.5" title={`${GUIDANCE_LABEL[r.guidance]}: ${pct(r.guidance_p[r.guidance])}`}>
+										<GuidanceChip value={r.guidance} />
+									</td>
+									<td class="whitespace-nowrap px-3 py-2.5 text-stone-700">{strengthWord(r.results_strength)}</td>
+									<td class="whitespace-nowrap px-3 py-2.5 text-stone-700">{outlookWord(r.outlook_tone)}</td>
+									<td class="px-3 py-2.5 text-xs text-stone-500">{says.join(", ")}</td>
+									<td class="whitespace-nowrap px-4 py-2.5 text-right">
+										<a href={r.url} target="_blank" rel="noreferrer" class="text-xs text-stone-500 underline hover:text-stone-900">
+											SEC
+										</a>
+									</td>
+								</tr>
+							);
+						})
+					}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</Page>

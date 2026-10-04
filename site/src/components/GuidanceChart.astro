@@ -1,0 +1,123 @@
+---
+// Share of releases that raised (up) or lowered (down) guidance, per quarter of publication.
+import { GUIDANCE_LABEL, GUIDANCE_ORDER, pct, quarterLabel, tip, yearGroups, type Quarter } from "../lib/radar";
+
+interface Props {
+	quarters: Quarter[];
+}
+const { quarters } = Astro.props;
+
+const step = 0.1;
+const up = Math.max(step, Math.ceil(Math.max(...quarters.map((q) => q.guidance.raised)) / step) * step);
+const down = Math.max(step, Math.ceil(Math.max(...quarters.map((q) => q.guidance.lowered)) / step) * step);
+const range = up + down;
+const y = (v: number) => `${((up - v) / range) * 100}%`; // v > 0 is raised, v < 0 lowered
+const ticks: number[] = [];
+for (let v = up; v > -down - 1e-9; v -= step) ticks.push(Math.round(v * 10) / 10);
+const labelled = [...quarters].reverse().find((q) => !q.partial) ?? quarters[quarters.length - 1];
+const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
+---
+
+<figure class="radar">
+	<div class="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-600">
+		<span><span class="radar-key" style="background: var(--radar-up)"></span>Raised guidance</span>
+		<span><span class="radar-key" style="background: var(--radar-down)"></span>Lowered guidance</span>
+	</div>
+	<div class="radar-plot" style="height: 260px">
+		{
+			ticks.map((v) => (
+				<div class:list={["radar-gridline", { "is-axis": v === 0 }]} style={`top: ${y(v)}`}>
+					<span>{pct(Math.abs(v))}</span>
+				</div>
+			))
+		}
+		<div class="radar-bands">
+			{
+				quarters.map((q) => (
+					<div
+						class="radar-band"
+						data-tip={tip({
+							title: `${quarterLabel(q.quarter)} · ${q.n} releases${q.partial ? " so far" : ""}`,
+							rows: [
+								["raised", pct(q.guidance.raised), "#2a78d6"],
+								["lowered", pct(q.guidance.lowered), "#e34948"],
+								["reaffirmed", pct(q.guidance.reaffirmed)],
+								["new period, no comparison", pct(q.guidance.new_period)],
+							],
+						})}
+					>
+						<div
+							class="gbar gbar-up"
+							style={`top: ${y(q.guidance.raised)}; height: ${(q.guidance.raised / range) * 100}%; opacity: ${q.partial ? 0.45 : 1}`}
+						/>
+						<div
+							class="gbar gbar-down"
+							style={`top: ${y(0)}; height: ${(q.guidance.lowered / range) * 100}%; opacity: ${q.partial ? 0.45 : 1}`}
+						/>
+						{q === labelled && (
+							<span class="gbar-label" style={`top: ${y(q.guidance.raised)}`}>
+								{pct(q.guidance.raised)}
+							</span>
+						)}
+					</div>
+				))
+			}
+		</div>
+	</div>
+	<div class="radar-years">
+		{years.map((g) => <div style={`grid-column: span ${g.span}`}>{g.year}</div>)}
+	</div>
+	<details class="radar-table mt-3">
+		<summary>Show as table</summary>
+		<div class="overflow-x-auto">
+			<table>
+				<thead>
+					<tr>
+						<th>Quarter</th>
+						<th>Releases</th>
+						{GUIDANCE_ORDER.map((c) => <th>{GUIDANCE_LABEL[c]}</th>)}
+					</tr>
+				</thead>
+				<tbody>
+					{
+						quarters.map((q) => (
+							<tr>
+								<td>{quarterLabel(q.quarter)}</td>
+								<td>{q.n}</td>
+								{GUIDANCE_ORDER.map((c) => <td>{pct(q.guidance[c])}</td>)}
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</details>
+</figure>
+
+<style>
+	.gbar {
+		position: absolute;
+		left: 50%;
+		width: min(calc(100% - 2px), 24px);
+		transform: translateX(-50%);
+		min-height: 1px;
+	}
+	.gbar-up {
+		background: var(--radar-up);
+		border-radius: 4px 4px 0 0;
+	}
+	.gbar-down {
+		background: var(--radar-down);
+		border-radius: 0 0 4px 4px;
+	}
+	.gbar-label {
+		position: absolute;
+		left: 50%;
+		transform: translate(-50%, -19px);
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 16px;
+		color: var(--radar-ink);
+		white-space: nowrap;
+	}
+</style>

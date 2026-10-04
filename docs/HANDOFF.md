@@ -10,18 +10,23 @@ apartado 2) y usar el mismo modelo para lo que hace bien: leer. El producto es a
 de resultados**, descrito en [RADAR.md](RADAR.md). Las secciones 1 a 6 de este documento
 describen el estudio cerrado y se conservan como contexto.
 
+Decisiones del usuario ese día:
+- El radar se publica como **sitio propio en un enlace aparte**, no como sección de su web
+  personal. La web personal solo lo referencia desde la tarjeta del proyecto.
+- Aprobó lanzar las 4 preguntas temáticas sobre todo el histórico.
+
 | Hecho | Pendiente |
 |---|---|
 | Estudio cerrado como nulo sin `lock`; nota de cierre en `PREREGISTRATION.md` | |
 | `radar.py`, `radar_universe.py`, `validation.py`, comandos `radar` y `validate`, 9 tests nuevos (51 en verde) | |
-| Validación del guidance con un segundo lector (Claude, a ciegas, 48 comunicados): 82 % de acuerdo estricto, 93 % en la dirección. Los "lowered" son el punto débil (7 de 9) | Que una persona repase `validation/guidance_labels.csv`. Las demás preguntas están sin validar |
-| Comunicados de 2025–2026 puntuados con las preguntas de texto: 754 peticiones, $0.63 reales ($0.79 estimados). Gasto acumulado del proyecto: unos $3.99 de $10 | |
+| Validación del guidance con un segundo lector (Claude, a ciegas, 48 comunicados): 82 % de acuerdo estricto, 93 % en la dirección. Los "lowered" son el punto débil (7 de 9) | Que una persona repase `validation/guidance_labels.csv`. Las demás preguntas, incluidas las temáticas, están sin validar |
+| Comunicados de 2025–2026 puntuados con las preguntas de texto: 754 peticiones, $0.63 reales ($0.79 estimados) | |
+| Preguntas temáticas (aranceles, IA, cadena de suministro, reestructuración) sobre todo el histórico: 2.338 peticiones, $0.99 reales ($1.24 estimados). **Gasto acumulado del proyecto: $4.98 de $10** | |
 | Dataset en `radar/`: 2.238 comunicados de 99 empresas, de 2021-01-13 a 2026-10-01; 79 filings descartados por no ser de resultados y 21 por duplicados | |
-| `radar update` probado contra EDGAR: 20 segundos, no encuentra nada nuevo y deja el dataset igual | |
-| Preguntas temáticas (aranceles, IA, cadena de suministro, reestructuración) definidas en `questions.THEME_QUESTIONS` | **No lanzadas.** Estimación: $1.24 sobre todo el histórico. Requiere permiso del usuario. Mientras tanto todo se ejecuta con `--no-themes` |
-| Workflow `.github/workflows/radar.yml` (dos veces al día, tope $0.25 por ejecución, `--no-themes`) | El usuario tiene que crear los secretos `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` en GitHub. Sin ellos el job falla. No se ha ejecutado nunca en GitHub: falta comprobar que EDGAR no bloquea las IP de Actions |
-| Web: rama `earnings-radar` del repo `personal-website` (worktree en `PersonalWebsite/personal-website-radar`) con `/radar/`, `/radar/companies/`, `/radar/company/<ticker>/` y `/radar/method/`. Compila (105 páginas) y está revisada en escritorio y móvil | Fusionar en `main` despliega en `alejandrorodriguez.dev`. Pendiente del visto bueno del usuario |
-| | Esta rama (`radar`) tampoco está en `main` ni subida. La web lee `radar/` de `main`, así que hasta fusionar usa su copia local |
+| `radar update` probado contra EDGAR en local: 20 segundos, no encuentra nada nuevo y deja el dataset igual | |
+| Sitio estático en `site/` (Astro, 102 páginas): resumen, empresas, ficha por empresa y método. Revisado en escritorio y móvil | |
+| Workflow `.github/workflows/radar.yml`: actualiza los datos dos veces al día, compila el sitio y lo publica en la rama `gh-pages` | El usuario tiene que crear los secretos `PERPLEXITY_API_KEY` y `SEC_USER_AGENT` en GitHub; sin ellos el sitio se sigue publicando pero no entran comunicados nuevos. Falta comprobar que EDGAR no bloquea las IP de Actions |
+| Tarjeta "Earnings Radar" en `personal-website` (`src/data/profile.ts`), con enlace al sitio | |
 | | Ampliar al S&P 500 (estimación previa: $8–12, por encima de lo que queda del tope) |
 
 ## 1. Qué se pidió (resumen del encargo)

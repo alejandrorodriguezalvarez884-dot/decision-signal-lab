@@ -1,14 +1,14 @@
 {
  "meta": {
-  "generated_utc": "2026-10-04T11:40:11+00:00",
+  "generated_utc": "2026-10-04T11:57:17+00:00",
   "model": "pplx-decider-v1-27b",
   "releases": 2238,
   "companies": 99,
   "first_date": "2021-01-13",
   "last_date": "2026-10-01",
   "current_quarter": "2026Q4",
-  "input_tokens": 48813034,
-  "api_cost_usd": 1.95,
+  "input_tokens": 73106532,
+  "api_cost_usd": 2.92,
   "theme_threshold": 0.5,
   "guidance_classes": {
    "raised": "Guidance for at least one key metric is raised and none is lowered",
@@ -33,7 +33,7 @@
    "supply_chain": "Does `press_release` say that supply chain disruptions, component shortages or logistics constraints hurt the company's results or outlook?",
    "restructuring": "Does `press_release` report job cuts, a restructuring program or restructuring charges?"
   },
-  "has_themes": false,
+  "has_themes": true,
   "validation": {
    "labelled": 45,
    "agree_strict": 37,
@@ -174,10 +174,10 @@
     "uncertainty": 0.3402
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0309,
+    "supply_chain": 0.0309,
+    "restructuring": 0.268
    }
   },
   {
@@ -207,10 +207,10 @@
     "uncertainty": 0.2396
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0104,
+    "ai": 0.0312,
+    "supply_chain": 0.0625,
+    "restructuring": 0.1979
    }
   },
   {
@@ -240,10 +240,10 @@
     "uncertainty": 0.268
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0515,
+    "supply_chain": 0.0928,
+    "restructuring": 0.1546
    }
   },
   {
@@ -273,10 +273,10 @@
     "uncertainty": 0.2165
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0103,
+    "ai": 0.0515,
+    "supply_chain": 0.1546,
+    "restructuring": 0.1546
    }
   },
   {
@@ -306,10 +306,10 @@
     "uncertainty": 0.2062
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0619,
+    "supply_chain": 0.2062,
+    "restructuring": 0.1959
    }
   },
   {
@@ -339,10 +339,10 @@
     "uncertainty": 0.2887
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0515,
+    "supply_chain": 0.2165,
+    "restructuring": 0.1443
    }
   },
   {
@@ -372,10 +372,10 @@
     "uncertainty": 0.3299
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0619,
+    "supply_chain": 0.1443,
+    "restructuring": 0.1443
    }
   },
   {
@@ -405,10 +405,10 @@
     "uncertainty": 0.3093
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.0619,
+    "supply_chain": 0.0928,
+    "restructuring": 0.1649
    }
   },
   {
@@ -438,10 +438,10 @@
     "uncertainty": 0.2371
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0103,
+    "ai": 0.0722,
+    "supply_chain": 0.0928,
+    "restructuring": 0.3196
    }
   },
   {
@@ -471,10 +471,10 @@
     "uncertainty": 0.2245
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0,
+    "ai": 0.1429,
+    "supply_chain": 0.0408,
+    "restructuring": 0.2041
    }
   },
   {
@@ -504,10 +504,10 @@
     "uncertainty": 0.2041
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0102,
+    "ai": 0.1429,
+    "supply_chain": 0.0204,
+    "restructuring": 0.2551
    }
   },
   {
@@ -537,10 +537,10 @@
     "uncertainty": 0.2041
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0,
+    "ai": 0.1429,
+    "supply_chain": 0.0,
+    "restructuring": 0.2551
    }
   },
   {
@@ -570,10 +570,10 @@
     "uncertainty": 0.1649
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.1753,
+    "supply_chain": 0.0103,
+    "restructuring": 0.3814
    }
   },
   {
@@ -603,10 +603,10 @@
     "uncertainty": 0.2062
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0206,
+    "ai": 0.1649,
+    "supply_chain": 0.0103,
+    "restructuring": 0.2268
    }
   },
   {
@@ -636,10 +636,10 @@
     "uncertainty": 0.1915
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0213,
+    "ai": 0.1915,
+    "supply_chain": 0.0106,
+    "restructuring": 0.266
    }
   },
   {
@@ -669,10 +669,10 @@
     "uncertainty": 0.1735
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0306,
+    "ai": 0.2245,
+    "supply_chain": 0.0102,
+    "restructuring": 0.2449
    }
   },
   {
@@ -702,10 +702,10 @@
     "uncertainty": 0.1735
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0408,
+    "ai": 0.2041,
+    "supply_chain": 0.0,
+    "restructuring": 0.3571
    }
   },
   {
@@ -735,10 +735,10 @@
     "uncertainty": 0.3163
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.3367,
+    "ai": 0.1531,
+    "supply_chain": 0.0102,
+    "restructuring": 0.2449
    }
   },
   {
@@ -768,10 +768,10 @@
     "uncertainty": 0.2143
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.2755,
+    "ai": 0.1939,
+    "supply_chain": 0.0,
+    "restructuring": 0.1939
    }
   },
   {
@@ -801,10 +801,10 @@
     "uncertainty": 0.1735
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1939,
+    "ai": 0.2347,
+    "supply_chain": 0.0,
+    "restructuring": 0.2449
    }
   },
   {
@@ -834,10 +834,10 @@
     "uncertainty": 0.1531
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1939,
+    "ai": 0.2245,
+    "supply_chain": 0.0102,
+    "restructuring": 0.3367
    }
   },
   {
@@ -867,10 +867,10 @@
     "uncertainty": 0.2143
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1735,
+    "ai": 0.2755,
+    "supply_chain": 0.0306,
+    "restructuring": 0.2347
    }
   },
   {
@@ -900,10 +900,10 @@
     "uncertainty": 0.1771
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1667,
+    "ai": 0.2396,
+    "supply_chain": 0.0312,
+    "restructuring": 0.2604
    }
   },
   {
@@ -933,10 +933,10 @@
     "uncertainty": 1.0
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0,
+    "ai": 0.0,
+    "supply_chain": 0.0,
+    "restructuring": 0.5
    }
   }
  ],
@@ -968,10 +968,10 @@
     "uncertainty": 0.0
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0,
+    "ai": 0.5,
+    "supply_chain": 0.0,
+    "restructuring": 0.125
    },
    "prior": {
     "n": 8,
@@ -998,10 +998,10 @@
      "uncertainty": 0.25
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.0,
+     "ai": 0.25,
+     "supply_chain": 0.0,
+     "restructuring": 0.0
     }
    }
   },
@@ -1032,10 +1032,10 @@
     "uncertainty": 0.0
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0,
+    "ai": 0.125,
+    "supply_chain": 0.125,
+    "restructuring": 0.375
    },
    "prior": {
     "n": 8,
@@ -1062,10 +1062,10 @@
      "uncertainty": 0.375
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.5,
+     "ai": 0.5,
+     "supply_chain": 0.125,
+     "restructuring": 0.875
     }
    }
   },
@@ -1096,10 +1096,10 @@
     "uncertainty": 0.0833
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1167,
+    "ai": 0.1667,
+    "supply_chain": 0.0,
+    "restructuring": 0.1833
    },
    "prior": {
     "n": 61,
@@ -1126,10 +1126,10 @@
      "uncertainty": 0.1148
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.1639,
+     "ai": 0.0328,
+     "supply_chain": 0.0,
+     "restructuring": 0.2131
     }
    }
   },
@@ -1160,10 +1160,10 @@
     "uncertainty": 0.1064
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.2553,
+    "ai": 0.0213,
+    "supply_chain": 0.0426,
+    "restructuring": 0.3617
    },
    "prior": {
     "n": 48,
@@ -1190,10 +1190,10 @@
      "uncertainty": 0.2917
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.3542,
+     "ai": 0.0,
+     "supply_chain": 0.0,
+     "restructuring": 0.4167
     }
    }
   },
@@ -1224,10 +1224,10 @@
     "uncertainty": 0.2708
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.1667,
+    "ai": 0.7917,
+    "supply_chain": 0.0625,
+    "restructuring": 0.1667
    },
    "prior": {
     "n": 48,
@@ -1254,10 +1254,10 @@
      "uncertainty": 0.2292
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.1458,
+     "ai": 0.7708,
+     "supply_chain": 0.0,
+     "restructuring": 0.25
     }
    }
   },
@@ -1288,10 +1288,10 @@
     "uncertainty": 0.2955
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.3636,
+    "ai": 0.0455,
+    "supply_chain": 0.0,
+    "restructuring": 0.5455
    },
    "prior": {
     "n": 43,
@@ -1318,10 +1318,10 @@
      "uncertainty": 0.3256
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.2558,
+     "ai": 0.0233,
+     "supply_chain": 0.0,
+     "restructuring": 0.3256
     }
    }
   },
@@ -1352,10 +1352,10 @@
     "uncertainty": 0.125
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0312,
+    "ai": 0.4375,
+    "supply_chain": 0.0,
+    "restructuring": 0.2188
    },
    "prior": {
     "n": 32,
@@ -1382,10 +1382,10 @@
      "uncertainty": 0.0938
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.0,
+     "ai": 0.3125,
+     "supply_chain": 0.0,
+     "restructuring": 0.3438
     }
    }
   },
@@ -1416,10 +1416,10 @@
     "uncertainty": 0.275
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.4,
+    "ai": 0.275,
+    "supply_chain": 0.025,
+    "restructuring": 0.475
    },
    "prior": {
     "n": 39,
@@ -1446,10 +1446,10 @@
      "uncertainty": 0.2564
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.1538,
+     "ai": 0.2308,
+     "supply_chain": 0.0256,
+     "restructuring": 0.3077
     }
    }
   },
@@ -1480,10 +1480,10 @@
     "uncertainty": 0.1667
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0833,
+    "ai": 0.0972,
+    "supply_chain": 0.0,
+    "restructuring": 0.1667
    },
    "prior": {
     "n": 72,
@@ -1510,10 +1510,10 @@
      "uncertainty": 0.2222
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.0972,
+     "ai": 0.0694,
+     "supply_chain": 0.0,
+     "restructuring": 0.1528
     }
    }
   },
@@ -1544,10 +1544,10 @@
     "uncertainty": 0.2941
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.0588,
+    "ai": 0.2941,
+    "supply_chain": 0.0,
+    "restructuring": 0.2353
    },
    "prior": {
     "n": 16,
@@ -1574,10 +1574,10 @@
      "uncertainty": 0.125
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.125,
+     "ai": 0.375,
+     "supply_chain": 0.0,
+     "restructuring": 0.125
     }
    }
   },
@@ -1608,10 +1608,10 @@
     "uncertainty": 0.25
    },
    "themes": {
-    "tariffs": null,
-    "ai": null,
-    "supply_chain": null,
-    "restructuring": null
+    "tariffs": 0.25,
+    "ai": 0.125,
+    "supply_chain": 0.0,
+    "restructuring": 0.0
    },
    "prior": {
     "n": 16,
@@ -1638,10 +1638,10 @@
      "uncertainty": 0.25
     },
     "themes": {
-     "tariffs": null,
-     "ai": null,
-     "supply_chain": null,
-     "restructuring": null
+     "tariffs": 0.1875,
+     "ai": 0.0,
+     "supply_chain": 0.0,
+     "restructuring": 0.0
     }
    }
   }
@@ -2554,7 +2554,9 @@
    "uncertainty": 0.521,
    "demand_weakness": 0.601,
    "margin_pressure": 0.07,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/320187/000032018726000184/0000320187-26-000184-index.htm"
   },
   {
@@ -2588,7 +2590,9 @@
    "uncertainty": 0.028,
    "demand_weakness": 0.029,
    "margin_pressure": 0.062,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/0000909832-26-000084-index.htm"
   },
   {
@@ -2605,7 +2609,9 @@
    "uncertainty": 0.188,
    "demand_weakness": 0.045,
    "margin_pressure": 0.166,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/0001193125-26-387905-index.htm"
   },
   {
@@ -2622,7 +2628,9 @@
    "uncertainty": 0.182,
    "demand_weakness": 0.026,
    "margin_pressure": 0.039,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000147/0000796343-26-000147-index.htm"
   },
   {
@@ -2656,7 +2664,9 @@
    "uncertainty": 0.284,
    "demand_weakness": 0.026,
    "margin_pressure": 0.2,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/0001045810-26-000073-index.htm"
   },
   {
@@ -2673,7 +2683,10 @@
    "uncertainty": 0.335,
    "demand_weakness": 0.029,
    "margin_pressure": 0.073,
-   "themes": [],
+   "themes": [
+    "ai",
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000187/0001108524-26-000187-index.htm"
   },
   {
@@ -2690,7 +2703,10 @@
    "uncertainty": 0.693,
    "demand_weakness": 0.063,
    "margin_pressure": 0.325,
-   "themes": [],
+   "themes": [
+    "tariffs",
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/0000104169-26-000145-index.htm"
   },
   {
@@ -2707,7 +2723,9 @@
    "uncertainty": 0.407,
    "demand_weakness": 0.518,
    "margin_pressure": 0.196,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000113/0000060667-26-000113-index.htm"
   },
   {
@@ -2724,7 +2742,9 @@
    "uncertainty": 0.408,
    "demand_weakness": 0.031,
    "margin_pressure": 0.138,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/27419/000002741926000034/0000027419-26-000034-index.htm"
   },
   {
@@ -2741,7 +2761,9 @@
    "uncertainty": 0.228,
    "demand_weakness": 0.034,
    "margin_pressure": 0.07,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/354950/000035495026000145/0000354950-26-000145-index.htm"
   },
   {
@@ -2758,7 +2780,9 @@
    "uncertainty": 0.201,
    "demand_weakness": 0.023,
    "margin_pressure": 0.073,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/858877/000085887726000106/0000858877-26-000106-index.htm"
   },
   {
@@ -2877,7 +2901,9 @@
    "uncertainty": 0.072,
    "demand_weakness": 0.032,
    "margin_pressure": 0.09,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000077/0000059478-26-000077-index.htm"
   },
   {
@@ -2928,7 +2954,10 @@
    "uncertainty": 0.394,
    "demand_weakness": 0.346,
    "margin_pressure": 0.387,
-   "themes": [],
+   "themes": [
+    "tariffs",
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1744489/000174448926000056/0001744489-26-000056-index.htm"
   },
   {
@@ -2945,7 +2974,10 @@
    "uncertainty": 0.356,
    "demand_weakness": 0.032,
    "margin_pressure": 0.037,
-   "themes": [],
+   "themes": [
+    "tariffs",
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/32604/000003260426000042/0000032604-26-000042-index.htm"
   },
   {
@@ -2996,7 +3028,9 @@
    "uncertainty": 0.52,
    "demand_weakness": 0.084,
    "margin_pressure": 0.098,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1075531/000107553126000036/0001075531-26-000036-index.htm"
   },
   {
@@ -3030,7 +3064,9 @@
    "uncertainty": 0.152,
    "demand_weakness": 0.312,
    "margin_pressure": 0.138,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000067/0000063908-26-000067-index.htm"
   },
   {
@@ -3064,7 +3100,10 @@
    "uncertainty": 0.086,
    "demand_weakness": 0.036,
    "margin_pressure": 0.049,
-   "themes": [],
+   "themes": [
+    "tariffs",
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000040/0000018230-26-000040-index.htm"
   },
   {
@@ -3081,7 +3120,9 @@
    "uncertainty": 0.173,
    "demand_weakness": 0.248,
    "margin_pressure": 0.399,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1666700/000166670026000049/0001666700-26-000049-index.htm"
   },
   {
@@ -3098,7 +3139,9 @@
    "uncertainty": 0.849,
    "demand_weakness": 0.12,
    "margin_pressure": 0.143,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1326160/000132616026000037/0001326160-26-000037-index.htm"
   },
   {
@@ -3115,7 +3158,9 @@
    "uncertainty": 0.457,
    "demand_weakness": 0.086,
    "margin_pressure": 0.047,
-   "themes": [],
+   "themes": [
+    "restructuring"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/21665/000002166526000041/0000021665-26-000041-index.htm"
   },
   {
@@ -3149,7 +3194,9 @@
    "uncertainty": 0.859,
    "demand_weakness": 0.045,
    "margin_pressure": 0.092,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/0002115436-26-000006-index.htm"
   },
   {
@@ -3166,7 +3213,9 @@
    "uncertainty": 0.328,
    "demand_weakness": 0.685,
    "margin_pressure": 0.087,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/0000093410-26-000162-index.htm"
   },
   {
@@ -3183,7 +3232,9 @@
    "uncertainty": 0.036,
    "demand_weakness": 0.022,
    "margin_pressure": 0.046,
-   "themes": [],
+   "themes": [
+    "tariffs"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/0000320193-26-000018-index.htm"
   },
   {
@@ -3200,7 +3251,9 @@
    "uncertainty": 0.175,
    "demand_weakness": 0.037,
    "margin_pressure": 0.132,
-   "themes": [],
+   "themes": [
+    "ai"
+   ],
    "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/0001018724-26-000024-index.htm"
   },
   {

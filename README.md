@@ -3,8 +3,9 @@
 **El producto: el radar de resultados.** Un modelo de decisión lee cada comunicado de resultados
 de 99 empresas del S&P 100 y responde siempre las mismas preguntas (¿sube o baja el guidance?,
 ¿hay presión en márgenes?, ¿se debilita la demanda?). Las respuestas se publican como datos en
-`radar/` y alimentan la sección `/radar/` de la web. Cómo funciona, comandos y validación:
-[docs/RADAR.md](docs/RADAR.md).
+`radar/` y se ven en el sitio de `site/`, publicado en
+https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/. Cómo funciona,
+comandos y validación: [docs/RADAR.md](docs/RADAR.md).
 
 **El origen: un estudio que salió nulo.** Lo que sigue describe ese estudio, cerrado el
 2026-10-04. El radar reutiliza su descarga, su limpieza de texto y su cliente.
@@ -103,6 +104,7 @@ src/decisionsignal/
   radar_universe.py  empresas del radar con nombre y sector
   validation.py  muestra a ciegas y acuerdo con un segundo lector
 radar/           dataset publicado (releases.json, summary.json)
+site/            sitio Astro estático que muestra radar/ (GitHub Pages)
 validation/      muestra, etiquetas y resultado de la validación
 tests/           look-ahead, limpieza de texto, cliente, estadística, e2e sintético
 ```

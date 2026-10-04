@@ -1,0 +1,243 @@
+---
+import Page from "../components/Page.astro";
+import { GUIDANCE_LABEL, REPO_URL, THEME_LABEL, fmtDate, releases, summary, type GuidanceClass } from "../lib/radar";
+
+const m = summary.meta;
+const v = m.validation;
+const share = (a: number, b: number) => `${Math.round((a / b) * 100)}%`;
+const urlOf = (id: string) => releases.find((r) => r.id === id)?.url;
+const lowered = v?.by_model_class.lowered ?? { n: 0, agree_strict: 0, agree_lenient: 0 };
+const perRelease = ((m.api_cost_usd / m.releases) * 100).toFixed(2);
+const QUESTION_LABEL: Record<string, string> = {
+	guidance: "Guidance",
+	results_strength: "Results",
+	outlook_tone: "Outlook",
+	uncertainty: "Caution",
+	demand_weakness: "Weakening demand",
+	margin_pressure: "Margin pressure",
+};
+---
+
+<Page
+	title="Method"
+	description="How the Earnings Radar reads results releases: the source, the exact questions asked to the model, how often it is right and what it cannot do."
+>
+	<Fragment slot="header">
+		<h1 class="mt-3 font-serif text-3xl font-semibold text-stone-900">How it works, and how far to trust it</h1>
+	</Fragment>
+
+	<div class="method mt-8 max-w-2xl text-base leading-relaxed text-stone-700">
+		<h2>The text</h2>
+		<p>
+			When a US company reports results it files a Form 8-K with the SEC under Item 2.02, with the press release
+			attached. The radar takes that press release from EDGAR for {m.companies} companies of the S&P 100 (the list
+			as of December 2020, fixed in advance), from {fmtDate(m.first_date)} onwards: {m.releases.toLocaleString("en-US")} releases so far.
+			Tables and legal boilerplate are removed; the narrative is what the model reads. When a company files a
+			second Item 2.02 within 20 days, only the first counts.
+		</p>
+
+		<h2>The questions</h2>
+		<p>
+			The reader is a decision model (<code>{m.model}</code>). Unlike a chat model it does not write: it takes a
+			text and a fixed set of typed questions and returns a probability for each answer. Company names, tickers
+			and dates are masked before it reads. These are the questions, word for word:
+		</p>
+		<dl>
+			{
+				Object.entries(m.questions).map(([k, q]) => (
+					<>
+						<dt>{QUESTION_LABEL[k] ?? k}</dt>
+						<dd>{q.replaceAll("`press_release`", "the press release")}</dd>
+					</>
+				))
+			}
+		</dl>
+		<p>The guidance question has seven possible answers:</p>
+		<dl>
+			{
+				Object.entries(m.guidance_classes).map(([k, text]) => (
+					<>
+						<dt>{GUIDANCE_LABEL[k as GuidanceClass]}</dt>
+						<dd>{text}</dd>
+					</>
+				))
+			}
+		</dl>
+		{
+			m.has_themes && (
+				<>
+					<p>And the theme questions:</p>
+					<dl>
+						{Object.entries(m.theme_questions).map(([k, q]) => (
+							<>
+								<dt>{THEME_LABEL[k] ?? k}</dt>
+								<dd>{q.replaceAll("`press_release`", "the press release")}</dd>
+							</>
+						))}
+					</dl>
+				</>
+			)
+		}
+
+		<h2>The numbers on the charts</h2>
+		<p>
+			A release counts under the guidance answer the model finds most likely. It counts as describing margin
+			pressure, weakening demand or caution when the model's answer is at or past the midpoint of the scale.
+			Quarters are quarters of publication: a release that comes out in February counts in the first quarter,
+			whatever fiscal period it reports. A share over roughly 97 companies moves by one point with each company,
+			so differences of two or three points mean little.
+		</p>
+
+		{
+			v && (
+				<>
+					<h2>How often it is right</h2>
+					<p>
+						I checked the guidance answer on {v.labelled + v.unclear.length} releases, chosen so that every answer was
+						covered. A second reader labelled them from the text without seeing what the model had said. That reader
+						was Claude, another AI model, not a human analyst, so this is agreement between two readers and not a
+						score against a ground truth.
+					</p>
+					<ul>
+						<li>
+							On {v.unclear.length} of them the release announces new ranges without saying whether they are higher or
+							lower, so the text alone cannot settle it. They are left out of the counts below.
+						</li>
+						<li>
+							On the other {v.labelled}, both readers gave the same answer on {v.agree_strict} ({share(v.agree_strict, v.labelled)}),
+							or {v.agree_lenient} ({share(v.agree_lenient, v.labelled)}) counting cases with two defensible answers, such as a
+							range narrowed around the same midpoint.
+						</li>
+						<li>
+							On raised, lowered or neither, which is what the main chart uses, they agreed on {v.agree_direction}{" "}
+							({share(v.agree_direction, v.labelled)}).
+						</li>
+					</ul>
+					<div class="not-prose my-5 overflow-x-auto rounded-xl border border-stone-200 bg-white">
+						<table class="w-full text-sm tabular-nums">
+							<thead>
+								<tr class="border-b border-stone-200 text-left text-xs text-stone-500">
+									<th class="px-4 py-2.5 font-medium">The model said</th>
+									<th class="px-3 py-2.5 text-right font-medium">Releases</th>
+									<th class="px-4 py-2.5 text-right font-medium">Second reader agreed</th>
+								</tr>
+							</thead>
+							<tbody>
+								{Object.entries(v.by_model_class).map(([k, c]) => (
+									<tr class="border-b border-stone-100 last:border-0">
+										<td class="px-4 py-2">{GUIDANCE_LABEL[k as GuidanceClass]}</td>
+										<td class="px-3 py-2 text-right">{c.n}</td>
+										<td class="px-4 py-2 text-right">{c.agree_lenient}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+					<p>
+						The weak spot is "lowered": {lowered.n - lowered.agree_lenient} of the {lowered.n} releases the model
+						marked as lowered were not. The disagreements, each with its filing:
+					</p>
+					<ul>
+						{v.disagreements.map((d) => (
+							<li>
+								Model: {GUIDANCE_LABEL[d.model as GuidanceClass].toLowerCase()}. Reader:{" "}
+								{GUIDANCE_LABEL[d.reader as GuidanceClass].toLowerCase()} ({d.note}).{" "}
+								{urlOf(d.accessionNumber) && (
+									<a href={urlOf(d.accessionNumber)} target="_blank" rel="noreferrer">
+										Filing
+									</a>
+								)}
+							</li>
+						))}
+					</ul>
+					<p>
+						The sample is small and it measures how often the model is right when it gives an answer, not how many
+						releases of each kind it misses. The other questions have not been checked this way.
+					</p>
+				</>
+			)
+		}
+
+		<h2>What it does not do</h2>
+		<ul>
+			<li>It does not predict prices or returns, and nothing here is investment advice.</li>
+			<li>
+				It reads the press release only. The numbers in the financial tables, the conference call and the slides
+				are not in it, and many releases state a new range without the old one.
+			</li>
+			<li>Press releases are written by the company and are upbeat almost without exception. Tone is not fact.</li>
+			<li>
+				{m.companies} very large companies are not the market. Sectors with two or four of them are shown, but one
+				release moves them a lot.
+			</li>
+		</ul>
+
+		<h2>The experiment that did not work</h2>
+		<p>
+			This started as a different question: once the price has reacted to a results release, can the model tell
+			whether the news is better or worse than that reaction implies, and so predict the following weeks? On
+			1,529 releases from 2021 to 2024 it could not. Its judgement had no relation to the abnormal return of the
+			next 20 sessions (weekly rank correlation −0.05, p = 0.11, with the wrong sign), and it was mostly the
+			first-day move restated: it leaned "better" after a fall and "worse" after a rise (rank correlation −0.70
+			with the reaction). Three rewordings of the question did no better. The releases from 2025 on, set aside
+			for a confirmation test, were never used for one because there was nothing to confirm.
+		</p>
+		<p>
+			What the model did do well was read. The same answers that failed as a trading signal traced the margin
+			squeeze of 2022 and its fading, quarter by quarter. That is what this page publishes.
+		</p>
+
+		<h2>Cost and code</h2>
+		<p>
+			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls, and a new release costs
+			about {perRelease} cents. The site is static and rebuilds from a JSON file that a scheduled job updates.
+			The pipeline, the questions, the validation sample and the dataset are in{" "}
+			<a href={REPO_URL}>the repository</a>.
+		</p>
+	</div>
+</Page>
+
+<style>
+	.method :global(h2) {
+		margin-top: 2.5rem;
+		margin-bottom: 0.75rem;
+		font-family: "Source Serif 4", Georgia, serif;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #1c1917;
+	}
+	.method :global(p),
+	.method :global(ul),
+	.method :global(dl) {
+		margin-top: 0.75rem;
+	}
+	.method :global(ul) {
+		list-style: disc;
+		padding-left: 1.25rem;
+	}
+	.method :global(li) {
+		margin-top: 0.4rem;
+	}
+	.method :global(dt) {
+		margin-top: 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #1c1917;
+	}
+	.method :global(dd) {
+		font-size: 0.875rem;
+		color: #57534e;
+	}
+	.method :global(a) {
+		text-decoration: underline;
+	}
+	.method :global(a:hover) {
+		color: #1c1917;
+	}
+	.method :global(code) {
+		font-size: 0.85em;
+		background: #f5f5f4;
+		padding: 0.1em 0.35em;
+		border-radius: 4px;
+	}
+</style>

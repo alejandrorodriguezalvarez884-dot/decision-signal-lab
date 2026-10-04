@@ -1,0 +1,209 @@
+---
+// Tokens, shared chart chrome and the one tooltip every radar chart uses.
+---
+
+<div id="radar-tip" role="status" aria-live="polite" hidden></div>
+
+<style is:global>
+	.radar {
+		--radar-surface: #ffffff;
+		--radar-ink: #1c1917;
+		--radar-ink-2: #57534e;
+		--radar-muted: #78716c;
+		--radar-grid: #e7e5e4;
+		--radar-axis: #d6d3d1;
+		--radar-up: #2a78d6;
+		--radar-down: #e34948;
+		--radar-neutral: #a8a29e;
+		--radar-line: #2a78d6;
+	}
+	.radar-key {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		border-radius: 2px;
+		vertical-align: -1px;
+		margin-right: 6px;
+	}
+	.radar-plot {
+		position: relative;
+		margin-left: 34px;
+	}
+	.radar-gridline {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 0;
+		border-top: 1px solid var(--radar-grid);
+	}
+	.radar-gridline.is-axis {
+		border-top-color: var(--radar-axis);
+	}
+	.radar-gridline span {
+		position: absolute;
+		left: -34px;
+		top: -8px;
+		width: 28px;
+		text-align: right;
+		font-size: 11px;
+		line-height: 16px;
+		color: var(--radar-muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.radar-bands {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: 1fr;
+	}
+	.radar-band {
+		position: relative;
+	}
+	.radar-band:hover,
+	.radar-band.is-active {
+		background: rgba(28, 25, 23, 0.04);
+	}
+	.radar-years {
+		margin-left: 34px;
+		display: grid;
+		grid-auto-flow: column;
+		font-size: 11px;
+		line-height: 16px;
+		color: var(--radar-muted);
+		padding-top: 4px;
+	}
+	.radar-years > div {
+		border-left: 1px solid var(--radar-axis);
+		padding-left: 4px;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	.radar-table summary {
+		cursor: pointer;
+		font-size: 12px;
+		color: var(--radar-muted);
+	}
+	.radar-table summary:hover {
+		color: var(--radar-ink);
+	}
+	.radar-table table {
+		margin-top: 8px;
+		font-size: 12px;
+		font-variant-numeric: tabular-nums;
+		border-collapse: collapse;
+	}
+	.radar-table th,
+	.radar-table td {
+		padding: 3px 10px 3px 0;
+		text-align: right;
+		white-space: nowrap;
+		border-bottom: 1px solid var(--radar-grid);
+	}
+	.radar-table th:first-child,
+	.radar-table td:first-child {
+		text-align: left;
+	}
+	.radar-table th {
+		font-weight: 500;
+		color: var(--radar-muted);
+	}
+	#radar-tip {
+		position: fixed;
+		z-index: 60;
+		pointer-events: none;
+		min-width: 150px;
+		max-width: 260px;
+		padding: 8px 10px;
+		border-radius: 8px;
+		background: #1c1917;
+		color: #fafaf9;
+		font-size: 12px;
+		line-height: 1.45;
+		box-shadow: 0 6px 20px rgba(28, 25, 23, 0.18);
+	}
+	#radar-tip .tip-title {
+		color: #d6d3d1;
+		margin-bottom: 4px;
+	}
+	#radar-tip .tip-row {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+	}
+	#radar-tip .tip-row b {
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		min-width: 34px;
+	}
+	#radar-tip .tip-row i {
+		flex: none;
+		width: 10px;
+		height: 2px;
+		border-radius: 1px;
+		align-self: center;
+	}
+	#radar-tip .tip-row span {
+		color: #d6d3d1;
+	}
+</style>
+
+<script>
+	// One tooltip for every chart. Marks carry {title, rows: [label, value, color?]} as JSON in
+	// data-tip; everything is inserted with textContent.
+	const box = document.getElementById("radar-tip")!;
+	let active: Element | null = null;
+
+	function render(el: Element) {
+		const data = JSON.parse(el.getAttribute("data-tip")!);
+		box.replaceChildren();
+		const title = document.createElement("div");
+		title.className = "tip-title";
+		title.textContent = data.title;
+		box.append(title);
+		for (const [label, value, color] of data.rows) {
+			const row = document.createElement("div");
+			row.className = "tip-row";
+			const key = document.createElement("i");
+			key.style.background = color ?? "transparent";
+			row.append(key);
+			const b = document.createElement("b");
+			b.textContent = value;
+			const s = document.createElement("span");
+			s.textContent = label;
+			row.append(b, s);
+			box.append(row);
+		}
+	}
+
+	function place(x: number, y: number) {
+		const { width, height } = box.getBoundingClientRect();
+		const left = Math.min(Math.max(8, x + 14), window.innerWidth - width - 8);
+		const top = y + 18 + height > window.innerHeight ? y - height - 12 : y + 18;
+		box.style.left = `${left}px`;
+		box.style.top = `${Math.max(8, top)}px`;
+	}
+
+	function hide() {
+		active?.classList.remove("is-active");
+		active = null;
+		box.hidden = true;
+	}
+
+	document.addEventListener("pointermove", (e) => {
+		const el = (e.target as Element).closest?.("[data-tip]");
+		if (!el) return hide();
+		if (el !== active) {
+			active?.classList.remove("is-active");
+			active = el;
+			el.classList.add("is-active");
+			render(el);
+			box.hidden = false;
+		}
+		place(e.clientX, e.clientY);
+	});
+	document.addEventListener("pointerdown", (e) => {
+		if (!(e.target as Element).closest?.("[data-tip]")) hide();
+	});
+	window.addEventListener("scroll", hide, { passive: true });
+</script>

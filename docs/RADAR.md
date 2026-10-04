@@ -18,7 +18,7 @@ resultados del S&P 100, convertido en datos y publicado en la web. No predice na
    (agregados por trimestre de publicación, por sector y por empresa; se regenera a partir del
    anterior).
 
-`radar/` está en git, a diferencia de `data/`: es lo que consume la web.
+`radar/` está en git, a diferencia de `data/`: es lo que lee el sitio.
 
 ## Comandos
 
@@ -33,19 +33,42 @@ Todos aceptan `--no-themes`, que omite las preguntas temáticas (un tercio del c
 comunicado). `build` reutiliza la caché: los comunicados ya puntuados no se vuelven a pagar.
 Los topes `DECIDER_MAX_USD` y `DECIDER_TOTAL_MAX_USD` siguen aplicando.
 
-## Actualización automática
+## El sitio
 
-`.github/workflows/radar.yml` ejecuta `radar update` dos veces al día y hace commit de `radar/`
-si hay algo nuevo. Necesita dos secretos en el repositorio de GitHub (Settings → Secrets and
-variables → Actions): `PERPLEXITY_API_KEY` y `SEC_USER_AGENT`. En GitHub no hay caché de
-respuestas, así que el tope total no cuenta lo gastado antes; el tope por ejecución es $0.25.
+`site/` es un sitio Astro estático que lee `radar/*.json` directamente del repositorio. Se
+publica en GitHub Pages, en un enlace propio:
 
-## La web
+**https://alejandrorodriguezalvarez884-dot.github.io/decision-signal-lab/**
 
-Las páginas están en el repositorio `personal-website` (`src/pages/radar/`). Guarda una copia de
-los dos JSON en `src/data/radar/` y, antes de cada build, `scripts/sync-radar.mjs` la sustituye
-por la de la rama `main` de este repositorio si puede descargarla. El despliegue se relanza dos
-veces al día, media hora después de la actualización.
+Tiene cuatro tipos de página: resumen, empresas, ficha por empresa (`/company/<ticker>/`) y
+método. La web personal (`personal-website`) solo lo enlaza desde la tarjeta del proyecto.
+
+```bash
+cd site
+npm install
+npx astro dev --background   # http://localhost:4321/decision-signal-lab/
+npm run build                # genera site/dist
+```
+
+Todos los enlaces internos pasan por `link()` (`site/src/lib/radar.ts`), que antepone la ruta
+base `/decision-signal-lab`. Si el sitio se moviera a un dominio propio, basta con cambiar
+`site` y `base` en `site/astro.config.mjs`.
+
+## Actualización y despliegue automáticos
+
+`.github/workflows/radar.yml` se ejecuta dos veces al día (13:30 y 22:30 UTC), y también al
+hacer push a `main` de cambios en `site/` o `radar/`:
+
+1. `radar update`: busca filings nuevos, los puntúa y hace commit de `radar/` si hay algo.
+   Este paso necesita dos secretos en GitHub (Settings → Secrets and variables → Actions):
+   `PERPLEXITY_API_KEY` y `SEC_USER_AGENT`. Si faltan, el paso se salta con un aviso y el
+   resto sigue. En un push no se ejecuta.
+2. Compila `site/`.
+3. Publica `site/dist` en la rama `gh-pages`, que es la que sirve GitHub Pages
+   (Settings → Pages → Deploy from a branch → `gh-pages`).
+
+En GitHub no hay caché de respuestas, así que el tope total no cuenta lo gastado antes; el tope
+por ejecución es $0.25.
 
 ## Validación
 
@@ -67,5 +90,5 @@ cubre la pregunta de guidance.
 | Concepto | Coste |
 |---|---|
 | Puntuar 2025–2026 con las preguntas de texto (754 comunicados, 2026-10-04) | $0.63 |
-| Un comunicado nuevo, sin temáticas | ≈ $0.001 |
-| Las 4 preguntas temáticas sobre todo el histórico (estimación, sin lanzar) | $1.24 |
+| Las 4 preguntas temáticas sobre todo el histórico (2.338 comunicados, 2026-10-04) | $0.99 |
+| Un comunicado nuevo, con temáticas | ≈ $0.0013 |

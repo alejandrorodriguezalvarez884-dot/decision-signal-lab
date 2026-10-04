@@ -1,0 +1,124 @@
+---
+// One series over time: a 2px line with a light wash, the last value labelled.
+import { tip, yearGroups } from "../lib/radar";
+
+interface Props {
+	title: string;
+	note?: string;
+	points: { label: string; year: string; value: number; n?: number; faded?: boolean }[];
+	max: number;
+	ticks: { v: number; label: string }[];
+	format: (v: number) => string;
+	what: string; // what the value is, for the tooltip row
+	height?: number;
+	endLabel?: boolean; // off when the axis ticks already name the levels
+}
+const { title, note, points, max, ticks, format, what, height = 150, endLabel = true } = Astro.props;
+
+const x = (i: number) => ((i + 0.5) / points.length) * 100;
+const yv = (v: number) => (1 - v / max) * 100;
+const line = points.map((p, i) => `${x(i).toFixed(2)},${yv(p.value).toFixed(2)}`).join(" ");
+const area = `${x(0).toFixed(2)},100 ${line} ${x(points.length - 1).toFixed(2)},100`;
+const last = points[points.length - 1];
+const years = yearGroups(points.map((p) => p.year));
+---
+
+<figure class="radar">
+	<figcaption class="mb-3">
+		<div class="text-sm font-medium text-stone-900">{title}</div>
+		{note && <div class="text-xs text-stone-500">{note}</div>}
+	</figcaption>
+	<div class:list={["radar-plot", { "trend-plot": endLabel }]} style={`height: ${height}px`}>
+		{
+			ticks.map((t) => (
+				<div class:list={["radar-gridline", { "is-axis": t.v === 0 }]} style={`top: ${yv(t.v)}%`}>
+					<span>{t.label}</span>
+				</div>
+			))
+		}
+		<svg class="trend-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+			<polygon points={area} fill="var(--radar-line)" fill-opacity="0.1"></polygon>
+			<polyline
+				points={line}
+				fill="none"
+				stroke="var(--radar-line)"
+				stroke-width="2"
+				stroke-linejoin="round"
+				stroke-linecap="round"
+				vector-effect="non-scaling-stroke"></polyline>
+		</svg>
+		<div class="trend-dot" style={`left: ${x(points.length - 1)}%; top: ${yv(last.value)}%`}></div>
+		{
+			endLabel && (
+				<div class="trend-label" style={`left: ${x(points.length - 1)}%; top: ${yv(last.value)}%`}>
+					{format(last.value)}
+				</div>
+			)
+		}
+		<div class="radar-bands">
+			{
+				points.map((p) => (
+					<div
+						class="radar-band"
+						data-tip={tip({
+							title: p.n === undefined ? p.label : `${p.label} · ${p.n} releases`,
+							rows: [[what, format(p.value), "#2a78d6"]],
+						})}
+					/>
+				))
+			}
+		</div>
+	</div>
+	<div class:list={["radar-years", { "trend-years": endLabel }]}>
+		{years.map((g) => <div style={`grid-column: span ${g.span}`}>{g.span > 1 ? `’${g.year.slice(2)}` : ""}</div>)}
+	</div>
+	<details class="radar-table mt-3">
+		<summary>Show as table</summary>
+		<div class="overflow-x-auto">
+			<table>
+				<tbody>
+					{
+						points.map((p) => (
+							<tr>
+								<td>{p.label}</td>
+								<td>{format(p.value)}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</details>
+</figure>
+
+<style>
+	.trend-plot,
+	.trend-years {
+		margin-right: 26px;
+	}
+	.trend-svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+	}
+	.trend-dot {
+		position: absolute;
+		width: 12px;
+		height: 12px;
+		margin: -6px 0 0 -6px;
+		border-radius: 50%;
+		background: var(--radar-line);
+		border: 2px solid var(--radar-surface);
+	}
+	.trend-label {
+		position: absolute;
+		transform: translate(10px, -50%);
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 16px;
+		color: var(--radar-ink);
+		white-space: nowrap;
+	}
+</style>
