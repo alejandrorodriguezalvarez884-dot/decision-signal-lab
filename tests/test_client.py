@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from decisionsignal.client import BudgetExceeded, Cache, DecisionClient, payload, request_key
+from decisionsignal.client import BudgetExceeded, Cache, DecisionClient, estimate_tokens, payload, request_key
 from decisionsignal.questions import REACTION_QUESTIONS
 from decisionsignal.score import flatten_answer
 
@@ -75,6 +75,14 @@ def test_spend_is_billed_at_the_documented_price(tmp_path):
     c = _client(tmp_path, lambda req: httpx.Response(200, json=ANSWER))
     c.call(payload({"s": 1}, REACTION_QUESTIONS))
     assert c.spend.usd == pytest.approx(1000 * 0.04 / 1e6)
+
+
+def test_estimate_counts_the_state_once_per_question():
+    # Billing observed on the real API: the text is charged again for every question asked.
+    text = {"press_release": "word " * 2000}
+    one = dict(list(REACTION_QUESTIONS.items())[:1])
+    ratio = estimate_tokens(payload(text, REACTION_QUESTIONS)) / estimate_tokens(payload(text, one))
+    assert ratio == pytest.approx(len(REACTION_QUESTIONS), rel=0.1)
 
 
 def test_retries_on_429(tmp_path, monkeypatch):

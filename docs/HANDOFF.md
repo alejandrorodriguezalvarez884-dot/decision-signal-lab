@@ -40,13 +40,18 @@ inglés.
 | Hecho | Pendiente |
 |---|---|
 | Pipeline completo (`src/decisionsignal/`), CLI `decisionsignal` | Validar el parser de EDGAR con filings **reales** |
-| 36 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Perplexity simulado, estadística y e2e sintético | Primera llamada real a Perplexity: confirmar el formato de respuesta y el `usage` (los tests usan el ejemplo de su documentación) |
+| 41 tests en verde: cronología y look-ahead, texto, anonimización, cliente de Perplexity simulado, estadística y e2e sintético | Primera llamada real a Perplexity: confirmar el formato de respuesta y el `usage` (los tests usan el ejemplo de su documentación) |
 | Descarga de precios (yfinance) probada con datos reales | Piloto con datos reales (~30 eventos de 2024 S2) |
 | Pre-registro **en borrador** (`docs/PREREGISTRATION.md`) | Ajustar preguntas en el split de diseño, cerrar el pre-registro y `decisionsignal lock` |
 | Repo en GitHub: `alejandrorodriguezalvarez884-dot/decision-signal-lab` | Escala completa: requiere **aprobación de coste** del usuario |
 | Cliente adaptado a Perplexity Decider (único proveedor, fijado en `config.py`) | |
-| Piloto sin modelo ejecutado dos veces el 2026-10-04 (14 empresas, 30 filings, 29 eventos de 2024 S2): horas de EDGAR, sesiones y retornos revisados y correctos. Estimación del piloto con modelo: $0.0205 | Piloto con modelo: pedir permiso al usuario con esa estimación |
+| Piloto sin modelo ejecutado dos veces el 2026-10-04 (14 empresas, 30 filings, 29 eventos de 2024 S2): horas de EDGAR, sesiones y retornos revisados y correctos. Estimación del piloto con modelo: $0.0205 | |
 | Limpieza de texto corregida tras el primer piloto (`text.py`): la narrativa se corta en el primer estado financiero y se quitan secciones legales con títulos largos, mobiliario de página, contactos y notas de tablas. Texto mediano de 15.4k a 8.1k caracteres; total al 66 % | Anonimización: rompe nombres de producto ("the Company Watch") y deja frases como "the Company CEO". Sin arreglar |
+| Piloto con Perplexity hecho el 2026-10-04: 175 peticiones, 0 errores, formato de respuesta y `usage` confirmados, $0.108 reales frente a $0.0205 estimados. Causa: la API cobra el texto una vez por pregunta. Estimador corregido | |
+| Recortes por coste decididos por el usuario (tope total de $10, `DECIDER_TOTAL_MAX_USD`): universo S&P 100 de diciembre de 2020 (99 empresas con datos), 8 + 3 preguntas, variantes sin anonimizar solo en el 15 % de los eventos | Lanzar el diseño: `score --split design --n-cf 300`, estimado en $3.11. Requiere el visto bueno del usuario y subir `DECIDER_MAX_USD` (ahora 1.00) |
+| Descarga completa del S&P 100 hecha el 2026-10-04: 2.371 filings, 2.350 textos, 2.291 eventos (1.585 diseño, 706 holdout). Estimación del holdout: $1.19 | Antes de lanzar el diseño, borrar `data/interim/answers.parquet` (respuestas del piloto con las preguntas antiguas; siguen en la caché) |
+| | Limpieza de texto a escala: 246 de 2.291 textos (11 %) llegan al tope de 24k caracteres y 95 conservan algún "(Unaudited)". Peor que en el piloto; sin arreglar |
+| | Diseño de la pregunta principal: en el piloto el modelo nunca elige "worse" (P máxima 0.35) y `react_anon__nvr` correlaciona −0.72 con la reacción del día 0. Puede ser solo una apuesta de reversión; revisar en el split de diseño antes del lock |
 | | Los 2 comunicados de ABNB (PDF con líneas partidas) siguen llegando al tope de 24k caracteres; uno conserva el inicio de la sección legal |
 
 ### Lo que falta que aporte el usuario
@@ -97,7 +102,7 @@ uv run pytest           # debe salir todo en verde
    - **Eventos:** en `data/interim/events.parquet`, que `r0_abn` y `fwd_abn_*` cuadran con
      algún caso conocido. Por ejemplo, AAPL publicó el 31-10-2024 tras el cierre, así que el
      día 0 es el 1-11 y la entrada el 4-11.
-2. **Piloto con el modelo** (estimado en menos de $0.10, dentro del tope por defecto `DECIDER_MAX_USD=1.00`):
+2. **Piloto con el modelo** (hecho el 2026-10-04; costó $0.108, dentro del tope por defecto `DECIDER_MAX_USD=1.00`):
    ```bash
    uv run decisionsignal pilot
    ```
@@ -113,7 +118,8 @@ uv run pytest           # debe salir todo en verde
    3. **Enseñar la estimación al usuario y esperar su aprobación.**
    4. Subir `DECIDER_MAX_USD` a lo aprobado y lanzar `score --split design --n-cf 300`.
    5. `report`.
-   - Coste esperado de todo el estudio: unos $12–16 de API y 1–2 GB de EDGAR. La descarga de
+   - Coste esperado de todo el estudio: unos $35–40 de API (el texto se cobra una vez por
+     pregunta) y 1–2 GB de EDGAR. La descarga de
      EDGAR también requiere el visto bueno del usuario.
 5. Iterar las preguntas **solo** con datos del split de diseño. Después:
    1. Cerrar `docs/PREREGISTRATION.md` (quitar "BORRADOR").
@@ -137,7 +143,8 @@ Detalle completo en [METHODOLOGY.md](METHODOLOGY.md).
     que *abre* después de la publicación).
   - La entrada es la apertura de la sesión siguiente al día 0.
   - Todo lo que ve el modelo termina en el cierre del día 0.
-- **Universo:** S&P 500 histórico (fja05680/sp500, licencia MIT). Riesgo de supervivencia:
+- **Universo:** S&P 100 a 21-12-2020 (lista fija en `config.py`), con la pertenencia histórica
+  al S&P 500 (fja05680/sp500, licencia MIT). Decisión del usuario para abaratar el estudio. Riesgo de supervivencia:
   medido, no eliminado.
 - **Modelo:** fijado en `pplx-decider-v1-27b` (Perplexity), sin alternativa configurable.
 - **Señal principal:** `react_anon__nvr` = P(better) − P(worse), con texto anonimizado más la

@@ -39,8 +39,8 @@ def build_panel() -> pd.DataFrame:
     feats = wide_features(answers)
     feats.to_parquet(PATHS.features, index=False)
     p = events[events["drop_reason"].isna()].merge(texts, on="accessionNumber").merge(feats, on="accessionNumber", how="left")
-    if "text_raw__is_earnings_release" in p:
-        p["is_earnings"] = p["text_raw__is_earnings_release"].fillna(0) >= 0.5
+    if "text_anon__is_earnings_release" in p:
+        p["is_earnings"] = p["text_anon__is_earnings_release"].fillna(0) >= 0.5
     else:
         p["is_earnings"] = p["text"].map(looks_like_earnings_release)
     p = p[p["is_earnings"]].reset_index(drop=True)
@@ -98,6 +98,11 @@ def contamination(d: pd.DataFrame) -> dict:
                 "probe__outperform_next_month"):
         if sig in d and d[sig].notna().any():
             out[sig] = A.fama_macbeth_ic(d, sig, PRIMARY_TARGET, PRIMARY_HORIZON)
+    # Raw variants cover a sample of events; compare masked against raw on those same events.
+    for raw, anon in (("react_raw__nvr", "react_anon__nvr"), ("text_raw__composite", "text_anon__composite")):
+        if raw in d and anon in d and d[raw].notna().any():
+            same = d[d[raw].notna()]
+            out[f"{anon}__on_raw_sample"] = A.fama_macbeth_ic(same, anon, PRIMARY_TARGET, PRIMARY_HORIZON)
     if "probe__outperform_next_quarter" in d:
         out["probe__outperform_next_quarter_vs_fwd60"] = A.fama_macbeth_ic(d, "probe__outperform_next_quarter", "fwd_abn_60", 60)
     by_year = []

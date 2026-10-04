@@ -8,6 +8,7 @@ import pandas as pd
 from . import questions as Q
 from .anonymize import anonymize
 from .client import DecisionClient, payload
+from .config import in_raw_sample
 from .prereg import assert_locked
 
 # Variant name -> what the model sees.
@@ -15,6 +16,9 @@ from .prereg import assert_locked
 #   react_raw / react_anon     press release + day-0 reaction sentence     <- react_anon is PRIMARY
 #   probe                      company, date and reaction, NO press release (memorization probe)
 #   cf_*                       masked text + a counterfactual reaction (sensitivity check)
+# The raw variants exist only to compare against the masked ones (memorization check), so they
+# are sent for a fixed sample of events: see config.RAW_SAMPLE_FRACTION.
+RAW_VARIANTS = ("text_raw", "react_raw")
 MAIN_VARIANTS = ("text_raw", "text_anon", "react_raw", "react_anon", "probe")
 CF_VARIANTS = tuple(Q.COUNTERFACTUAL_REACTIONS)
 
@@ -31,7 +35,10 @@ def build_payloads(events: pd.DataFrame, variants: tuple[str, ...]) -> list[tupl
     for _, ev in events.iterrows():
         raw, anon = _texts_for(ev)
         sentence = Q.describe_reaction(ev["r0_abn"], ev["r0_z"])
+        send_raw = in_raw_sample(ev["accessionNumber"])
         for v in variants:
+            if v in RAW_VARIANTS and not send_raw:
+                continue
             if v == "text_raw":
                 state, qs = Q.text_request(raw)
             elif v == "text_anon":

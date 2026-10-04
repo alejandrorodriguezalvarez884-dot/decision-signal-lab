@@ -23,7 +23,7 @@ def step_universe(end: date) -> pd.DataFrame:
     uni = build_universe(end)
     cov = coverage_report(uni)
     (RESULTS / "coverage_universe.json").write_text(json.dumps(cov, indent=2))
-    print(f"universe: {cov['spells']} spells, {cov['mapped_to_cik']} mapped to CIK, "
+    print(f"universe: {cov['companies']} S&P 100 companies, {cov['spells']} spells, {cov['mapped_to_cik']} mapped to CIK, "
           f"{len(cov['unmapped_tickers'])} unmapped tickers (see results/coverage_universe.json)")
     return uni
 

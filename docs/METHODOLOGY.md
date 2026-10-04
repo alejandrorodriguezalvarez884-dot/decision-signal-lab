@@ -17,7 +17,7 @@ todas las carteras son de papel.
 |---|---|---|
 | Texto | EDGAR: 8-K con Item 2.02, exhibit EX-99 (normalmente el 99.1) | Gratuito, de dominio público y con hora de aceptación exacta |
 | Momento de publicación | Hora "Accepted" de la página índice del filing (hora del Este de EE. UU.) | Es conservador: el mismo comunicado suele salir antes por agencia, nunca después |
-| Universo | Composición histórica del S&P 500 ([fja05680/sp500](https://github.com/fja05680/sp500), MIT) | Evita usar los miembros actuales para el pasado |
+| Universo | Las 100 empresas del S&P 100 a 21 de diciembre de 2020 (lista en `config.py`, tomada del historial de Wikipedia) mientras sigan en el S&P 500 ([fja05680/sp500](https://github.com/fja05680/sp500), MIT) | La lista se fija antes de la ventana del estudio: no se eligen empresas por cómo les fue después. Se usa el S&P 100 y no el S&P 500 por coste |
 | Ticker → CIK | `company_tickers.json` de la SEC más una tabla de cambios de ticker | Solo conoce tickers actuales (ver limitaciones) |
 | Precios | Yahoo Finance (yfinance), diarios y ajustados | Gratis. Se toman la acción, SPY y los ETF sectoriales SPDR |
 | Baseline léxico | Diccionario Loughran-McDonald (`pysentiment2`) | Es el estándar en finanzas |
@@ -47,15 +47,21 @@ durante la sesión, después del cierre y en fin de semana, y la media sesión d
 
 ## Qué hace el modelo
 
-Por cada evento se hacen cinco variantes, cada una en una sola llamada con todas sus preguntas
-(definidas en `src/decisionsignal/questions.py`):
+Por cada evento se hacen hasta cinco variantes, cada una en una sola llamada con todas sus
+preguntas (definidas en `src/decisionsignal/questions.py`: 8 de solo texto, 3 con reacción y 2
+de sonda):
 
 | Variante | Qué ve el modelo | Para qué |
 |---|---|---|
-| `text_raw` / `text_anon` | Solo el comunicado | Rasgos del texto: guidance, tono, demanda, márgenes, extraordinarios… |
+| `text_raw` / `text_anon` | Solo el comunicado | Rasgos del texto: guidance, fuerza de resultados, tono, incertidumbre, demanda, márgenes |
 | `react_raw` / `react_anon` | Comunicado + frase con la reacción | **Juicio principal:** ¿la noticia es mejor o peor de lo que refleja el precio? |
 | `probe` | Empresa, fecha y reacción, **sin comunicado** | Sonda de memoria |
 | `cf_*` (submuestra) | Comunicado anonimizado + reacciones inventadas | ¿Usa el modelo realmente la reacción? |
+
+Las variantes `*_raw` (sin anonimizar) solo sirven para la comprobación de memoria, así que se
+envían para una muestra fija del 15 % de los eventos (`RAW_SAMPLE_FRACTION`). La muestra sale
+de un hash del número de filing, no de los datos, y queda fijada en `config.py`. El recorte es
+por coste.
 
 Al modelo se le pregunta por lenguaje, no por aritmética, así que el código traduce la reacción a
 palabras ("cerró un 7.1 % por debajo del mercado: un movimiento negativo grande para lo habitual
@@ -109,11 +115,20 @@ defensas:
 
 - **Precio:** $0.04 por millón de tokens de entrada; la salida no se cobra (docs de Perplexity,
   2026-10).
-- **Escala completa:** ~11k eventos × 5 variantes × ~7k tokens ≈ 300–400M tokens ≈ **$12–16**,
-  más una submuestra contrafactual.
+- **Cómo se factura (medido en el piloto, 2026-10-04):** el texto se cobra **una vez por
+  pregunta**. Una petición con 13 preguntas cuesta unas 13 veces su texto. El estimador
+  (`estimate_tokens`) lo tiene en cuenta y queda un 16 % por encima de lo facturado.
+- **Escala completa:** el piloto costó $0.108 por 29 eventos (≈ $0.0033 por evento con 13 + 4
+  preguntas y todas las variantes). Con el S&P 500 entero (~11k eventos) serían unos $35–40.
+- **Recortes por coste (2026-10-04):** S&P 100 en lugar de S&P 500 (2.291 eventos: 1.585 de
+  diseño y 706 de holdout), 8 + 3 preguntas en lugar de 13 + 4, y variantes sin anonimizar solo
+  en el 15 % de los eventos. Estimación: **$3.11 el diseño** (con 300 contrafactuales) y
+  **$1.19 el holdout**, $4.30 en total.
 - **Controles:**
   - `decisionsignal estimate` da el coste antes de gastar nada.
-  - `DECIDER_MAX_USD` es un tope duro: el cliente rechaza el lote si la estimación lo supera y se
+  - `DECIDER_TOTAL_MAX_USD` (10 $) es el techo de todo lo gastado en la vida del proyecto,
+    contando lo ya pagado en ejecuciones anteriores.
+  - `DECIDER_MAX_USD` es un tope duro por ejecución: el cliente rechaza el lote si la estimación lo supera y se
     detiene si el gasto real lo cruza.
   - Toda respuesta se guarda en `data/cache/decision_cache.sqlite` y nunca se paga dos veces.
 - **Versión del modelo:** fijada en el código en `pplx-decider-v1-27b`, el único modelo que

@@ -1,4 +1,5 @@
-"""Point-in-time S&P 500 membership and ticker -> SEC CIK mapping.
+"""The study universe (S&P 100 as of December 2020), its point-in-time S&P 500 membership and
+the ticker -> SEC CIK mapping.
 
 Membership: github.com/fja05680/sp500 (MIT), one row per membership spell
 (ticker, start_date, end_date). Using spells instead of today's constituents removes the
@@ -15,7 +16,7 @@ from datetime import date
 
 import pandas as pd
 
-from .config import PATHS, STUDY_START, sec_user_agent
+from .config import PATHS, SP100_DEC_2020, STUDY_START, sec_user_agent
 from .http import cached_get
 
 MEMBERSHIP_URL = (
@@ -60,6 +61,7 @@ TICKER_RENAMES = {
     "NLOK": "GEN",
     "ADS": "BFH",
     "COG": "CTRA",
+    "BK": "BNY",
 }
 
 
@@ -76,10 +78,17 @@ def spells_overlapping(membership: pd.DataFrame, start: date, end: date) -> pd.D
     return m[(m["start_date"] <= e) & (m["end_date"] >= s)]
 
 
+def restrict_to_sp100(spells: pd.DataFrame) -> pd.DataFrame:
+    """Keep the spells of the companies in the fixed S&P 100 list, under any ticker they have
+    used (the list says FB; the later META spell belongs to the same company)."""
+    wanted = {normalize_ticker(t) for t in SP100_DEC_2020}
+    return spells[spells["ticker"].map(normalize_ticker).isin(wanted)]
+
+
 def build_universe(end: date | None = None) -> pd.DataFrame:
     """One row per membership spell in the study window, with CIK when it can be mapped."""
     end = end or date.today()
-    spells = spells_overlapping(load_membership(), STUDY_START, end).copy()
+    spells = restrict_to_sp100(spells_overlapping(load_membership(), STUDY_START, end)).copy()
     spells["key"] = spells["ticker"].map(normalize_ticker)
     sec = load_sec_tickers()
     sec["key"] = sec["ticker"].map(normalize_ticker)
@@ -94,6 +103,7 @@ def build_universe(end: date | None = None) -> pd.DataFrame:
 def coverage_report(uni: pd.DataFrame) -> dict:
     mapped = uni["cik"].notna()
     return {
+        "companies": int(uni["cik"].nunique()),
         "spells": int(len(uni)),
         "mapped_to_cik": int(mapped.sum()),
         "unmapped_tickers": sorted(uni.loc[~mapped, "ticker"].unique().tolist()),

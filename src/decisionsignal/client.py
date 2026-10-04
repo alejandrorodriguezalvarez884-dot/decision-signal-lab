@@ -28,6 +28,7 @@ from .config import (
     PATHS,
     max_usd,
     perplexity_api_key,
+    total_max_usd,
 )
 from .http import RateLimiter
 
@@ -41,8 +42,11 @@ def request_key(p: dict) -> str:
 
 
 def estimate_tokens(p: dict) -> int:
-    body = json.dumps({"state": p["state"], "questions": p["questions"]}, ensure_ascii=False)
-    return int(len(body) / CHARS_PER_TOKEN_ESTIMATE) + 50
+    # The API bills the state once per question: on the 2024 pilot, billed input tokens tracked
+    # len(state) * number of questions, so a 13-question request costs about 13 times its text.
+    state = len(json.dumps(p["state"], ensure_ascii=False))
+    questions = len(json.dumps(p["questions"], ensure_ascii=False))
+    return int((state * max(1, len(p["questions"])) + questions) / CHARS_PER_TOKEN_ESTIMATE) + 50
 
 
 def estimate_usd(payloads: list[dict]) -> float:
@@ -91,7 +95,9 @@ class BudgetExceeded(RuntimeError):
 
 @dataclass
 class Spend:
-    cap_usd: float
+    cap_usd: float  # per run
+    total_cap_usd: float = float("inf")  # over the life of the project
+    prior_usd: float = 0.0  # already paid in earlier runs (everything in the cache)
     input_tokens: int = 0
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
@@ -102,6 +108,9 @@ class Spend:
     def check(self) -> None:
         if self.usd > self.cap_usd:
             raise BudgetExceeded(f"spent ${self.usd:.4f} > cap ${self.cap_usd:.2f}")
+        if self.prior_usd + self.usd > self.total_cap_usd:
+            raise BudgetExceeded(
+                f"total spend ${self.prior_usd + self.usd:.4f} > DECIDER_TOTAL_MAX_USD=${self.total_cap_usd:.2f}")
 
     def add(self, tokens: int) -> None:
         with self._lock:
@@ -111,13 +120,18 @@ class Spend:
 
 class DecisionClient:
     def __init__(self, cache: Cache | None = None, transport: httpx.BaseTransport | None = None,
-                 cap_usd: float | None = None, api_key: str | None = None):
+                 cap_usd: float | None = None, api_key: str | None = None,
+                 total_cap_usd: float | None = None):
         self.cache = cache or Cache()
         self._api_key = api_key
         self._transport = transport
         self._http: httpx.Client | None = None
         self.limiter = RateLimiter(DECIDER_MAX_RPS)
-        self.spend = Spend(cap_usd if cap_usd is not None else max_usd())
+        self.spend = Spend(
+            cap_usd if cap_usd is not None else max_usd(),
+            total_cap_usd if total_cap_usd is not None else total_max_usd(),
+            self.cache.total_input_tokens() * DECIDER_PRICE_PER_INPUT_TOKEN,
+        )
 
     @property
     def http(self) -> httpx.Client:
@@ -165,6 +179,11 @@ class DecisionClient:
             raise BudgetExceeded(
                 f"estimated ${est:.4f} exceeds DECIDER_MAX_USD=${self.spend.cap_usd:.2f}; raise the cap "
                 "explicitly after approving the cost"
+            )
+        if self.spend.prior_usd + est > self.spend.total_cap_usd:
+            raise BudgetExceeded(
+                f"${self.spend.prior_usd:.4f} already spent plus an estimated ${est:.4f} exceeds "
+                f"DECIDER_TOTAL_MAX_USD=${self.spend.total_cap_usd:.2f}"
             )
         results: list[dict | None] = [None] * len(payloads)
         pool = ThreadPoolExecutor(DECIDER_CONCURRENCY)

@@ -52,14 +52,6 @@ TEXT_QUESTIONS: dict[str, dict] = {
         "instructions": "How much uncertainty or caution about the future does management express in `press_release`?",
         "criteria": ["None", "A little", "A moderate amount", "A lot"],
     },
-    "one_time_items": {
-        "type": "noul",
-        "instructions": "Do the results in `press_release` include significant one-time charges, impairments, or write-downs?",
-    },
-    "restructuring": {
-        "type": "noul",
-        "instructions": "Does `press_release` announce restructuring, layoffs, or a cost-cutting program?",
-    },
     "demand_weakness": {
         "type": "noul",
         "instructions": "Does `press_release` describe weakening customer demand, orders, or bookings?",
@@ -67,18 +59,6 @@ TEXT_QUESTIONS: dict[str, dict] = {
     "margin_pressure": {
         "type": "noul",
         "instructions": "Does `press_release` describe declining or pressured profit margins?",
-    },
-    "exec_departure": {
-        "type": "noul",
-        "instructions": "Does `press_release` announce that the CEO or CFO is leaving?",
-    },
-    "capital_return": {
-        "type": "noul",
-        "instructions": "Does `press_release` announce a new or larger share buyback or dividend?",
-    },
-    "transitory_driver": {
-        "type": "noul",
-        "instructions": "Is the main news in `press_release` caused by temporary or one-time factors rather than lasting changes in the business?",
     },
     # Deliberately naive: asks for the market outcome directly. Kept as a reference point.
     "naive_reaction": {
@@ -112,10 +92,6 @@ REACTION_QUESTIONS: dict[str, dict] = {
     "underappreciated_longterm": {
         "type": "noul",
         "instructions": "Does `press_release` contain news about the company's long-term prospects that `initial_market_reaction` does not reflect?",
-    },
-    "direction_consistent": {
-        "type": "noul",
-        "instructions": "Does the direction of `initial_market_reaction` match the tone of the news in `press_release`?",
     },
 }
 

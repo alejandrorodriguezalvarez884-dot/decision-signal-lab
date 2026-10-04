@@ -15,7 +15,7 @@ Si el resultado es "no hay señal", se dirá así.
 
 ## Cómo funciona
 
-1. **Texto:** comunicados de resultados de empresas del S&P 500 (8-K Item 2.02, EX-99.1) desde
+1. **Texto:** comunicados de resultados de empresas del S&P 100 (8-K Item 2.02, EX-99.1) desde
    2021, sacados de EDGAR con su hora exacta de aceptación.
 2. **Reacción:** retorno anormal del día 0 (primera sesión completa tras la publicación) frente
    a SPY, escalado por la volatilidad normal de la acción.
@@ -49,7 +49,7 @@ Las claves solo viven en `.env`, que git ignora, o en variables de entorno. Nunc
 
 ```bash
 uv run decisionsignal pilot --skip-model   # piloto con datos reales sin llamar al modelo (~30 eventos de 2024 S2)
-uv run decisionsignal pilot                # piloto completo (< $0.10 de API)
+uv run decisionsignal pilot                # piloto completo (~$0.11 de API)
 ```
 
 Escala completa, paso a paso (cada paso escribe en `data/interim/` y se puede repetir):
@@ -76,7 +76,7 @@ Los resultados van a `results/`: `report.md`, `results.json`, figuras e informes
 ```
 src/decisionsignal/
   config.py      constantes del estudio (fechas, horizontes, precios, límites)
-  universe.py    S&P 500 en cada fecha + CIK
+  universe.py    S&P 100 de diciembre de 2020 + CIK
   edgar.py       8-K Item 2.02, hora de aceptación, EX-99
   text.py        HTML -> narrativa (sin tablas ni texto legal)
   anonymize.py   oculta empresa, ticker y fechas
