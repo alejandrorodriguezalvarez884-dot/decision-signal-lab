@@ -6,16 +6,18 @@
 
 <style is:global>
 	.radar {
-		--radar-surface: #1e222d;
-		--radar-ink: #f0f3fa;
-		--radar-ink-2: #d1d4dc;
-		--radar-muted: #868993;
-		--radar-grid: #2a2e39;
-		--radar-axis: #363a45;
-		--radar-up: #2962ff;
-		--radar-down: #f23645;
-		--radar-neutral: #5d606b;
-		--radar-line: #2962ff;
+		/* The site's tokens. A reading is drawn in the ink itself; green and red are kept for
+		   guidance that was raised or lowered, the one thing here with a direction. */
+		--radar-surface: var(--color-page);
+		--radar-ink: var(--color-ink-strong);
+		--radar-ink-2: var(--color-ink);
+		--radar-muted: var(--color-muted);
+		--radar-grid: var(--color-line);
+		--radar-axis: var(--color-line-strong);
+		--radar-up: var(--color-up);
+		--radar-down: var(--color-down);
+		--radar-neutral: var(--color-faint);
+		--radar-line: var(--color-ink-strong);
 		--radar-gutter: 40px; /* room for the value labels left of a plot */
 	}
 	.radar-words {
@@ -221,15 +223,15 @@
 		max-width: 260px;
 		padding: 8px 10px;
 		border-radius: 6px;
-		border: 1px solid #363a45;
-		background: #2a2e39;
-		color: #f0f3fa;
+		border: 1px solid #3a3e42;
+		background: #222528;
+		color: #f2f0ea;
 		font-size: 12px;
 		line-height: 1.45;
 		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 	}
 	#radar-tip .tip-title {
-		color: #b2b5be;
+		color: #a9a7a1;
 		margin-bottom: 4px;
 	}
 	#radar-tip .tip-row {
@@ -250,7 +252,7 @@
 		align-self: center;
 	}
 	#radar-tip .tip-row span {
-		color: #b2b5be;
+		color: #a9a7a1;
 	}
 </style>
 

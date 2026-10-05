@@ -45,115 +45,58 @@ const teaser = ["raised", "strong", "margin_pressure", "tariffs"]
 	title="Analyse a company's latest results"
 	description="Type any company that files with the SEC. Its latest results release is fetched from EDGAR and read on the spot by a decision model: guidance, results, outlook, margins, demand and themes, as probabilities."
 >
-	<section class="mx-auto max-w-3xl pt-4 text-center sm:pt-10">
-		<p class="inline-flex items-center gap-2 rounded-full border border-line bg-panel px-3 py-1 text-xs font-medium text-muted">
-			<span class="live-dot" aria-hidden="true"></span>Runs live on the latest SEC filing
+	<section>
+		<h1 class="lede">What did the company just say in its results?</h1>
+		<p class="mt-5 max-w-2xl text-ink">
+			Type any company that reports to the SEC. Its latest results release is fetched from EDGAR and read on the spot
+			by a decision model that answers the same fixed questions for every company, with a probability for each answer.
 		</p>
-		<h1 class="mt-5  text-4xl font-semibold leading-tight text-ink-strong sm:text-5xl">
-			What did the company just say in its results?
-		</h1>
-		<p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-			Type any company that reports to the SEC. Its latest results release is fetched from EDGAR and read on the
-			spot by a decision model that answers fixed questions with probabilities.
-		</p>
-		<div class="mx-auto mt-8 max-w-2xl text-left">
+		<div class="mt-8 max-w-2xl">
 			<CompanySearch large autofocus />
 		</div>
-		<p class="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm text-muted">
+		<p class="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
 			<span>Try</span>
-			{
-				examples.map((e) => (
-					<a
-						href={analyse(e.ticker)}
-						class="rounded-full border border-line bg-panel px-3 py-1 text-ink transition-colors hover:border-faint hover:text-ink-strong"
-					>
-						{e.name}
-					</a>
-				))
-			}
+			{examples.map((e) => <a href={analyse(e.ticker)} class="link">{e.name}</a>)}
 		</p>
 	</section>
 
-	<section class="mt-16 grid gap-4 sm:mt-20 sm:grid-cols-3">
-		{
-			steps.map((s, i) => (
-				<div class="rounded-md border border-line bg-panel p-6">
-					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">{i + 1}</div>
-					<h2 class="mt-4  text-xl font-semibold text-ink-strong">{s.title}</h2>
-					<p class="mt-2 text-sm leading-relaxed text-muted">{s.text}</p>
-				</div>
-			))
-		}
-	</section>
+	<div class="mt-16 grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+		<section class="sec">
+			<h2 class="sec-title">What you get</h2>
+			<dl class="mt-2 divide-y divide-line">
+				{gets.map(([title, text]) => (
+					<div class="grid gap-x-6 gap-y-0.5 py-3 sm:grid-cols-[10rem_minmax(0,1fr)]"><dt class="text-ink-strong">{title}</dt><dd class="text-sm text-muted">{text}</dd></div>
+				))}
+			</dl>
+		</section>
+		<section class="sec self-start">
+			<div class="sec-head"><h2 class="sec-title">How a reading is made</h2><a href={link("/method/")} class="sec-note hover:text-ink-strong">The questions, word for word →</a></div>
+			<ol class="divide-y divide-line">
+				{steps.map((s, i) => (
+					<li class="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3 py-3"><span class="num text-[13px] text-muted">{i + 1}</span>
+						<span><span class="block text-ink-strong">{s.title}</span><span class="block text-sm text-muted">{s.text}</span></span></li>
+				))}
+			</ol>
+		</section>
+	</div>
 
-	<section class="mt-6 rounded-md border border-line bg-panel p-6 sm:p-8">
-		<h2 class="text-xl font-semibold text-ink-strong">What you get</h2>
-		<dl class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-			{
-				gets.map(([title, text]) => (
-					<div class="border-l-2 border-line pl-4">
-						<dt class="text-sm font-semibold text-ink-strong">{title}</dt>
-						<dd class="mt-1 text-sm leading-relaxed text-muted">{text}</dd>
-					</div>
-				))
-			}
-			<div class="border-l-2 border-line pl-4">
-				<dt class="text-sm font-semibold text-ink-strong">How it was done</dt>
-				<dd class="mt-1 text-sm leading-relaxed text-muted">
-					Every step of the run as it happens, and the questions word for word on the{" "}
-					<a href={link("/method/")} class="underline hover:text-ink-strong">method page</a>.
-				</dd>
-			</div>
-		</dl>
-	</section>
-
-	<section class="mt-6 rounded-md border border-line bg-panel p-6 sm:p-8">
-		<div class="flex flex-wrap items-end justify-between gap-3">
-			<div>
-				<h2 class="text-xl font-semibold text-ink-strong">Market trends</h2>
-				<p class="mt-1 text-sm text-muted">
-					The same reading over {m.releases.toLocaleString("en-US")} releases from {m.companies} large companies since 2021.
-					Releases published in {quarterLabel(lastFull.quarter)}:
-				</p>
-			</div>
-			<a href={link("/trends/")} class="text-sm font-medium text-ink-strong underline underline-offset-4 hover:text-muted">
-				See all trends
-			</a>
+	<section class="sec mt-14">
+		<div class="sec-head">
+			<h2 class="sec-title">Market trends</h2>
+			<a href={link("/trends/")} class="sec-note hover:text-ink-strong">All trends →</a>
 		</div>
-		<div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-			{
-				teaser.map((s) => (
-					<a href={link("/trends/")} class="rounded-md border border-line p-4 transition-colors hover:border-faint">
-						<div class="text-xs leading-snug text-muted">{s.title}</div>
-						<div class="mt-2 text-3xl font-semibold tabular-nums text-ink-strong">{pct(s.value(lastFull))}</div>
-						{prev && <div class="mt-1 text-xs text-muted">{deltaText(s.value(lastFull), s.value(prev), quarterLabel(prev.quarter))}</div>}
-					</a>
-				))
-			}
+		<p class="max-w-3xl text-sm text-muted">
+			The same reading over {m.releases.toLocaleString("en-US")} releases from {m.companies} large companies since 2021.
+			Releases published in {quarterLabel(lastFull.quarter)}:
+		</p>
+		<div class="mt-6 grid grid-cols-2 gap-x-10 gap-y-8 lg:grid-cols-4">
+			{teaser.map((s) => (
+				<a href={link("/trends/")} class="group block">
+					<div class="text-[13px] text-muted group-hover:text-ink-strong">{s.title}</div>
+					<div class="num mt-1 text-[2rem] leading-none text-ink-strong">{pct(s.value(lastFull))}</div>
+					{prev && <div class="mt-2 text-[12.5px] text-muted">{deltaText(s.value(lastFull), s.value(prev), quarterLabel(prev.quarter))}</div>}
+				</a>
+			))}
 		</div>
 	</section>
 </Page>
-
-<style>
-	.live-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: #2962ff;
-		box-shadow: 0 0 0 0 rgba(41, 98, 255, 0.5);
-		animation: live-pulse 1.8s infinite;
-	}
-	@keyframes live-pulse {
-		70% {
-			box-shadow: 0 0 0 7px rgba(41, 98, 255, 0);
-		}
-		100% {
-			box-shadow: 0 0 0 0 rgba(41, 98, 255, 0);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.live-dot {
-			animation: none;
-		}
-	}
-</style>

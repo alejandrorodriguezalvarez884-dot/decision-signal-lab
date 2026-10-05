@@ -4,6 +4,14 @@
 export const REPO_URL = "https://github.com/alejandrorodriguezalvarez884-dot/decision-signal-lab";
 export const AUTHOR_URL = "https://alejandrorodriguez.dev";
 
+// Inside Market Hub the radar is one of the portal's sections: its header is the portal's, and an
+// analysis links to the same company's price page and numbers.
+const site = (v: string | undefined, fallback: string) => (v ?? fallback).replace(/\/$/, "");
+export const HUB_URL = site(import.meta.env.PUBLIC_HUB_URL, "https://themarkethub.app");
+export const FUNDAMENTALS_URL = site(import.meta.env.PUBLIC_FUNDAMENTALS_URL, "https://fundamentals.themarkethub.app");
+export const hubQuoteUrl = (ticker: string) => `${HUB_URL}/quote/?t=${encodeURIComponent(ticker)}`;
+export const fundamentalsUrl = (ticker: string) => `${FUNDAMENTALS_URL}/stock/?t=${encodeURIComponent(ticker)}`;
+
 // Internal links carry the base path the site is published under.
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 export const link = (path: string) => `${BASE}${path}`;

@@ -99,10 +99,10 @@ const charts = [
 		<p class="mt-2 text-sm text-muted">
 			{company.n} results releases, from {fmtDate(history[0].date)} to {fmtDate(rows[0].date)}.
 		</p>
-		<div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border border-line bg-panel p-4 sm:p-5">
+		<div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 sec">
 			<a
 				href={`${link("/analyze/")}?ticker=${company.ticker}`}
-				class="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-strong"
+				class="btn btn-primary"
 			>
 				Analyse the latest results live
 			</a>
@@ -113,7 +113,7 @@ const charts = [
 	<section class="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
 		{
 			tiles.map((t) => (
-				<div class="rounded-md border border-line bg-panel p-5">
+				<div class="sec">
 					<div class="text-sm leading-snug text-muted">{t.label}</div>
 					<div class="mt-2 text-3xl font-semibold tabular-nums text-ink-strong">
 						{t.n} <span class="text-base font-normal text-faint">of {history.length}</span>
@@ -129,13 +129,13 @@ const charts = [
 		<div class="chart-grid mt-4 grid gap-4 md:grid-cols-2">
 			{
 				charts.map((c) => (
-					<div class="min-w-0 rounded-md border border-line bg-panel p-6">
+					<div class="sec">
 						<TrendChart title={c.title} note={c.note} points={series(c.key)} max={1} ticks={c.ticks} format={c.format} what={c.what} height={220} words />
 					</div>
 				))
 			}
 		</div>
-		<div class="mt-4 overflow-x-auto rounded-md border border-line bg-panel">
+		<div class="mt-4 overflow-x-auto">
 			<table class="w-full text-sm">
 				<thead>
 					<tr class="border-b border-line text-left text-xs text-muted">

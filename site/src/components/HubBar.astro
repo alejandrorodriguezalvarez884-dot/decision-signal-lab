@@ -32,13 +32,11 @@
 		.then((r) => (r.ok ? (r.json() as Promise<Me>) : null))
 		.then((me) => {
 			if (!me?.hub) return;
-			const hubLink = el("a", "btn btn-ghost hidden py-1.5 sm:inline-flex", "My Hub");
+			const hubLink = el("a", "btn btn-ghost hidden sm:inline-flex", "My Hub");
 			hubLink.href = `${me.hub}/dashboard/`;
-			const back = el("a", "hidden text-xs font-semibold text-muted hover:text-ink-strong md:inline", "← Market Hub");
-			back.href = me.hub;
-			box.append(back, hubLink);
+			box.append(hubLink);
 			if (!me.user) return;
-			const pic = el("a", "flex h-8 w-8 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-sm font-semibold text-white");
+			const pic = el("a", "flex h-8 w-8 flex-none items-center justify-center overflow-hidden rounded-full bg-raised text-sm font-medium text-ink-strong ring-2 ring-transparent hover:ring-line-strong");
 			pic.href = `${me.hub}/account/`;
 			pic.title = `${me.user.name} · ${me.user.email}`;
 			const initial = me.user.name.charAt(0).toUpperCase();

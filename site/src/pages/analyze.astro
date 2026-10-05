@@ -2,7 +2,6 @@
 // The on-demand analysis. The page is an empty shell: the browser asks the API to read the
 // company's latest results release, shows each step as the server reports it and draws the answer.
 import Page from "../components/Page.astro";
-import CompanySearch from "../components/CompanySearch.astro";
 import { benchmark, summary } from "../lib/radar";
 
 const context = {
@@ -16,10 +15,7 @@ const context = {
 	title="Analyse a company"
 	description="Run the Earnings Radar reading on the latest results release of any company that files with the SEC."
 >
-	<div class="max-w-xl">
-		<CompanySearch />
-	</div>
-	<div id="analysis" class="mt-8" data-context={JSON.stringify(context)}></div>
+	<div id="analysis" data-context={JSON.stringify(context)}></div>
 	<noscript><p class="mt-6 text-sm text-muted">This page needs JavaScript to run the analysis.</p></noscript>
 </Page>
 
@@ -34,6 +30,8 @@ const context = {
 		companyUrl,
 		flagValue,
 		fmtDate,
+		fundamentalsUrl,
+		hubQuoteUrl,
 		headline,
 		link,
 		pct,
@@ -82,8 +80,8 @@ const context = {
 		if (external) (e.target = "_blank"), (e.rel = "noreferrer");
 		return e;
 	};
-	const card = "rounded-md border border-line bg-panel p-5 sm:p-6";
-	const cardTitle = (text: string) => h("h2", " text-lg font-semibold text-ink-strong", text);
+	const card = "sec";
+	const cardTitle = (text: string) => h("h2", "sec-title", text);
 	const secs = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 	const whenFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
 
@@ -157,7 +155,7 @@ const context = {
 	// =========================================================================== the result
 	function chip(value: GuidanceClass) {
 		const dot = value === "raised" ? "var(--radar-up)" : value === "lowered" ? "var(--radar-down)" : "var(--radar-axis)";
-		const e = h("span", "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-raised px-3 py-1 text-sm font-semibold text-ink");
+		const e = h("span", "inline-flex items-center gap-2 whitespace-nowrap text-ink-strong");
 		const d = h("span", "h-2.5 w-2.5 rounded-full");
 		d.style.background = dot;
 		return add(e, d, GUIDANCE_LABEL[value]);
@@ -173,39 +171,45 @@ const context = {
 		const { latest, previous, company } = r;
 		const out = document.createDocumentFragment();
 
-		const head = h("div", "mt-8");
-		const h1 = h("h1", " text-3xl font-semibold text-ink-strong sm:text-4xl", `${tidyName(company.name)} `);
-		h1.append(h("span", "text-xl font-normal text-faint", company.ticker));
-		const meta = h("p", "mt-2 text-sm text-muted", `Latest results published ${fmtDate(latest.date)} · `);
-		meta.append(a(latest.url, "SEC filing", undefined, true));
-		out.append(add(head, h1, meta));
+		const head = h("div", "mt-10");
+		const meta = h("p", "text-[13px] text-muted", `${company.ticker} · Latest results published ${fmtDate(latest.date)} · `);
+		meta.append(a(latest.url, "SEC filing", "link", true));
+		const h1 = h("h1", "mt-1 text-[2rem] font-medium leading-tight tracking-tight text-ink-strong", tidyName(company.name));
+		// Inside Market Hub: the same company's price page and numbers, one tab away.
+		const tabs = h("nav", "tabs hub-only mt-4");
+		tabs.setAttribute("aria-label", "This company in Market Hub");
+		const current = a(location.href, "Results release", "tab-btn");
+		current.setAttribute("aria-selected", "true");
+		current.setAttribute("aria-current", "page");
+		add(tabs, a(hubQuoteUrl(company.ticker), "Price", "tab-btn"), a(fundamentalsUrl(company.ticker), "Fundamentals", "tab-btn"), current);
+		out.append(add(head, meta, h1, tabs));
 
 		// The reading in one sentence.
-		const verdict = h("section", "verdict mt-6");
-		add(verdict, h("div", "text-xs font-medium uppercase tracking-wide text-muted", "The release in one sentence"), h("p", "mt-2  text-xl leading-snug text-ink-strong sm:text-2xl", headline(latest)));
+		const verdict = h("section", "verdict mt-10");
+		add(verdict, h("div", "text-[13px] text-muted", "The release in one sentence"), h("p", "lede mt-2", headline(latest)));
 		out.append(verdict);
 
-		const tiles = h("section", "mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4");
+		const tiles = h("section", "mt-12 grid grid-cols-2 gap-x-10 gap-y-8 lg:grid-cols-4");
 		const tile = (label: string, value: HTMLElement, sub: string, meter?: number) => {
-			const t = h("div", "rounded-md border border-line bg-panel p-4 sm:p-5");
-			add(t, h("div", "text-xs font-medium uppercase tracking-wide text-muted", label), add(h("div", "mt-3"), value));
+			const t = h("div", "sec");
+			add(t, h("div", "text-[13px] text-muted", label), add(h("div", "mt-2"), value));
 			if (meter !== undefined) {
 				const fill = h("span", "meter-fill");
 				fill.style.width = `${Math.max(meter * 100, 2)}%`;
 				t.append(add(h("div", "meter"), fill));
 			}
-			return add(t, h("div", "mt-2 text-xs text-muted", sub));
+			return add(t, h("div", "mt-2 text-[12.5px] text-muted", sub));
 		};
 		tiles.append(tile("Guidance", chip(latest.guidance), `${pct(latest.guidance_p[latest.guidance])} likely${previous ? ` · was ${GUIDANCE_LABEL[previous.guidance].toLowerCase()}` : ""}`));
 		for (const s of SCALES) {
 			const now = s.word(latest[s.key]);
 			const before = previous ? s.word(previous[s.key]) : null;
 			const sub = before === null ? "" : before === now ? "same as last time" : `was ${before.toLowerCase()}`;
-			tiles.append(tile(s.label, h("div", "text-xl font-semibold leading-tight text-ink-strong", now), sub, latest[s.key]));
+			tiles.append(tile(s.label, h("div", "text-xl font-medium leading-tight text-ink-strong", now), sub, latest[s.key]));
 		}
 		out.append(tiles);
 
-		const insight = h("section", "mt-4 grid gap-4 md:grid-cols-2");
+		const insight = h("section", "mt-12 grid gap-x-14 gap-y-12 md:grid-cols-2");
 		const stands = add(h("div", `min-w-0 ${card}`), cardTitle("What stands out"), h("p", "mt-1 text-xs text-muted", `Against the latest release of ${benchmark.label}.`), bullets(standouts(latest, benchmark)));
 		const changed = add(
 			h("div", `min-w-0 ${card}`),
@@ -215,7 +219,7 @@ const context = {
 		);
 		out.append(add(insight, stands, changed));
 
-		const two = h("section", "mt-4 grid gap-4 md:grid-cols-2");
+		const two = h("section", "mt-12 grid gap-x-14 gap-y-12 md:grid-cols-2");
 		const g = add(h("div", `min-w-0 ${card}`), cardTitle("Guidance, as the model reads it"), h("p", "mt-1 text-xs text-muted", "The probability of each answer, likeliest first."));
 		const bars = h("div", "mt-5 space-y-3");
 		GUIDANCE_ORDER.map((c) => ({ c, p: latest.guidance_p[c] }))
@@ -223,10 +227,10 @@ const context = {
 			.filter((x, i) => i < 3 || x.p >= 0.03)
 			.forEach(({ c, p }) => {
 				const row = h("div", "grid grid-cols-[6.5rem_1fr_2.75rem] items-center gap-3 text-sm");
-				const bar = h("span", "block h-full rounded-r");
+				const bar = h("span", "block h-full");
 				bar.style.width = `${Math.max(p * 100, 1)}%`;
 				bar.style.background = "var(--radar-line)";
-				bars.append(add(row, h("span", "text-muted", GUIDANCE_LABEL[c]), add(h("span", "h-3"), bar), h("span", "text-right font-medium tabular-nums text-ink-strong", pct(p))));
+				bars.append(add(row, h("span", "text-muted", GUIDANCE_LABEL[c]), add(h("span", "h-3"), bar), h("span", "num text-right text-[13px] text-ink-strong", pct(p))));
 			});
 		two.append(add(g, bars));
 
@@ -256,15 +260,15 @@ const context = {
 		out.append(two);
 
 		// Yes/no readings, one card each.
-		const topics = h("section", "mt-10");
-		add(topics, h("h2", " text-xl font-semibold text-ink-strong", "What the release says, topic by topic"), h("p", "mt-1 text-sm text-muted", `Each is a yes/no question to the model. The bar is how likely “yes” is; the line marks 50%.`));
-		const grid = h("div", "mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3");
+		const topics = h("section", "sec mt-14");
+		add(topics, h("h2", "sec-title", "What the release says, topic by topic"), h("p", "mt-1 text-[13px] text-muted", `Each is a yes/no question to the model. The bar is how likely “yes” is; the line marks 50%.`));
+		const grid = h("div", "mt-6 grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-3");
 		for (const f of FLAGS) {
 			const p = flagValue(latest, f.key);
 			if (p === undefined) continue;
 			const yes = p >= THRESHOLD;
-			const c = h("div", `rounded-md border bg-panel p-4 ${yes ? "border-faint" : "border-line"}`);
-			const top = add(h("div", "flex items-center justify-between gap-3"), h("span", "text-sm font-semibold text-ink-strong", f.label), h("span", yes ? "pill pill-yes" : "pill pill-no", yes ? "Yes" : "No"));
+			const c = h("div", "min-w-0");
+			const top = add(h("div", "flex items-center justify-between gap-3"), h("span", yes ? "text-ink-strong" : "text-muted", f.label), h("span", yes ? "pill pill-yes" : "pill pill-no", yes ? "Yes" : "No"));
 			const fill = h("span", `meter-fill${yes ? "" : " is-muted"}`);
 			fill.style.width = `${Math.max(p * 100, 2)}%`;
 			const meter = add(h("div", "meter has-mid"), fill);
@@ -274,9 +278,9 @@ const context = {
 		}
 		out.append(add(topics, grid));
 
-		const more = h("p", "mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm");
-		if (company.in_study) more.append(a(companyUrl(company.ticker), `${tidyName(company.name)}'s releases since 2021`, "font-medium text-ink-strong underline underline-offset-4"));
-		more.append(a(link("/method/"), "The questions and the model", "font-medium text-ink-strong underline underline-offset-4"));
+		const more = h("p", "mt-12 flex flex-wrap gap-x-6 gap-y-2 text-sm");
+		if (company.in_study) more.append(a(companyUrl(company.ticker), `${tidyName(company.name)}'s releases since 2021`, "link"));
+		more.append(a(link("/method/"), "The questions and the model", "link"));
 		out.append(more);
 
 		document.title = `${tidyName(company.name)}: latest results — Earnings Radar`;
@@ -286,7 +290,7 @@ const context = {
 	function fail(message: string) {
 		const box = h("div", card);
 		const back = h("p", "mt-4 text-sm");
-		back.append(a(link("/"), "Search another company", "font-medium text-ink-strong underline underline-offset-4"));
+		back.append(a(link("/"), "Search another company", "link"));
 		add(box, h("p", "font-medium text-ink-strong", "The analysis could not be run"), h("p", "mt-2 text-sm text-muted", message), back);
 		root.replaceChildren(box);
 	}
@@ -294,7 +298,7 @@ const context = {
 	async function run() {
 		const ticker = (new URLSearchParams(location.search).get("ticker") ?? "").trim().toUpperCase();
 		if (!/^[A-Z][A-Z0-9.\-]{0,9}$/.test(ticker)) {
-			return void root.replaceChildren(h("p", "text-sm text-muted", "Type a company above to run the analysis on its latest results release."));
+			return void root.replaceChildren(h("p", "text-muted", "Search a company in the box above to read its latest results release."));
 		}
 		const panel = runPanel(ticker);
 		root.replaceChildren(panel.el);
@@ -372,11 +376,9 @@ const context = {
 <style is:global>
 	/* The run panel. Deeper while the analysis is being computed, a panel like the rest once done. */
 	.run {
-		border-radius: 6px;
-		padding: 20px 22px 0;
-		background: #0e1118;
-		border: 1px solid #2a2e39;
-		color: #d1d4dc;
+		border-top: 1px solid var(--color-line-strong);
+		padding-top: 14px;
+		color: #c9c7c1;
 		overflow: hidden;
 	}
 	.run-head {
@@ -389,29 +391,27 @@ const context = {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		font-size: 12px;
-		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: #f0f3fa;
+		font-size: 13px;
+		font-weight: 500;
+		color: #f2f0ea;
 	}
 	.run-dot {
 		width: 9px;
 		height: 9px;
 		border-radius: 50%;
-		background: #2962ff;
+		background: #f2f0ea;
 		animation: run-pulse 1.4s infinite;
 	}
 	.run-clock {
 		font-size: 13px;
 		font-variant-numeric: tabular-nums;
-		color: #868993;
+		color: #8c8b86;
 	}
 	.run-title {
 		margin-top: 10px;
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: #f0f3fa;
+		color: #f2f0ea;
 	}
 	.run-steps {
 		margin-top: 14px;
@@ -428,11 +428,11 @@ const context = {
 		animation: run-in 0.25s ease-out;
 	}
 	.run-step.is-busy {
-		color: #f0f3fa;
+		color: #f2f0ea;
 	}
 	.run-step.is-ok,
 	.run-step.is-skip {
-		color: #868993;
+		color: #8c8b86;
 	}
 	.run-mark {
 		width: 14px;
@@ -442,25 +442,25 @@ const context = {
 	}
 	.is-busy > .run-mark {
 		border: 2px solid rgba(250, 250, 249, 0.25);
-		border-top-color: #2962ff;
+		border-top-color: #f2f0ea;
 		animation: run-spin 0.7s linear infinite;
 	}
 	.is-ok > .run-mark {
-		background: #2962ff center / 9px no-repeat
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 5.2 4.2 7.4 8 3'/%3E%3C/svg%3E");
+		background: #f2f0ea center / 9px no-repeat
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='%230b0c0d' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 5.2 4.2 7.4 8 3'/%3E%3C/svg%3E");
 	}
 	.is-skip > .run-mark {
-		border: 2px solid #5d606b;
+		border: 2px solid #5f5f5b;
 	}
 	.run-at {
 		font-size: 12px;
 		font-variant-numeric: tabular-nums;
-		color: #5d606b;
+		color: #5f5f5b;
 	}
 	.run-bar {
 		position: relative;
-		height: 3px;
-		margin: 18px -22px 0;
+		height: 2px;
+		margin: 18px 0 0;
 		background: rgba(250, 250, 249, 0.08);
 		overflow: hidden;
 	}
@@ -469,7 +469,7 @@ const context = {
 		position: absolute;
 		inset: 0;
 		width: 35%;
-		background: #2962ff;
+		background: #f2f0ea;
 		animation: run-slide 1.2s ease-in-out infinite;
 	}
 	.run-toggle {
@@ -485,10 +485,10 @@ const context = {
 		color: var(--radar-ink);
 	}
 	.run.is-done {
-		background: var(--radar-surface);
-		border: 1px solid var(--radar-grid);
 		color: var(--radar-ink-2);
-		transition: background 0.3s;
+	}
+	.run.is-done .run-bar {
+		display: none;
 	}
 	.run.is-done .run-live {
 		color: var(--radar-ink);
@@ -516,11 +516,11 @@ const context = {
 	}
 	@keyframes run-pulse {
 		0% {
-			box-shadow: 0 0 0 0 rgba(41, 98, 255, 0.6);
+			box-shadow: 0 0 0 0 rgba(242, 240, 234, 0.6);
 		}
 		70%,
 		100% {
-			box-shadow: 0 0 0 8px rgba(41, 98, 255, 0);
+			box-shadow: 0 0 0 8px rgba(242, 240, 234, 0);
 		}
 	}
 	@keyframes run-spin {
@@ -551,24 +551,20 @@ const context = {
 		}
 	}
 
-	.verdict {
-		border-radius: 6px;
-		border: 1px solid var(--radar-grid);
-		border-left: 4px solid var(--radar-line);
-		background: var(--radar-surface);
-		padding: 20px 24px;
+	.verdict .lede {
+		max-width: 30em;
+		font-size: clamp(1.35rem, 1rem + 1.4vw, 2rem);
+		color: var(--color-ink-strong);
 	}
 	.meter {
 		position: relative;
-		height: 6px;
+		height: 3px;
 		margin-top: 12px;
-		border-radius: 3px;
-		background: #2a2e39;
+		background: #222528;
 	}
 	.meter-fill {
 		display: block;
 		height: 100%;
-		border-radius: 3px;
 		background: var(--radar-line);
 	}
 	.meter-fill.is-muted {
@@ -578,24 +574,19 @@ const context = {
 		content: "";
 		position: absolute;
 		left: 50%;
-		top: -3px;
-		width: 2px;
-		height: 12px;
-		margin-left: -1px;
+		top: -4px;
+		width: 1px;
+		height: 11px;
 		background: var(--radar-ink-2);
 	}
 	.pill {
-		border-radius: 999px;
-		padding: 2px 10px;
-		font-size: 12px;
-		font-weight: 600;
+		font-family: var(--font-mono);
+		font-size: 12.5px;
 	}
 	.pill-yes {
-		background: #2962ff;
-		color: #fff;
+		color: var(--color-ink-strong);
 	}
 	.pill-no {
-		background: #2a2e39;
 		color: var(--radar-muted);
 	}
 	.key-dot,

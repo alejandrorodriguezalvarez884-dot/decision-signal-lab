@@ -39,8 +39,8 @@ const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
 						data-tip={tip({
 							title: `${quarterLabel(q.quarter)} · ${q.n} releases${q.partial ? " so far" : ""}`,
 							rows: [
-								["raised", pct(q.guidance.raised), "#2962ff"],
-								["lowered", pct(q.guidance.lowered), "#f23645"],
+								["raised", pct(q.guidance.raised), "#f2f0ea"],
+								["lowered", pct(q.guidance.lowered), "#ff6b57"],
 								["reaffirmed", pct(q.guidance.reaffirmed)],
 								["new period, no comparison", pct(q.guidance.new_period)],
 							],

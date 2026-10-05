@@ -1,9 +1,12 @@
 ---
-// Shell shared by every page: header with the navigation, the page body and the footer.
+// Shell shared by every page. Inside Market Hub the header is the portal's own (logo, sections,
+// search, account) with the radar's pages on a second line; on its own site the radar keeps its
+// name and that second line is its navigation.
 import Layout from "../layouts/Layout.astro";
+import CompanySearch from "./CompanySearch.astro";
 import HubBar from "./HubBar.astro";
 import RadarStyles from "./RadarStyles.astro";
-import { AUTHOR_URL, REPO_URL, link } from "../lib/reading";
+import { AUTHOR_URL, FUNDAMENTALS_URL, HUB_URL, REPO_URL, link } from "../lib/reading";
 
 interface Props {
 	title: string;
@@ -13,63 +16,104 @@ const { title, description } = Astro.props;
 
 const path = Astro.url.pathname;
 const under = (...roots: string[]) => roots.some((r) => path.startsWith(link(r)));
-const links = [
-	{ href: link("/"), label: "Analyse a company", short: "Analyse", active: path === link("/") || under("/analyze/") },
-	{ href: link("/trends/"), label: "Market trends", short: "Market trends", active: under("/trends/", "/company/") },
-	{ href: link("/method/"), label: "Method", short: "Method", active: under("/method/") },
+const sections = [
+	{ href: `${HUB_URL}/today/`, label: "Today", active: false },
+	{ href: `${HUB_URL}/markets/`, label: "Markets", active: false },
+	{ href: `${FUNDAMENTALS_URL}/`, label: "Fundamentals", active: false },
+	{ href: link("/"), label: "Earnings", active: true },
 ];
+const pages = [
+	{ href: link("/"), label: "Analyse a company", active: path === link("/") || under("/analyze/") },
+	{ href: link("/trends/"), label: "Market trends", active: under("/trends/", "/company/") },
+	{ href: link("/method/"), label: "Method", active: under("/method/") },
+];
+const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px] font-semibold tracking-tight text-ink-strong";
 ---
 
 <Layout title={`${title} — Earnings Radar`} description={description}>
-	<header class="sticky top-0 z-50 border-b border-line bg-page/95 backdrop-blur">
-		<nav class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:gap-6">
-			<a href={link("/")} class="flex flex-none items-center gap-2 whitespace-nowrap text-[15px] font-bold tracking-tight text-ink-strong">
-				<span class="brand-mark" aria-hidden="true"></span><span class="hidden sm:inline">Earnings Radar</span>
+	<header class="top-0 z-50 border-b border-line bg-page/95 backdrop-blur sm:sticky">
+		<div class="mx-auto flex h-14 max-w-[1240px] items-center gap-4 px-5 lg:gap-8">
+			<a href={`${HUB_URL}/`} class:list={[brand, "hub-only"]}>
+				<svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+					<path d="M4 2v16M4 10h8"></path><circle cx="14.5" cy="10" r="2.75" fill="currentColor" stroke="none"></circle>
+				</svg>
+				<span>Market Hub</span>
 			</a>
-			<ul class="flex items-center gap-0.5 text-[13px] font-semibold sm:gap-1">
-				{
-					links.map((l) => (
-						<li>
-							<a
-								href={l.href}
-								aria-current={l.active ? "page" : undefined}
-								class={`whitespace-nowrap rounded px-2.5 py-2 transition-colors hover:bg-raised hover:text-ink-strong sm:px-3 ${l.active ? "text-ink-strong" : "text-muted"}`}
-							>
-								<span class="sm:hidden">{l.short}</span>
-								<span class="hidden sm:inline">{l.label}</span>
-							</a>
-						</li>
-					))
-				}
+			<a href={link("/")} class:list={[brand, "standalone-only"]}>
+				<svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+					<circle cx="10" cy="10" r="8"></circle><circle cx="10" cy="10" r="2.5" fill="currentColor" stroke="none"></circle>
+				</svg>
+				<span>Earnings Radar</span>
+			</a>
+			<nav class="hub-only hidden sm:block" aria-label="Market Hub">
+				<ul class="flex items-center gap-5 text-sm">
+					{sections.map((l) => (
+						<li><a href={l.href} aria-current={l.active ? "true" : undefined}
+							class:list={["border-b py-1 transition-colors hover:text-ink-strong", l.active ? "border-ink-strong text-ink-strong" : "border-transparent text-muted"]}>{l.label}</a></li>
+					))}
+				</ul>
+			</nav>
+			<div class="ml-auto hidden w-full max-w-sm md:block"><CompanySearch compact id="header-search" /></div>
+			<button id="search-toggle" type="button" class="ml-auto rounded-sm p-2 text-muted hover:text-ink-strong md:hidden" aria-label="Search" aria-expanded="false" aria-controls="mobile-search">
+				<svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="9" r="6"></circle><path d="m14 14 4 4" stroke-linecap="round"></path></svg>
+			</button>
+			<HubBar />
+		</div>
+		<div id="mobile-search" class="border-t border-line px-5 py-2 md:hidden" hidden><CompanySearch compact id="mobile-search-box" /></div>
+		<nav class="hub-only border-t border-line sm:hidden" aria-label="Market Hub">
+			<ul class="flex gap-5 overflow-x-auto px-5 text-sm [scrollbar-width:none]">
+				{sections.map((l) => (
+					<li><a href={l.href} aria-current={l.active ? "true" : undefined}
+						class:list={["-mb-px block border-b py-2", l.active ? "border-ink-strong text-ink-strong" : "border-transparent text-muted"]}>{l.label}</a></li>
+				))}
 			</ul>
-			<div class="ml-auto"><HubBar /></div>
+		</nav>
+		<nav class="border-t border-line" aria-label="Earnings Radar">
+			<ul class="mx-auto flex max-w-[1240px] items-center gap-5 overflow-x-auto px-5 text-sm [scrollbar-width:none]">
+				<li class="hub-only hidden flex-none py-2 font-medium text-ink-strong sm:block">Earnings Radar</li>
+				{pages.map((l) => (
+					<li class="flex-none"><a href={l.href} aria-current={l.active ? "page" : undefined}
+						class:list={["block py-2 transition-colors hover:text-ink-strong", l.active ? "text-ink-strong underline decoration-1 underline-offset-[6px]" : "text-muted"]}>{l.label}</a></li>
+				))}
+			</ul>
 		</nav>
 	</header>
-	<main class="radar mx-auto max-w-6xl px-4 pb-16 pt-6 sm:pt-8">
+	<main class="radar mx-auto max-w-[1240px] px-5 pb-24 pt-8 sm:pt-12">
 		<slot name="header" />
 		<slot />
-		<p class="mt-14 border-t border-line pt-5 text-xs leading-relaxed text-muted">
-			A description of what company press releases say, produced by a decision model. It is not a forecast of
-			anything and it is not investment advice. Source text: SEC EDGAR.{" "}
-			<a href={link("/method/")} class="underline hover:text-ink-strong">How it works</a>.
-		</p>
 	</main>
-	<footer class="border-t border-line bg-deep">
-		<div class="mx-auto flex max-w-6xl flex-wrap justify-center gap-x-4 gap-y-1 px-4 py-8 text-xs text-muted">
-			<a href={AUTHOR_URL} class="hover:text-ink">Built by Alejandro Rodríguez Álvarez</a>
-			<a href={REPO_URL} class="hover:text-ink">Source and data on GitHub</a>
+	<footer class="border-t border-line">
+		<div class="mx-auto grid max-w-[1240px] gap-6 px-5 py-8 text-[13px] text-muted md:grid-cols-[1fr_auto]">
+			<p class="max-w-2xl">
+				A description of what company press releases say, produced by a decision model. It is not a forecast of
+				anything and it is not investment advice. Source text: SEC EDGAR.{" "}
+				<a href={link("/method/")} class="link">How it works</a>.
+			</p>
+			<div class="flex flex-wrap items-start gap-x-5 gap-y-1">
+				<a href={`${HUB_URL}/privacy/`} class="hub-only hover:text-ink-strong">Privacy</a>
+				<a href={REPO_URL} class="hover:text-ink-strong">Source and data</a>
+				<a href={AUTHOR_URL} class="hover:text-ink-strong">Built by Alejandro Rodríguez Álvarez</a>
+			</div>
 		</div>
 	</footer>
 	<RadarStyles />
 </Layout>
 
-<style>
-	/* Two rings and a dot: the radar. */
-	.brand-mark {
-		width: 22px;
-		height: 22px;
-		border-radius: 50%;
-		border: 2px solid #f0f3fa;
-		background: radial-gradient(circle, #2962ff 0 4px, transparent 4.5px);
-	}
-</style>
+<script>
+	const toggle = document.getElementById("search-toggle")!;
+	const box = document.getElementById("mobile-search")!;
+	toggle.addEventListener("click", () => {
+		box.hidden = !box.hidden;
+		toggle.setAttribute("aria-expanded", String(!box.hidden));
+		if (!box.hidden) box.querySelector("input")?.focus();
+	});
+	// "/" goes to the search from anywhere on the page.
+	document.addEventListener("keydown", (e) => {
+		if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+		if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+		const input = document.querySelector<HTMLInputElement>("#header-search input");
+		if (!input || !input.offsetParent) return;
+		e.preventDefault();
+		input.focus();
+	});
+</script>

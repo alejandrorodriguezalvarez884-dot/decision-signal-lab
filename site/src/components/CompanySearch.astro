@@ -5,44 +5,41 @@ import { link } from "../lib/reading";
 
 interface Props {
 	large?: boolean;
+	compact?: boolean; // the header's: no button, smaller
 	autofocus?: boolean;
+	id?: string;
 }
-const { large = false, autofocus = false } = Astro.props;
+const { large = false, compact = false, autofocus = false, id = "company-search" } = Astro.props;
 ---
 
-<form class="company-search relative" role="search" data-analyse={link("/analyze/")}>
-	<label class="sr-only" for="company-search-input">Company name or ticker</label>
+<form class="company-search relative" role="search" data-analyse={link("/analyze/")} id={id}>
+	<label class="sr-only" for={`${id}-input`}>Company name or ticker</label>
 	<div
 		class:list={[
-			"flex items-center gap-2 rounded-md border border-line-strong bg-panel shadow-sm transition focus-within:border-muted focus-within:ring-4 focus-within:ring-accent/30",
-			large ? "p-2 pl-5" : "p-1.5 pl-4",
+			"group flex items-center gap-2 rounded-[3px] border border-line-strong transition focus-within:border-ink-strong",
+			large ? "p-1.5 pl-4" : compact ? "py-0.5 pl-3 pr-2" : "p-1 pl-3",
 		]}
 	>
-		<svg class="h-5 w-5 flex-none text-faint" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+		<svg class="h-4 w-4 flex-none text-muted" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
 			<circle cx="9" cy="9" r="6"></circle>
 			<path d="m14 14 4 4" stroke-linecap="round"></path>
 		</svg>
 		<input
-			id="company-search-input"
+			id={`${id}-input`}
 			type="search"
 			autocomplete="off"
 			spellcheck="false"
 			autofocus={autofocus}
-			placeholder="Company name or ticker"
-			class:list={["min-w-0 flex-1 bg-transparent text-ink-strong placeholder:text-faint focus:outline-none", large ? "py-2 text-lg" : "py-1.5 text-base"]}
+			placeholder={compact ? "Search a company or ticker" : "Company or ticker: Apple, AMD, Costco…"}
+			class:list={["min-w-0 flex-1 bg-transparent text-ink-strong placeholder:text-faint focus:outline-none [&::-webkit-search-cancel-button]:hidden", large ? "py-2 text-base" : compact ? "py-1 text-[13px]" : "py-1 text-sm"]}
 		/>
-		<button
-			type="submit"
-			class:list={[
-				"flex-none rounded-md bg-accent font-medium text-white transition-colors hover:bg-accent-strong",
-				large ? "px-5 py-2.5 text-base" : "px-4 py-2 text-sm",
-			]}
-		>
-			Analyse
-		</button>
+		{compact && <kbd class="hidden flex-none rounded-sm border border-line-strong px-1.5 text-[11px] leading-5 text-muted group-focus-within:hidden md:block" aria-hidden="true">/</kbd>}
+		{!compact && (
+			<button type="submit" class:list={["btn btn-primary flex-none", large ? "px-5 py-2" : "px-3 py-1.5"]}>Analyse</button>
+		)}
 	</div>
 	<ul class="search-list" role="listbox" hidden></ul>
-	<p class="search-note mt-2 text-sm text-muted" hidden></p>
+	<p class="search-note mt-2 text-xs text-muted" hidden></p>
 </form>
 
 <script>
@@ -70,10 +67,10 @@ const { large = false, autofocus = false } = Astro.props;
 					li.setAttribute("role", "option");
 					li.setAttribute("aria-selected", String(i === active));
 					const name = document.createElement("span");
-					name.className = "min-w-0 truncate font-medium text-ink-strong";
+					name.className = "min-w-0 truncate text-ink";
 					name.textContent = tidyName(c.name);
 					const ticker = document.createElement("span");
-					ticker.className = "flex-none text-xs tabular-nums text-faint";
+					ticker.className = "num flex-none text-xs text-muted";
 					ticker.textContent = c.ticker;
 					li.append(name, ticker);
 					li.addEventListener("pointerdown", (e) => (e.preventDefault(), go(c.ticker)));
@@ -149,10 +146,11 @@ const { large = false, autofocus = false } = Astro.props;
 		right: 0;
 		margin-top: 6px;
 		padding: 6px;
-		border-radius: 6px;
+		border-radius: 3px;
 		border: 1px solid var(--color-line-strong);
 		background: var(--color-panel);
-		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+		box-shadow: 0 16px 40px rgb(0 0 0 / 0.6);
+		min-width: 280px;
 	}
 	.search-list[hidden] {
 		display: none;
@@ -162,9 +160,9 @@ const { large = false, autofocus = false } = Astro.props;
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px;
-		padding: 9px 12px;
-		border-radius: 4px;
-		font-size: 0.9375rem;
+		padding: 8px 10px;
+		border-radius: 2px;
+		font-size: 14px;
 		cursor: pointer;
 	}
 	.search-list li:hover,

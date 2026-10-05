@@ -17,7 +17,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : null;
 		<link rel="icon" type="image/svg+xml" href={link("/favicon.svg")} />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="dark" />
-		<meta name="theme-color" content="#131722" />
+		<meta name="theme-color" content="#0b0c0d" />
 		<meta name="description" content={description} />
 		{canonical && <link rel="canonical" href={canonical} />}
 		<meta property="og:type" content="website" />
@@ -25,10 +25,19 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site) : null;
 		<meta property="og:description" content={description} />
 		{canonical && <meta property="og:url" content={canonical} />}
 		<title>{title}</title>
+		<script is:inline define:vars={{ hubIcon: link("/hub.svg") }}>
+			// Inside Market Hub (its domain; or ?hub on a local preview) the page takes the portal's
+			// header and icon. Decided here, before the first paint, so nothing flickers.
+			if (location.hostname === "localhost" && new URLSearchParams(location.search).has("hub")) sessionStorage.setItem("hub", "1");
+			if (/(^|\.)themarkethub\.app$/.test(location.hostname) || (location.hostname === "localhost" && sessionStorage.getItem("hub"))) {
+				document.documentElement.classList.add("in-hub");
+				document.querySelector('link[rel="icon"]').href = hubIcon;
+			}
+		</script>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
 			rel="stylesheet"
 		/>
 	</head>

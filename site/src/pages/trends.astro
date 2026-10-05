@@ -72,7 +72,7 @@ const columns: { label: string; value: (s: Sector | NonNullable<Sector["prior"]>
 	{ label: "AI", value: (s) => s.themes.ai },
 	{ label: "Restructuring", value: (s) => s.themes.restructuring },
 ];
-const shade = (v: number) => `background: rgba(42, 120, 214, ${((Math.min(v, 0.6) / 0.6) * 0.42).toFixed(3)})`;
+const shade = (v: number) => `background: rgba(242, 240, 234, ${((Math.min(v, 0.6) / 0.6) * 0.42).toFixed(3)})`;
 
 // Who said what in the last full quarter.
 const nameOf = new Map(summary.companies.map((c) => [c.ticker, c.name]));
@@ -114,7 +114,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 		<div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
 			{
 				tiles.map((t) => (
-					<div class="rounded-md border border-line bg-panel p-5">
+					<div class="sec">
 						<div class="text-sm leading-snug text-muted">{t.title}</div>
 						<div class="mt-2 text-4xl font-semibold tabular-nums text-ink-strong">{pct(t.now)}</div>
 						{t.before !== undefined && prev && (
@@ -140,7 +140,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 		}
 	</section>
 
-	<section class="mt-6 rounded-md border border-line bg-panel p-6 sm:p-8">
+	<section class="sec mt-14">
 		<h2 class="text-xl font-semibold text-ink-strong">What stands out in {lastLabel}</h2>
 		<p class="mt-1 text-sm text-muted">Records since 2021 and the largest moves against the same quarter a year earlier.</p>
 		<ul class="mt-4 grid gap-x-10 gap-y-3 text-sm leading-relaxed text-ink md:grid-cols-2">
@@ -155,7 +155,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 		</ul>
 	</section>
 
-	<section class="mt-12 rounded-md border border-line bg-panel p-6 sm:p-8">
+	<section class="sec mt-14">
 		<div class="radar-head is-stacked">
 			<div>
 				<h2 class="text-xl font-semibold text-ink-strong">Guidance: who raised, who lowered</h2>
@@ -193,7 +193,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 						{g.list.map((s) => {
 							const a = g.shared ? shared : axis([s]);
 							return (
-								<div class="min-w-0 rounded-md border border-line bg-panel p-6">
+								<div class="sec">
 									<TrendChart title={s.title} note={s.note} points={points(s)} max={a.max} ticks={a.ticks} format={pct} what="of releases" now={now(s)} />
 								</div>
 							);
@@ -211,7 +211,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 			before. Sorted by raised minus lowered. Sectors with fewer than {SMALL_SECTOR} companies are listed last: one
 			release moves them a lot.
 		</p>
-		<div class="mt-4 overflow-x-auto rounded-md border border-line bg-panel">
+		<div class="mt-4 overflow-x-auto">
 			<table class="w-full text-sm tabular-nums">
 				<thead>
 					<tr class="border-b border-line text-left text-xs font-medium text-muted">
@@ -259,7 +259,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 		<div class="mt-4 grid gap-4 md:grid-cols-2">
 			{
 				said.map((g) => (
-					<div class="rounded-md border border-line bg-panel p-6">
+					<div class="sec">
 						<h3 class="flex items-center gap-2 text-sm font-semibold text-ink-strong">
 							<span class="h-2.5 w-2.5 rounded-full" style={`background: ${g.dot}`} />
 							{g.title}
@@ -268,7 +268,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 						{g.list.length ? (
 							<div class="mt-3 flex flex-wrap gap-1.5">
 								{g.list.map((c) => (
-									<a href={companyUrl(c.ticker)} class="rounded-full bg-raised px-2.5 py-1 text-xs text-ink transition-colors hover:bg-line-strong hover:text-ink-strong">
+									<a href={companyUrl(c.ticker)} class="chip">
 										{c.name}
 									</a>
 								))}
@@ -299,7 +299,7 @@ const sectors = [...new Set(summary.companies.map((c) => c.sector))].sort();
 							.map((c) => (
 								<a
 									href={companyUrl(c.ticker)}
-									class="flex items-center justify-between gap-3 rounded-lg border border-line bg-panel px-3.5 py-2.5 text-sm transition-colors hover:border-faint"
+									class="flex items-center justify-between gap-3 border-b border-line py-2.5 text-sm transition-colors hover:text-ink-strong"
 								>
 									<span class="min-w-0 truncate">
 										<span class="font-medium text-ink-strong">{c.name}</span>
