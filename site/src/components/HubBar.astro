@@ -1,0 +1,56 @@
+---
+// Right side of the header when the tool runs inside Market Hub: the way back to the portal and
+// the signed-in user. Filled from /api/me; empty when the tool is public.
+---
+
+<div id="hub-bar" class="flex flex-none items-center gap-2"></div>
+
+<script>
+	const API = (import.meta.env.PUBLIC_RADAR_API_URL ?? "").replace(/\/$/, "");
+
+	type Me = { user: { name: string; email: string; picture: string } | null; hub: string | null };
+	const box = document.getElementById("hub-bar")!;
+
+	// A session that ends while a page is open: the API answers 401 with the hub's sign-in
+	// address, and the visitor goes there (and comes back after signing in).
+	const plainFetch = window.fetch.bind(window);
+	window.fetch = async (...args: Parameters<typeof fetch>) => {
+		const res = await plainFetch(...args);
+		if (res.status === 401)
+			res.clone().json().then((b: { signin?: string }) => b?.signin && location.assign(b.signin)).catch(() => {});
+		return res;
+	};
+
+	function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: string) {
+		const e = document.createElement(tag);
+		e.className = cls;
+		if (text !== undefined) e.textContent = text;
+		return e;
+	}
+
+	plainFetch(`${API}/api/me`, { credentials: "include" })
+		.then((r) => (r.ok ? (r.json() as Promise<Me>) : null))
+		.then((me) => {
+			if (!me?.hub) return;
+			const hubLink = el("a", "btn btn-ghost hidden py-1.5 sm:inline-flex", "My Hub");
+			hubLink.href = `${me.hub}/dashboard/`;
+			const back = el("a", "hidden text-xs font-semibold text-muted hover:text-ink-strong md:inline", "← Market Hub");
+			back.href = me.hub;
+			box.append(back, hubLink);
+			if (!me.user) return;
+			const pic = el("a", "flex h-8 w-8 flex-none items-center justify-center overflow-hidden rounded-full bg-accent text-sm font-semibold text-white");
+			pic.href = `${me.hub}/account/`;
+			pic.title = `${me.user.name} · ${me.user.email}`;
+			const initial = me.user.name.charAt(0).toUpperCase();
+			if (me.user.picture) {
+				const img = el("img", "h-full w-full object-cover");
+				img.src = me.user.picture;
+				img.alt = "";
+				img.referrerPolicy = "no-referrer";
+				img.onerror = () => pic.replaceChildren(initial);
+				pic.append(img);
+			} else pic.textContent = initial;
+			box.append(pic);
+		})
+		.catch(() => {});
+</script>

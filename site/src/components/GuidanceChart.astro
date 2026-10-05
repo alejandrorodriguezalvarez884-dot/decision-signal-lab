@@ -19,7 +19,7 @@ const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
 ---
 
 <figure class="radar">
-	<div class="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-stone-600">
+	<div class="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
 		<span><span class="radar-key" style="background: var(--radar-up)"></span>Raised guidance</span>
 		<span><span class="radar-key" style="background: var(--radar-down)"></span>Lowered guidance</span>
 	</div>
@@ -39,8 +39,8 @@ const years = yearGroups(quarters.map((q) => q.quarter.slice(0, 4)));
 						data-tip={tip({
 							title: `${quarterLabel(q.quarter)} · ${q.n} releases${q.partial ? " so far" : ""}`,
 							rows: [
-								["raised", pct(q.guidance.raised), "#2a78d6"],
-								["lowered", pct(q.guidance.lowered), "#e34948"],
+								["raised", pct(q.guidance.raised), "#2962ff"],
+								["lowered", pct(q.guidance.lowered), "#f23645"],
 								["reaffirmed", pct(q.guidance.reaffirmed)],
 								["new period, no comparison", pct(q.guidance.new_period)],
 							],

@@ -66,7 +66,7 @@ const years = yearGroups(points.map((p) => p.year));
 						class="radar-band"
 						data-tip={tip({
 							title: p.n === undefined ? p.label : `${p.label} · ${p.n} releases`,
-							rows: [[what, format(p.value), "#2a78d6"]],
+							rows: [[what, format(p.value), "#2962ff"]],
 						})}
 					>
 						<i class="trend-mark" style={`top: ${yv(p.value)}%`} />

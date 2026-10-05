@@ -12,7 +12,7 @@ SHELL := /bin/bash
 
 # Most a single `make update` may spend on the API, in USD. Override: make update MAX_USD=1
 MAX_USD ?= 0.25
-.PHONY: help install test check update summary site api dev serve deploy save publish
+.PHONY: help install test check update summary site api dev serve deploy deploy-hub save publish
 
 help: ## List the targets
 	@grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
@@ -47,6 +47,9 @@ serve: site ## Run site and API together at http://localhost:8080, as in product
 
 deploy: ## Build and deploy the service to Cloud Run (see scripts/deploy-cloudrun.sh)
 	./scripts/deploy-cloudrun.sh
+
+deploy-hub: ## Deploy the copy inside Market Hub (radar.themarkethub.app, sign-in required)
+	SERVICE_NAME=earnings-radar-hub HUB_URL=https://themarkethub.app ./scripts/deploy-cloudrun.sh
 
 save: ## Commit radar/ if it changed and push the current branch
 	@if git diff --quiet HEAD -- radar/; then echo "radar/: nothing to commit"; \

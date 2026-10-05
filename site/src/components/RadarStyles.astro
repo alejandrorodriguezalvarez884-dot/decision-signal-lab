@@ -6,16 +6,16 @@
 
 <style is:global>
 	.radar {
-		--radar-surface: #ffffff;
-		--radar-ink: #1c1917;
-		--radar-ink-2: #57534e;
-		--radar-muted: #78716c;
-		--radar-grid: #e7e5e4;
-		--radar-axis: #d6d3d1;
-		--radar-up: #2a78d6;
-		--radar-down: #e34948;
-		--radar-neutral: #a8a29e;
-		--radar-line: #2a78d6;
+		--radar-surface: #1e222d;
+		--radar-ink: #f0f3fa;
+		--radar-ink-2: #d1d4dc;
+		--radar-muted: #868993;
+		--radar-grid: #2a2e39;
+		--radar-axis: #363a45;
+		--radar-up: #2962ff;
+		--radar-down: #f23645;
+		--radar-neutral: #5d606b;
+		--radar-line: #2962ff;
 		--radar-gutter: 40px; /* room for the value labels left of a plot */
 	}
 	.radar-words {
@@ -66,7 +66,7 @@
 	}
 	.radar-band:hover,
 	.radar-band.is-active {
-		background: rgba(28, 25, 23, 0.04);
+		background: rgba(255, 255, 255, 0.04);
 	}
 	.radar-years {
 		margin-left: var(--radar-gutter);
@@ -220,15 +220,16 @@
 		min-width: 150px;
 		max-width: 260px;
 		padding: 8px 10px;
-		border-radius: 8px;
-		background: #1c1917;
-		color: #fafaf9;
+		border-radius: 6px;
+		border: 1px solid #363a45;
+		background: #2a2e39;
+		color: #f0f3fa;
 		font-size: 12px;
 		line-height: 1.45;
-		box-shadow: 0 6px 20px rgba(28, 25, 23, 0.18);
+		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 	}
 	#radar-tip .tip-title {
-		color: #d6d3d1;
+		color: #b2b5be;
 		margin-bottom: 4px;
 	}
 	#radar-tip .tip-row {
@@ -249,7 +250,7 @@
 		align-self: center;
 	}
 	#radar-tip .tip-row span {
-		color: #d6d3d1;
+		color: #b2b5be;
 	}
 </style>
 

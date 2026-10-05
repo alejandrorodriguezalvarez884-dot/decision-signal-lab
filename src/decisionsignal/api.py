@@ -4,6 +4,10 @@
     GET /api/companies?q=...      companies whose ticker or name matches
     GET /api/analysis/{ticker}    the company's latest results release, read by the model
     GET /api/analysis/{ticker}/stream   the same, reported step by step as it runs
+    GET /api/me                   who is signed in to Market Hub, and the hub's address
+
+With HUB_URL and HUB_SESSION_SECRET set (the deployment inside Market Hub), only people signed in
+to Market Hub get in; without them (earningsradar.app) the service is public, as it always was.
 
 Everything else is the static site, when RADAR_STATIC_DIR points at its build.
 """
@@ -27,6 +31,8 @@ from fastapi.staticfiles import StaticFiles
 
 from .client import BudgetExceeded
 from .config import ONDEMAND_PER_IP_PER_HOUR
+from .hubauth import HubGate
+from .hubauth import settings as hub_settings
 from .ondemand import (
     Analyser,
     DailyBudgetReached,
@@ -92,8 +98,11 @@ def default_store() -> Store:
 
 
 def create_app(analyser: Analyser | None = None, directory: Directory | None = None,
-               static_dir: str | None = None) -> FastAPI:
-    """App factory. Tests pass their own analyser and directory, so they need no network."""
+               static_dir: str | None = None, hub: tuple[str, str] | None | bool = True) -> FastAPI:
+    """App factory. Tests pass their own analyser and directory, so they need no network.
+
+    ``hub`` is (hub URL, hub session secret) to admit only people signed in to Market Hub; by
+    default it comes from HUB_URL and HUB_SESSION_SECRET, and None leaves the service public."""
     logging.basicConfig(level=logging.INFO)
     app = FastAPI(title="Earnings Radar", docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -102,6 +111,9 @@ def create_app(analyser: Analyser | None = None, directory: Directory | None = N
     origins = [o.strip() for o in os.environ.get("RADAR_ALLOWED_ORIGINS", "").split(",") if o.strip()]
     if origins:
         app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET"], allow_headers=["*"])
+    hub = hub_settings() if hub is True else hub or None
+    if hub:
+        app.add_middleware(HubGate, hub_url=hub[0], secret=hub[1])
 
     directory = directory or Directory()
     analyser = analyser or Analyser(default_store())
@@ -110,6 +122,10 @@ def create_app(analyser: Analyser | None = None, directory: Directory | None = N
     @app.get("/api/health")
     def health() -> dict:
         return {"ok": True}
+
+    @app.get("/api/me")
+    def me(request: Request) -> dict:
+        return {"user": getattr(request.state, "user", None), "hub": hub[0] if hub else None}
 
     @app.get("/api/companies")
     def companies(q: str = Query(min_length=1, max_length=60)) -> dict:
@@ -121,6 +137,10 @@ def create_app(analyser: Analyser | None = None, directory: Directory | None = N
         return {"companies": [{"ticker": r.ticker, "name": r.name} for r in found]}
 
     def allow(request: Request) -> None:
+        # Behind the hub's sign-in there is no per-address limit (the owner's choice); the
+        # spending caps still apply. The public deployment keeps it.
+        if hub:
+            return
         if not limiter.allow(_client_address(request)):
             raise HTTPException(429, "Too many analyses from this address. Try again in an hour.")
 

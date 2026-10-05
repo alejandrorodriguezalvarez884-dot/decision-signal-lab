@@ -20,7 +20,7 @@ const context = {
 		<CompanySearch />
 	</div>
 	<div id="analysis" class="mt-8" data-context={JSON.stringify(context)}></div>
-	<noscript><p class="mt-6 text-sm text-stone-600">This page needs JavaScript to run the analysis.</p></noscript>
+	<noscript><p class="mt-6 text-sm text-muted">This page needs JavaScript to run the analysis.</p></noscript>
 </Page>
 
 <script>
@@ -76,14 +76,14 @@ const context = {
 		return e;
 	}
 	const add = <T extends HTMLElement>(parent: T, ...children: (HTMLElement | string)[]) => (parent.append(...children), parent);
-	const a = (href: string, text: string, cls = "underline hover:text-stone-900", external = false) => {
+	const a = (href: string, text: string, cls = "underline hover:text-ink-strong", external = false) => {
 		const e = h("a", cls, text) as HTMLAnchorElement;
 		e.href = href;
 		if (external) (e.target = "_blank"), (e.rel = "noreferrer");
 		return e;
 	};
-	const card = "rounded-2xl border border-stone-200 bg-white p-5 sm:p-6";
-	const cardTitle = (text: string) => h("h2", "font-serif text-lg font-semibold text-stone-900", text);
+	const card = "rounded-md border border-line bg-panel p-5 sm:p-6";
+	const cardTitle = (text: string) => h("h2", " text-lg font-semibold text-ink-strong", text);
 	const secs = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 	const whenFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
 
@@ -157,15 +157,15 @@ const context = {
 	// =========================================================================== the result
 	function chip(value: GuidanceClass) {
 		const dot = value === "raised" ? "var(--radar-up)" : value === "lowered" ? "var(--radar-down)" : "var(--radar-axis)";
-		const e = h("span", "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-800");
+		const e = h("span", "inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-raised px-3 py-1 text-sm font-semibold text-ink");
 		const d = h("span", "h-2.5 w-2.5 rounded-full");
 		d.style.background = dot;
 		return add(e, d, GUIDANCE_LABEL[value]);
 	}
 
 	function bullets(items: string[]) {
-		const list = h("ul", "mt-4 space-y-2.5 text-sm leading-relaxed text-stone-700");
-		for (const text of items) list.append(add(h("li", "flex gap-3"), h("span", "mt-2 h-1.5 w-1.5 flex-none rounded-full bg-stone-400"), h("span", "", text)));
+		const list = h("ul", "mt-4 space-y-2.5 text-sm leading-relaxed text-ink");
+		for (const text of items) list.append(add(h("li", "flex gap-3"), h("span", "mt-2 h-1.5 w-1.5 flex-none rounded-full bg-faint"), h("span", "", text)));
 		return list;
 	}
 
@@ -174,49 +174,49 @@ const context = {
 		const out = document.createDocumentFragment();
 
 		const head = h("div", "mt-8");
-		const h1 = h("h1", "font-serif text-3xl font-semibold text-stone-900 sm:text-4xl", `${tidyName(company.name)} `);
-		h1.append(h("span", "text-xl font-normal text-stone-400", company.ticker));
-		const meta = h("p", "mt-2 text-sm text-stone-500", `Latest results published ${fmtDate(latest.date)} · `);
+		const h1 = h("h1", " text-3xl font-semibold text-ink-strong sm:text-4xl", `${tidyName(company.name)} `);
+		h1.append(h("span", "text-xl font-normal text-faint", company.ticker));
+		const meta = h("p", "mt-2 text-sm text-muted", `Latest results published ${fmtDate(latest.date)} · `);
 		meta.append(a(latest.url, "SEC filing", undefined, true));
 		out.append(add(head, h1, meta));
 
 		// The reading in one sentence.
 		const verdict = h("section", "verdict mt-6");
-		add(verdict, h("div", "text-xs font-medium uppercase tracking-wide text-stone-500", "The release in one sentence"), h("p", "mt-2 font-serif text-xl leading-snug text-stone-900 sm:text-2xl", headline(latest)));
+		add(verdict, h("div", "text-xs font-medium uppercase tracking-wide text-muted", "The release in one sentence"), h("p", "mt-2  text-xl leading-snug text-ink-strong sm:text-2xl", headline(latest)));
 		out.append(verdict);
 
 		const tiles = h("section", "mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4");
 		const tile = (label: string, value: HTMLElement, sub: string, meter?: number) => {
-			const t = h("div", "rounded-2xl border border-stone-200 bg-white p-4 sm:p-5");
-			add(t, h("div", "text-xs font-medium uppercase tracking-wide text-stone-500", label), add(h("div", "mt-3"), value));
+			const t = h("div", "rounded-md border border-line bg-panel p-4 sm:p-5");
+			add(t, h("div", "text-xs font-medium uppercase tracking-wide text-muted", label), add(h("div", "mt-3"), value));
 			if (meter !== undefined) {
 				const fill = h("span", "meter-fill");
 				fill.style.width = `${Math.max(meter * 100, 2)}%`;
 				t.append(add(h("div", "meter"), fill));
 			}
-			return add(t, h("div", "mt-2 text-xs text-stone-500", sub));
+			return add(t, h("div", "mt-2 text-xs text-muted", sub));
 		};
 		tiles.append(tile("Guidance", chip(latest.guidance), `${pct(latest.guidance_p[latest.guidance])} likely${previous ? ` · was ${GUIDANCE_LABEL[previous.guidance].toLowerCase()}` : ""}`));
 		for (const s of SCALES) {
 			const now = s.word(latest[s.key]);
 			const before = previous ? s.word(previous[s.key]) : null;
 			const sub = before === null ? "" : before === now ? "same as last time" : `was ${before.toLowerCase()}`;
-			tiles.append(tile(s.label, h("div", "text-xl font-semibold leading-tight text-stone-900", now), sub, latest[s.key]));
+			tiles.append(tile(s.label, h("div", "text-xl font-semibold leading-tight text-ink-strong", now), sub, latest[s.key]));
 		}
 		out.append(tiles);
 
 		const insight = h("section", "mt-4 grid gap-4 md:grid-cols-2");
-		const stands = add(h("div", `min-w-0 ${card}`), cardTitle("What stands out"), h("p", "mt-1 text-xs text-stone-500", `Against the latest release of ${benchmark.label}.`), bullets(standouts(latest, benchmark)));
+		const stands = add(h("div", `min-w-0 ${card}`), cardTitle("What stands out"), h("p", "mt-1 text-xs text-muted", `Against the latest release of ${benchmark.label}.`), bullets(standouts(latest, benchmark)));
 		const changed = add(
 			h("div", `min-w-0 ${card}`),
 			cardTitle("What changed"),
-			h("p", "mt-1 text-xs text-stone-500", previous ? `Against the previous release, published ${fmtDate(previous.date)}.` : "No earlier release to compare with."),
+			h("p", "mt-1 text-xs text-muted", previous ? `Against the previous release, published ${fmtDate(previous.date)}.` : "No earlier release to compare with."),
 			bullets(changesSince(latest, previous ?? undefined)),
 		);
 		out.append(add(insight, stands, changed));
 
 		const two = h("section", "mt-4 grid gap-4 md:grid-cols-2");
-		const g = add(h("div", `min-w-0 ${card}`), cardTitle("Guidance, as the model reads it"), h("p", "mt-1 text-xs text-stone-500", "The probability of each answer, likeliest first."));
+		const g = add(h("div", `min-w-0 ${card}`), cardTitle("Guidance, as the model reads it"), h("p", "mt-1 text-xs text-muted", "The probability of each answer, likeliest first."));
 		const bars = h("div", "mt-5 space-y-3");
 		GUIDANCE_ORDER.map((c) => ({ c, p: latest.guidance_p[c] }))
 			.sort((x, y) => y.p - x.p)
@@ -226,12 +226,12 @@ const context = {
 				const bar = h("span", "block h-full rounded-r");
 				bar.style.width = `${Math.max(p * 100, 1)}%`;
 				bar.style.background = "var(--radar-line)";
-				bars.append(add(row, h("span", "text-stone-600", GUIDANCE_LABEL[c]), add(h("span", "h-3"), bar), h("span", "text-right font-medium tabular-nums text-stone-900", pct(p))));
+				bars.append(add(row, h("span", "text-muted", GUIDANCE_LABEL[c]), add(h("span", "h-3"), bar), h("span", "text-right font-medium tabular-nums text-ink-strong", pct(p))));
 			});
 		two.append(add(g, bars));
 
 		const peers = add(h("div", `min-w-0 ${card}`), cardTitle(`Against ${benchmark.label}`));
-		const key = h("p", "mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-500");
+		const key = h("p", "mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted");
 		add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-dot"), "this release"));
 		if (previous) add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-prev"), "previous release"));
 		add(key, add(h("span", "inline-flex items-center gap-1.5"), h("i", "key-tick"), "median company"));
@@ -257,26 +257,26 @@ const context = {
 
 		// Yes/no readings, one card each.
 		const topics = h("section", "mt-10");
-		add(topics, h("h2", "font-serif text-xl font-semibold text-stone-900", "What the release says, topic by topic"), h("p", "mt-1 text-sm text-stone-500", `Each is a yes/no question to the model. The bar is how likely “yes” is; the line marks 50%.`));
+		add(topics, h("h2", " text-xl font-semibold text-ink-strong", "What the release says, topic by topic"), h("p", "mt-1 text-sm text-muted", `Each is a yes/no question to the model. The bar is how likely “yes” is; the line marks 50%.`));
 		const grid = h("div", "mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3");
 		for (const f of FLAGS) {
 			const p = flagValue(latest, f.key);
 			if (p === undefined) continue;
 			const yes = p >= THRESHOLD;
-			const c = h("div", `rounded-2xl border bg-white p-4 ${yes ? "border-stone-400" : "border-stone-200"}`);
-			const top = add(h("div", "flex items-center justify-between gap-3"), h("span", "text-sm font-semibold text-stone-900", f.label), h("span", yes ? "pill pill-yes" : "pill pill-no", yes ? "Yes" : "No"));
+			const c = h("div", `rounded-md border bg-panel p-4 ${yes ? "border-faint" : "border-line"}`);
+			const top = add(h("div", "flex items-center justify-between gap-3"), h("span", "text-sm font-semibold text-ink-strong", f.label), h("span", yes ? "pill pill-yes" : "pill pill-no", yes ? "Yes" : "No"));
 			const fill = h("span", `meter-fill${yes ? "" : " is-muted"}`);
 			fill.style.width = `${Math.max(p * 100, 2)}%`;
 			const meter = add(h("div", "meter has-mid"), fill);
-			const sub = h("div", "mt-2 flex justify-between gap-3 text-xs text-stone-500");
+			const sub = h("div", "mt-2 flex justify-between gap-3 text-xs text-muted");
 			add(sub, h("span", "", `${pct(p)} likely`), h("span", "text-right", `${pct(benchmark.share[f.key])} of large companies say it`));
 			grid.append(add(c, top, meter, sub));
 		}
 		out.append(add(topics, grid));
 
 		const more = h("p", "mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm");
-		if (company.in_study) more.append(a(companyUrl(company.ticker), `${tidyName(company.name)}'s releases since 2021`, "font-medium text-stone-900 underline underline-offset-4"));
-		more.append(a(link("/method/"), "The questions and the model", "font-medium text-stone-900 underline underline-offset-4"));
+		if (company.in_study) more.append(a(companyUrl(company.ticker), `${tidyName(company.name)}'s releases since 2021`, "font-medium text-ink-strong underline underline-offset-4"));
+		more.append(a(link("/method/"), "The questions and the model", "font-medium text-ink-strong underline underline-offset-4"));
 		out.append(more);
 
 		document.title = `${tidyName(company.name)}: latest results — Earnings Radar`;
@@ -286,15 +286,15 @@ const context = {
 	function fail(message: string) {
 		const box = h("div", card);
 		const back = h("p", "mt-4 text-sm");
-		back.append(a(link("/"), "Search another company", "font-medium text-stone-900 underline underline-offset-4"));
-		add(box, h("p", "font-medium text-stone-900", "The analysis could not be run"), h("p", "mt-2 text-sm text-stone-600", message), back);
+		back.append(a(link("/"), "Search another company", "font-medium text-ink-strong underline underline-offset-4"));
+		add(box, h("p", "font-medium text-ink-strong", "The analysis could not be run"), h("p", "mt-2 text-sm text-muted", message), back);
 		root.replaceChildren(box);
 	}
 
 	async function run() {
 		const ticker = (new URLSearchParams(location.search).get("ticker") ?? "").trim().toUpperCase();
 		if (!/^[A-Z][A-Z0-9.\-]{0,9}$/.test(ticker)) {
-			return void root.replaceChildren(h("p", "text-sm text-stone-600", "Type a company above to run the analysis on its latest results release."));
+			return void root.replaceChildren(h("p", "text-sm text-muted", "Type a company above to run the analysis on its latest results release."));
 		}
 		const panel = runPanel(ticker);
 		root.replaceChildren(panel.el);
@@ -370,12 +370,13 @@ const context = {
 </script>
 
 <style is:global>
-	/* The run panel. Dark while the analysis is being computed, a light receipt once it is done. */
+	/* The run panel. Deeper while the analysis is being computed, a panel like the rest once done. */
 	.run {
-		border-radius: 16px;
+		border-radius: 6px;
 		padding: 20px 22px 0;
-		background: #1c1917;
-		color: #e7e5e4;
+		background: #0e1118;
+		border: 1px solid #2a2e39;
+		color: #d1d4dc;
 		overflow: hidden;
 	}
 	.run-head {
@@ -392,25 +393,25 @@ const context = {
 		font-weight: 600;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: #fafaf9;
+		color: #f0f3fa;
 	}
 	.run-dot {
 		width: 9px;
 		height: 9px;
 		border-radius: 50%;
-		background: #3987e5;
+		background: #2962ff;
 		animation: run-pulse 1.4s infinite;
 	}
 	.run-clock {
 		font-size: 13px;
 		font-variant-numeric: tabular-nums;
-		color: #a8a29e;
+		color: #868993;
 	}
 	.run-title {
 		margin-top: 10px;
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: #fafaf9;
+		color: #f0f3fa;
 	}
 	.run-steps {
 		margin-top: 14px;
@@ -427,11 +428,11 @@ const context = {
 		animation: run-in 0.25s ease-out;
 	}
 	.run-step.is-busy {
-		color: #fafaf9;
+		color: #f0f3fa;
 	}
 	.run-step.is-ok,
 	.run-step.is-skip {
-		color: #a8a29e;
+		color: #868993;
 	}
 	.run-mark {
 		width: 14px;
@@ -441,20 +442,20 @@ const context = {
 	}
 	.is-busy > .run-mark {
 		border: 2px solid rgba(250, 250, 249, 0.25);
-		border-top-color: #3987e5;
+		border-top-color: #2962ff;
 		animation: run-spin 0.7s linear infinite;
 	}
 	.is-ok > .run-mark {
-		background: #3987e5 center / 9px no-repeat
+		background: #2962ff center / 9px no-repeat
 			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 5.2 4.2 7.4 8 3'/%3E%3C/svg%3E");
 	}
 	.is-skip > .run-mark {
-		border: 2px solid #78716c;
+		border: 2px solid #5d606b;
 	}
 	.run-at {
 		font-size: 12px;
 		font-variant-numeric: tabular-nums;
-		color: #78716c;
+		color: #5d606b;
 	}
 	.run-bar {
 		position: relative;
@@ -468,7 +469,7 @@ const context = {
 		position: absolute;
 		inset: 0;
 		width: 35%;
-		background: #3987e5;
+		background: #2962ff;
 		animation: run-slide 1.2s ease-in-out infinite;
 	}
 	.run-toggle {
@@ -484,7 +485,7 @@ const context = {
 		color: var(--radar-ink);
 	}
 	.run.is-done {
-		background: #fff;
+		background: var(--radar-surface);
 		border: 1px solid var(--radar-grid);
 		color: var(--radar-ink-2);
 		transition: background 0.3s;
@@ -515,11 +516,11 @@ const context = {
 	}
 	@keyframes run-pulse {
 		0% {
-			box-shadow: 0 0 0 0 rgba(57, 135, 229, 0.6);
+			box-shadow: 0 0 0 0 rgba(41, 98, 255, 0.6);
 		}
 		70%,
 		100% {
-			box-shadow: 0 0 0 8px rgba(57, 135, 229, 0);
+			box-shadow: 0 0 0 8px rgba(41, 98, 255, 0);
 		}
 	}
 	@keyframes run-spin {
@@ -551,10 +552,10 @@ const context = {
 	}
 
 	.verdict {
-		border-radius: 16px;
+		border-radius: 6px;
 		border: 1px solid var(--radar-grid);
 		border-left: 4px solid var(--radar-line);
-		background: #fff;
+		background: var(--radar-surface);
 		padding: 20px 24px;
 	}
 	.meter {
@@ -562,7 +563,7 @@ const context = {
 		height: 6px;
 		margin-top: 12px;
 		border-radius: 3px;
-		background: #e7e5e4;
+		background: #2a2e39;
 	}
 	.meter-fill {
 		display: block;
@@ -590,11 +591,11 @@ const context = {
 		font-weight: 600;
 	}
 	.pill-yes {
-		background: #1c1917;
+		background: #2962ff;
 		color: #fff;
 	}
 	.pill-no {
-		background: #f5f5f4;
+		background: #2a2e39;
 		color: var(--radar-muted);
 	}
 	.key-dot,
@@ -605,7 +606,7 @@ const context = {
 		background: var(--radar-line);
 	}
 	.key-prev {
-		background: #fff;
+		background: var(--radar-surface);
 		border: 2px solid var(--radar-line);
 	}
 	.key-tick {

@@ -14,11 +14,11 @@ const { large = false, autofocus = false } = Astro.props;
 	<label class="sr-only" for="company-search-input">Company name or ticker</label>
 	<div
 		class:list={[
-			"flex items-center gap-2 rounded-2xl border border-stone-300 bg-white shadow-sm transition focus-within:border-stone-500 focus-within:ring-4 focus-within:ring-stone-200/70",
+			"flex items-center gap-2 rounded-md border border-line-strong bg-panel shadow-sm transition focus-within:border-muted focus-within:ring-4 focus-within:ring-accent/30",
 			large ? "p-2 pl-5" : "p-1.5 pl-4",
 		]}
 	>
-		<svg class="h-5 w-5 flex-none text-stone-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+		<svg class="h-5 w-5 flex-none text-faint" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
 			<circle cx="9" cy="9" r="6"></circle>
 			<path d="m14 14 4 4" stroke-linecap="round"></path>
 		</svg>
@@ -29,12 +29,12 @@ const { large = false, autofocus = false } = Astro.props;
 			spellcheck="false"
 			autofocus={autofocus}
 			placeholder="Company name or ticker"
-			class:list={["min-w-0 flex-1 bg-transparent text-stone-900 placeholder:text-stone-400 focus:outline-none", large ? "py-2 text-lg" : "py-1.5 text-base"]}
+			class:list={["min-w-0 flex-1 bg-transparent text-ink-strong placeholder:text-faint focus:outline-none", large ? "py-2 text-lg" : "py-1.5 text-base"]}
 		/>
 		<button
 			type="submit"
 			class:list={[
-				"flex-none rounded-xl bg-stone-900 font-medium text-white transition-colors hover:bg-stone-700",
+				"flex-none rounded-md bg-accent font-medium text-white transition-colors hover:bg-accent-strong",
 				large ? "px-5 py-2.5 text-base" : "px-4 py-2 text-sm",
 			]}
 		>
@@ -42,7 +42,7 @@ const { large = false, autofocus = false } = Astro.props;
 		</button>
 	</div>
 	<ul class="search-list" role="listbox" hidden></ul>
-	<p class="search-note mt-2 text-sm text-stone-500" hidden></p>
+	<p class="search-note mt-2 text-sm text-muted" hidden></p>
 </form>
 
 <script>
@@ -70,10 +70,10 @@ const { large = false, autofocus = false } = Astro.props;
 					li.setAttribute("role", "option");
 					li.setAttribute("aria-selected", String(i === active));
 					const name = document.createElement("span");
-					name.className = "min-w-0 truncate font-medium text-stone-900";
+					name.className = "min-w-0 truncate font-medium text-ink-strong";
 					name.textContent = tidyName(c.name);
 					const ticker = document.createElement("span");
-					ticker.className = "flex-none text-xs tabular-nums text-stone-400";
+					ticker.className = "flex-none text-xs tabular-nums text-faint";
 					ticker.textContent = c.ticker;
 					li.append(name, ticker);
 					li.addEventListener("pointerdown", (e) => (e.preventDefault(), go(c.ticker)));
@@ -149,10 +149,10 @@ const { large = false, autofocus = false } = Astro.props;
 		right: 0;
 		margin-top: 6px;
 		padding: 6px;
-		border-radius: 16px;
-		border: 1px solid #d6d3d1;
-		background: #fff;
-		box-shadow: 0 12px 32px rgba(28, 25, 23, 0.12);
+		border-radius: 6px;
+		border: 1px solid var(--color-line-strong);
+		background: var(--color-panel);
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 	}
 	.search-list[hidden] {
 		display: none;
@@ -163,12 +163,12 @@ const { large = false, autofocus = false } = Astro.props;
 		justify-content: space-between;
 		gap: 12px;
 		padding: 9px 12px;
-		border-radius: 10px;
+		border-radius: 4px;
 		font-size: 0.9375rem;
 		cursor: pointer;
 	}
 	.search-list li:hover,
 	.search-list li[aria-selected="true"] {
-		background: #f5f5f4;
+		background: var(--color-raised);
 	}
 </style>

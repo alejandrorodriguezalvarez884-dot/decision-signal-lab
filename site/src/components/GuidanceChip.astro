@@ -8,6 +8,6 @@ const { value } = Astro.props;
 const dot = value === "raised" ? "var(--radar-up)" : value === "lowered" ? "var(--radar-down)" : "var(--radar-axis)";
 ---
 
-<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-700">
+<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-raised px-2 py-0.5 text-xs font-medium text-ink">
 	<span class="h-2 w-2 rounded-full" style={`background: ${dot}`}></span>{GUIDANCE_LABEL[value]}
 </span>
