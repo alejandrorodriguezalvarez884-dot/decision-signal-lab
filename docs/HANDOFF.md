@@ -22,6 +22,25 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   - El script se niega a poner el login en `earnings-radar`, y reutiliza la clave de Perplexity
     que ya está en Secret Manager si `.env` no la trae.
 
+### Diseño del portal y cabecera compartida (2026-10-05, noche; desplegado en el hub)
+
+- `site/src/styles/global.css` es el del portal Market Hub (tipografía IBM Plex, sin cajas, sin
+  color de marca). Las variables `--radar-*` de `RadarStyles.astro` apuntan a esos tokens: una
+  lectura se dibuja en el color del texto, y el verde y el rojo quedan para "guidance raised" y
+  "lowered".
+- **El mismo build tiene dos cabeceras.** `layouts/Layout.astro` marca la página con `.in-hub`
+  antes de pintar cuando el dominio es `themarkethub.app` (o con `?hub` en local); lo que solo
+  sale en un modo lleva `hub-only` o `standalone-only`. Dentro del hub: cabecera del portal
+  (`Markets · Fundamentals · Earnings`), y en el análisis las pestañas `Price · Fundamentals ·
+  Results release` de la empresa. En `earningsradar.app`: su nombre y su navegación, sin nada
+  del hub.
+- El buscador va en la cabecera (`CompanySearch compact`); la portada está rehecha sin tarjetas.
+- 72 tests en verde y el sitio compila. Revisado en local en los dos modos; el resultado de un
+  análisis se revisó con un sustituto que responde desde `radar/releases.json` (gasto cero).
+- Subido a `main` y desplegado con `make deploy-hub` como `earnings-radar-hub-00002-h8z`.
+  **`make deploy` no se ha lanzado**: `earningsradar.app` sigue en `earnings-radar-00003-msk`; si
+  algún día se redespliega, cogerá este diseño en su modo propio.
+
 El usuario decidió el 2026-10-04 dejar de intentar predecir retornos (el diseño salió nulo, ver
 apartado 2) y usar el mismo modelo para lo que hace bien: leer. El producto es ahora el **radar
 de resultados**, descrito en [RADAR.md](RADAR.md). Las secciones 1 a 6 de este documento
