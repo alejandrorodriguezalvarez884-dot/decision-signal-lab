@@ -5,6 +5,23 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
 
+### Dentro de Market Hub (2026-10-05)
+
+- **Estilo nuevo**: el de Market Hub (tema oscuro inspirado en TradingView; tokens en
+  `site/src/styles/global.css`, variables `--radar-*` en `RadarStyles.astro` con la paleta oscura).
+  La cabecera lleva `HubBar.astro`: vuelta al hub y el usuario, si hay login.
+- **Dos despliegues del mismo código**, que comparten bucket y por tanto el contador y los topes
+  de gasto (0,25 $/día, 4 $ en total, entre los dos):
+  - `make deploy` → servicio `earnings-radar`, **público**, en `earningsradar.app`. No se ha
+    redesplegado: sigue con la revisión anterior al estilo nuevo. Si se redespliega (`make deploy`
+    o `make publish`), coge el estilo nuevo pero sigue público.
+  - `make deploy-hub` → servicio `earnings-radar-hub`, para `radar.themarkethub.app`. Con
+    `HUB_URL` solo entra quien tenga sesión en Market Hub (`src/decisionsignal/hubauth.py` lee la
+    cookie `mh_session` del hub y comprueba su firma con `market-hub-session-secret`; no la escribe
+    ni guarda nada del usuario). Sin límite por IP (decisión del usuario); los topes siguen.
+  - El script se niega a poner el login en `earnings-radar`, y reutiliza la clave de Perplexity
+    que ya está en Secret Manager si `.env` no la trae.
+
 El usuario decidió el 2026-10-04 dejar de intentar predecir retornos (el diseño salió nulo, ver
 apartado 2) y usar el mismo modelo para lo que hace bien: leer. El producto es ahora el **radar
 de resultados**, descrito en [RADAR.md](RADAR.md). Las secciones 1 a 6 de este documento
