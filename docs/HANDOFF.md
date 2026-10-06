@@ -134,6 +134,9 @@ inglés.
 
 ## 2. Dónde estamos
 
+> 2026-10-06: `site/src/components/HubNav.astro` lleva dos enlaces más de My Hub, `Analysis` y
+> `Community` (páginas nuevas del portal), igual que `App.astro` de `market-hub-landing`. Sin desplegar.
+
 | Hecho | Pendiente |
 |---|---|
 | Pipeline completo (`src/decisionsignal/`), CLI `decisionsignal` | Validar el parser de EDGAR con filings **reales** |
