@@ -70,6 +70,7 @@ const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px]
 				</>
 			))}
 		</nav>
+		<div class="px-3 pb-3"><a href={`${HUB_URL}/`} class="btn btn-ghost w-full py-1.5 text-[13px]"><span aria-hidden="true">←</span> Back to the home page</a></div>
 		<div data-hub-user="side" class="border-t border-line p-3"></div>
 	</aside>
 ) : (
@@ -86,6 +87,7 @@ const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px]
 		</div>
 		<nav class="border-t border-line" aria-label="My Hub">
 			<ul class="flex gap-1 overflow-x-auto px-2 text-[13px] font-semibold [scrollbar-width:none]">
+				<li><a href={`${HUB_URL}/`} class="block whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-muted"><span aria-hidden="true">←</span> Home</a></li>
 				{groups.flatMap((g) => g.links).filter((l) => l.label !== "Account and data" && l.label !== "News").map((l) => (
 					<li>
 						<a href={l.href} aria-current={l.active ? "true" : undefined}
