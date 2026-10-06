@@ -280,3 +280,11 @@ revisar antes de cualquier cambio, son:
 
 Cualquier cambio en estos dos, en `features.py` o en el pre-registro después del `lock` bloquea
 el holdout hasta registrar la desviación y volver a bloquear (es intencionado).
+
+## Pendiente de desplegar (2026-10-06)
+
+`HubNav.astro` tiene desde el 2026-10-06 el enlace a Media del portal (commit `7b0ef56`), pero
+`earnings-radar-hub` **no se ha vuelto a desplegar**: en el Mac del usuario la clave de Perplexity
+del `.env` no coincide con la de Secret Manager (`earnings-radar-perplexity-api-key`), y
+`make deploy-hub` guardaría la del `.env` como versión nueva. Antes de desplegar desde ahí, el
+usuario tiene que decir cuál es la buena.
