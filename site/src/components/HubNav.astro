@@ -21,6 +21,7 @@ const icons: Record<string, string> = {
 	earnings: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7",
 	news: "M4 5h13v14H6a2 2 0 0 1-2-2V5Zm13 4h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5",
 	opinion: "M4 5h16v11H9l-5 4V5Zm4 4h8M8 12h5",
+	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
 };
 const groups = [
 	{ label: "Your space", links: [
@@ -38,6 +39,7 @@ const groups = [
 		{ href: `${HUB_URL}/markets/`, label: "Markets", icon: "markets" },
 		{ href: `${HUB_URL}/news/`, label: "News", icon: "news" },
 		{ href: `${HUB_URL}/opinion/`, label: "Opinion", icon: "opinion" },
+		{ href: `${HUB_URL}/media/`, label: "Media", icon: "media" },
 	] },
 ] as { label: string; links: { href: string; label: string; icon: string; active?: boolean }[] }[];
 const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px] font-semibold tracking-tight text-ink-strong";
@@ -94,7 +96,7 @@ const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px]
 		<nav class="border-t border-line" aria-label="My Hub">
 			<ul class="flex gap-1 overflow-x-auto px-2 text-[13px] font-semibold [scrollbar-width:none]">
 				<li><a href={`${HUB_URL}/`} class="block whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-muted"><span aria-hidden="true">←</span> Home</a></li>
-				{groups.flatMap((g) => g.links).filter((l) => !["Account and data", "News", "Opinion"].includes(l.label)).map((l) => (
+				{groups.flatMap((g) => g.links).filter((l) => !["Account and data", "News", "Opinion", "Media"].includes(l.label)).map((l) => (
 					<li>
 						<a href={l.href} aria-current={l.active ? "true" : undefined}
 							class:list={["block whitespace-nowrap border-b-2 px-3 py-2", l.active ? "border-accent text-ink-strong" : "border-transparent text-muted"]}>{l.label}</a>
