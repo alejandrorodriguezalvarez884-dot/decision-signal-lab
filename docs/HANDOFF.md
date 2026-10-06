@@ -22,7 +22,7 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   - El script se niega a poner el login en `earnings-radar`, y reutiliza la clave de Perplexity
     que ya está en Secret Manager si `.env` no la trae.
 
-### Dentro de My Hub (2026-10-06)
+### Dentro de My Hub (2026-10-06; desplegado como `earnings-radar-hub-00004-t82`)
 
 El usuario pidió que, dentro de Market Hub, el radar quede integrado en el área privada del portal,
 porque solo se consulta desde ahí. La cabecera pública del portal ya no lo nombra.
