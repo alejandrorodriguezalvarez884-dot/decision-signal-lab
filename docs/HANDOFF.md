@@ -22,6 +22,19 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   - El script se niega a poner el login en `earnings-radar`, y reutiliza la clave de Perplexity
     que ya está en Secret Manager si `.env` no la trae.
 
+### Dentro de My Hub (2026-10-06)
+
+El usuario pidió que, dentro de Market Hub, el radar quede integrado en el área privada del portal,
+porque solo se consulta desde ahí. La cabecera pública del portal ya no lo nombra.
+
+- `components/HubNav.astro` sustituye a `HubBar.astro`: es la navegación de My Hub (la misma que
+  `App.astro` en `market-hub-landing`): barra lateral en pantallas anchas con "Your space", "Tools"
+  ("Earnings" marcada) y "Explore", y una barra arriba en pantallas estrechas. Va marcada
+  `hub-only`: en `earningsradar.app` no aparece y el radar conserva su cabecera con su nombre.
+- `Page.astro`: encima de cada página queda la barra propia del radar (nombre, sus tres páginas y
+  el buscador), la misma en los dos despliegues. Un cambio en la navegación de My Hub se hace en
+  los tres repos.
+
 ### Diseño del portal y cabecera compartida (2026-10-05, noche; desplegado en el hub)
 
 - `site/src/styles/global.css` es el del portal Market Hub (tipografía IBM Plex, sin cajas, sin
