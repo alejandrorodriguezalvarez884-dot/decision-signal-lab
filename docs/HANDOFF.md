@@ -134,8 +134,13 @@ inglés.
 
 ## 2. Dónde estamos
 
+> 2026-10-06: `scripts/deploy-cloudrun.sh` ya solo escribe un permiso cuando falta (`grant`): antes cada
+> despliegue reescribía la política IAM del proyecto y dos a la vez chocaban ("concurrent policy
+> changes"). Ahora los despliegues de los tres servicios pueden lanzarse en paralelo. Comprobado
+> contra el proyecto sin escribir nada; aún no se ha hecho un despliegue en paralelo de verdad.
+
 > 2026-10-06: `site/src/components/HubNav.astro` lleva dos enlaces más de My Hub, `Analysis` y
-> `Community` (páginas nuevas del portal), igual que `App.astro` de `market-hub-landing`. Sin desplegar.
+> `Community` (páginas nuevas del portal), igual que `App.astro` de `market-hub-landing`. Desplegado el mismo día.
 
 | Hecho | Pendiente |
 |---|---|
