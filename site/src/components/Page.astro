@@ -19,6 +19,7 @@ const under = (...roots: string[]) => roots.some((r) => path.startsWith(link(r))
 const sections = [
 	{ href: `${HUB_URL}/today/`, label: "Today", active: false },
 	{ href: `${HUB_URL}/markets/`, label: "Markets", active: false },
+	{ href: `${HUB_URL}/news/`, label: "News", active: false },
 	{ href: `${FUNDAMENTALS_URL}/`, label: "Fundamentals", active: false },
 	{ href: link("/"), label: "Earnings", active: true },
 ];
