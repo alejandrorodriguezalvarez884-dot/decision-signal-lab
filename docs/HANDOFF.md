@@ -5,6 +5,17 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
 
+### Contar visitas: Cloudflare Web Analytics (2026-10-07; en `main`, sin desplegar)
+
+- `site/src/layouts/Layout.astro` carga el script de Cloudflare Web Analytics (sin cookies) con un
+  token según el host: el del sitio de Market Hub en `radar.themarkethub.app`, el del radar en
+  `earningsradar.app`. En local y en `*.run.app` no se carga. Los tokens van en el HTML, no son
+  secretos.
+- El enlace `Privacy` del pie sale ya en los dos despliegues (antes solo en el hub): lleva a la
+  página de privacidad del portal, que nombra `earningsradar.app`.
+- Hay que desplegar los dos (`make deploy` y `make deploy-hub`). Se mira en Cloudflare:
+  Analytics & Logs → Web Analytics.
+
 ### Dentro de Market Hub (2026-10-05)
 
 - **Estilo nuevo**: el de Market Hub (tema oscuro inspirado en TradingView; tokens en
