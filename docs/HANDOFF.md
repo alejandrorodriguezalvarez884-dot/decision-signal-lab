@@ -5,7 +5,7 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
 
-### Contar visitas: Cloudflare Web Analytics (2026-10-07; en `main`, sin desplegar)
+### Contar visitas: Cloudflare Web Analytics (2026-10-07; desplegado en los dos)
 
 - `site/src/layouts/Layout.astro` carga el script de Cloudflare Web Analytics (sin cookies) con un
   token según el host: el del sitio de Market Hub en `radar.themarkethub.app`, el del radar en
@@ -13,7 +13,15 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   secretos.
 - El enlace `Privacy` del pie sale ya en los dos despliegues (antes solo en el hub): lleva a la
   página de privacidad del portal, que nombra `earningsradar.app`.
-- Hay que desplegar los dos (`make deploy` y `make deploy-hub`). Se mira en Cloudflare:
+- **Desplegados los dos el 2026-10-07**, desde el equipo Windows: `earnings-radar-hub-00008-m7x`
+  (`make deploy-hub`) y `earnings-radar-00004-jc2` (`make deploy`). **`earningsradar.app` lleva
+  desde ese despliegue el estilo de Market Hub** y todo lo hecho desde el 4 de octubre: estaba en
+  `earnings-radar-00003-msk`, a la que se puede volver con
+  `gcloud run services update-traffic earnings-radar --region europe-west1 --to-revisions earnings-radar-00003-msk=100`.
+  Sigue público. Su `SEC_USER_AGENT` pasó a ser el del `.env` de ese equipo (el mismo del hub).
+  Topes, bucket y memoria iguales. El `.env` de ese equipo no trae la clave de Perplexity, así que
+  el script reutilizó la de Secret Manager y no añadió versión. Comprobado: los dos responden, el
+  HTML lleva el script con los dos tokens y el público sigue sin pedir sesión. Se mira en Cloudflare:
   Analytics & Logs → Web Analytics.
 
 ### Dentro de Market Hub (2026-10-05)
@@ -23,9 +31,8 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
   La cabecera lleva `HubBar.astro`: vuelta al hub y el usuario, si hay login.
 - **Dos despliegues del mismo código**, que comparten bucket y por tanto el contador y los topes
   de gasto (0,25 $/día, 4 $ en total, entre los dos):
-  - `make deploy` → servicio `earnings-radar`, **público**, en `earningsradar.app`. No se ha
-    redesplegado: sigue con la revisión anterior al estilo nuevo. Si se redespliega (`make deploy`
-    o `make publish`), coge el estilo nuevo pero sigue público.
+  - `make deploy` → servicio `earnings-radar`, **público**, en `earningsradar.app`. Redesplegado
+    el 2026-10-07 con el estilo nuevo; sigue público.
   - `make deploy-hub` → servicio `earnings-radar-hub`, para `radar.themarkethub.app`. Con
     `HUB_URL` solo entra quien tenga sesión en Market Hub (`src/decisionsignal/hubauth.py` lee la
     cookie `mh_session` del hub y comprueba su firma con `market-hub-session-secret`; no la escribe
@@ -295,6 +302,9 @@ el holdout hasta registrar la desviación y volver a bloquear (es intencionado).
 ## Pendiente de desplegar (2026-10-06)
 
 `HubNav.astro` tiene desde el 2026-10-06 el enlace a Media del portal (commit `7b0ef56`), pero
+(**Resuelto el 2026-10-07**: se desplegó desde el equipo Windows, cuyo `.env` no trae esa clave, así
+que se usó la de Secret Manager. Lo de abajo sigue valiendo para el Mac.)
+
 `earnings-radar-hub` **no se ha vuelto a desplegar**: en el Mac del usuario la clave de Perplexity
 del `.env` no coincide con la de Secret Manager (`earnings-radar-perplexity-api-key`), y
 `make deploy-hub` guardaría la del `.env` como versión nueva. Antes de desplegar desde ahí, el
