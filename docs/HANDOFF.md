@@ -161,7 +161,9 @@ inglés.
 > `Community` (páginas nuevas del portal), igual que `App.astro` de `market-hub-landing`. Desplegado el mismo día.
 >
 > 2026-10-07: y uno más, `Watchlist`, entre `Analysis` y `Community` (la página nueva del portal,
-> `/watchlist/`). En `main`, **sin desplegar**: hasta que se despliegue, la barra de aquí no lo enseña.
+> `/watchlist/`). Desplegado ese día en el hub, desde el Mac, como `earnings-radar-hub-00009-z2g` (topes como
+> estaban; el `.env` del Mac ya no trae clave de Perplexity, así que sigue la de Secret Manager).
+> `earnings-radar` (`earningsradar.app`) no se redesplegó: no enseña esa barra.
 
 | Hecho | Pendiente |
 |---|---|
