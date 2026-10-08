@@ -5,6 +5,15 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
 
+### Playground en la barra de My Hub (2026-10-08; desplegado como `earnings-radar-hub-00010-c64`)
+
+"Tools" de la barra lateral lleva una herramienta más, **Playground**
+(https://playground.themarkethub.app, repo `market-hub-playground`): un tablero de gráficos y
+tablas que se compone pidiéndolo por chat. `PLAYGROUND_URL` y el enlace en `HubNav.astro`.
+Desplegado (solo el radar del hub; `earningsradar.app` no se tocó) desde una copia limpia del
+commit, con la configuración del servicio idéntica a la de antes. El subdominio estaba esperando
+su certificado de Google al desplegar: hasta que se emita, el enlace no abre.
+
 ### Peers en la navegación de My Hub (2026-10-08; sin desplegar)
 
 En `HubNav.astro`, el enlace `Peers` (Tools) lleva a Peer Map, la herramienta nueva (`market-hub-peers-map`,
