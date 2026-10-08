@@ -3,7 +3,7 @@
 // same navigation as the portal's own private pages (App.astro in market-hub-landing). On its
 // own site (earningsradar.app) none of this shows: Page.astro marks it hub-only. `part` is the
 // sidebar of a wide screen or the bar of a narrow one.
-import { FUNDAMENTALS_URL, HUB_URL, link } from "../lib/reading";
+import { FUNDAMENTALS_URL, HUB_URL, PLAYGROUND_URL, link } from "../lib/reading";
 
 interface Props {
 	part: "side" | "top";
@@ -23,6 +23,7 @@ const icons: Record<string, string> = {
 	news: "M4 5h13v14H6a2 2 0 0 1-2-2V5Zm13 4h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5",
 	opinion: "M4 5h16v11H9l-5 4V5Zm4 4h8M8 12h5",
 	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
+	playground: "M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z",
 };
 const groups = [
 	{ label: "Your space", links: [
@@ -36,6 +37,7 @@ const groups = [
 	{ label: "Tools", links: [
 		{ href: `${FUNDAMENTALS_URL}/`, label: "Fundamentals", icon: "tools" },
 		{ href: link("/"), label: "Earnings", icon: "earnings", active: true },
+		{ href: `${PLAYGROUND_URL}/`, label: "Playground", icon: "playground" },
 	] },
 	{ label: "Explore", links: [
 		{ href: `${HUB_URL}/markets/`, label: "Markets", icon: "markets" },
