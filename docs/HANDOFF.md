@@ -14,12 +14,11 @@ Desplegado (solo el radar del hub; `earningsradar.app` no se tocó) desde una co
 commit, con la configuración del servicio idéntica a la de antes. El subdominio estaba esperando
 su certificado de Google al desplegar: hasta que se emita, el enlace no abre.
 
-### Peers en la navegación de My Hub (2026-10-08; sin desplegar)
+### Peers en la navegación de My Hub (2026-10-08; desplegado como `earnings-radar-hub-00011-h8g`)
 
 En `HubNav.astro`, el enlace `Peers` (Tools) lleva a Peer Map, la herramienta nueva (`market-hub-peers-map`,
-https://peers.themarkethub.app). **En `main`, sin desplegar**: se despliega cuando el subdominio
-resuelva (falta el CNAME `peers` → `ghs.googlehosted.com` en Cloudflare, que pone el usuario), para
-no dejar un enlace roto. Solo afecta a la copia del hub (`make deploy-hub`).
+https://peers.themarkethub.app). Desplegado cuando el subdominio ya respondía; la configuración del
+servicio quedó como estaba (comparada antes y después). Solo afecta a la copia del hub (`make deploy-hub`).
 
 ### Contar visitas: Cloudflare Web Analytics (2026-10-07; desplegado en los dos)
 
