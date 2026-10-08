@@ -5,6 +5,13 @@ ordenador o en otra sesión de agente, sin el historial de la conversación.
 
 ## 0. Estado actual: el radar (giro del 2026-10-04)
 
+### Peers en la navegación de My Hub (2026-10-08; sin desplegar)
+
+En `HubNav.astro`, el enlace `Peers` (Tools) lleva a Peer Map, la herramienta nueva (`market-hub-peers-map`,
+https://peers.themarkethub.app). **En `main`, sin desplegar**: se despliega cuando el subdominio
+resuelva (falta el CNAME `peers` → `ghs.googlehosted.com` en Cloudflare, que pone el usuario), para
+no dejar un enlace roto. Solo afecta a la copia del hub (`make deploy-hub`).
+
 ### Contar visitas: Cloudflare Web Analytics (2026-10-07; desplegado en los dos)
 
 - `site/src/layouts/Layout.astro` carga el script de Cloudflare Web Analytics (sin cookies) con un
