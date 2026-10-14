@@ -3,7 +3,7 @@
 // same navigation as the portal's own private pages (App.astro in market-hub-landing). On its
 // own site (earningsradar.app) none of this shows: Page.astro marks it hub-only. `part` is the
 // sidebar of a wide screen or the bar of a narrow one.
-import { FUNDAMENTALS_URL, HUB_URL, PEERS_URL, PLAYGROUND_URL, link } from "../lib/reading";
+import { FUNDAMENTALS_URL, HUB_URL, OPTIONS_URL, PEERS_URL, PLAYGROUND_URL, link } from "../lib/reading";
 
 interface Props {
 	part: "side" | "top";
@@ -25,6 +25,7 @@ const icons: Record<string, string> = {
 	media: "M3 6h18v12H3zM10 9.5v5l4.5-2.5-4.5-2.5Z",
 	peers: "M4 7a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16 6a2 2 0 1 0 4 0 2 2 0 1 0-4 0M11 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0M8 6.8l8-.6M7 8.7l5 7.6M17.2 7.8l-3.3 8.4",
 	playground: "M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z",
+	options: "M3 20h18M3 15h7l10-10",
 };
 const groups = [
 	{ label: "Your space", links: [
@@ -40,6 +41,7 @@ const groups = [
 		{ href: link("/"), label: "Earnings", icon: "earnings", active: true },
 		{ href: `${PEERS_URL}/`, label: "Peers", icon: "peers" },
 		{ href: `${PLAYGROUND_URL}/`, label: "Playground", icon: "playground" },
+		{ href: `${OPTIONS_URL}/`, label: "Options", icon: "options" },
 	] },
 	{ label: "Explore", links: [
 		{ href: `${HUB_URL}/markets/`, label: "Markets", icon: "markets" },
