@@ -14,11 +14,12 @@ Desplegado (solo el radar del hub; `earningsradar.app` no se tocó) desde una co
 commit, con la configuración del servicio idéntica a la de antes. El subdominio estaba esperando
 su certificado de Google al desplegar: hasta que se emita, el enlace no abre.
 
-### Options en la navegación de My Hub (2026-10-14; **sin desplegar**)
+### Options en la navegación de My Hub (2026-10-14; desplegado como `earnings-radar-hub-00012-gss`)
 
 En `HubNav.astro`, el enlace `Options` (Tools) lleva a Options Lab, la herramienta nueva (`market-hub-options`,
-https://options.themarkethub.app). **No desplegar (`make deploy-hub`) hasta que ese subdominio responda por
-HTTPS**: hasta entonces el enlace no abre. Solo afecta a la copia del hub.
+https://options.themarkethub.app). Desplegado cuando ese subdominio ya respondía, con
+`gcloud run deploy earnings-radar-hub --source <export limpio>` sin flags: la configuración del servicio quedó
+idéntica (el `.env` de esta máquina no la tiene entera). Solo afecta a la copia del hub.
 
 ### Peers en la navegación de My Hub (2026-10-08; desplegado como `earnings-radar-hub-00011-h8g`)
 
