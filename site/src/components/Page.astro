@@ -7,7 +7,7 @@ import Layout from "../layouts/Layout.astro";
 import CompanySearch from "./CompanySearch.astro";
 import HubNav from "./HubNav.astro";
 import RadarStyles from "./RadarStyles.astro";
-import { AUTHOR_URL, HUB_URL, REPO_URL, link } from "../lib/reading";
+import { AUTHOR_URL, HUB_URL, link } from "../lib/reading";
 
 interface Props {
 	title: string;
@@ -75,7 +75,6 @@ const brand = "flex flex-none items-center gap-2.5 whitespace-nowrap text-[15px]
 					</p>
 					<div class="flex flex-wrap items-start gap-x-5 gap-y-1">
 						<a href={`${HUB_URL}/privacy/`} class="hover:text-ink-strong">Privacy</a>
-						<a href={REPO_URL} class="hover:text-ink-strong">Source and data</a>
 						<a href={AUTHOR_URL} class="hover:text-ink-strong">Built by Alejandro Rodríguez Álvarez</a>
 					</div>
 				</div>

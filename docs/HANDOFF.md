@@ -174,6 +174,11 @@ inglés.
 
 ## 2. Dónde estamos
 
+> 2026-10-15: **Sin enlace al código fuente.** El pie de página ya no lleva "Source" (el enlace al
+> repo de GitHub) y `REPO_URL` ya no existe en `site/src/lib/`: la web no enlaza ni menciona el
+> código, por decisión del usuario. **Sin desplegar**: llega a la web con el próximo `make deploy`.
+> En `/method/` se quitó la frase que decía que el pipeline y el dataset están en el repositorio.
+
 > 2026-10-06: `scripts/deploy-cloudrun.sh` ya solo escribe un permiso cuando falta (`grant`): antes cada
 > despliegue reescribía la política IAM del proyecto y dos a la vez chocaban ("concurrent policy
 > changes"). Ahora los despliegues de los tres servicios pueden lanzarse en paralelo. Comprobado

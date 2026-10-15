@@ -1,6 +1,6 @@
 ---
 import Page from "../components/Page.astro";
-import { GUIDANCE_LABEL, REPO_URL, THEME_LABEL, fmtDate, link, summary, type GuidanceClass } from "../lib/radar";
+import { GUIDANCE_LABEL, THEME_LABEL, fmtDate, link, summary, type GuidanceClass } from "../lib/radar";
 
 const m = summary.meta;
 const perRelease = ((m.api_cost_usd / m.releases) * 100).toFixed(2);
@@ -318,8 +318,7 @@ const benchmarks = [
 			model did well was read, and that became this site.
 		</p>
 		<p>
-			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls. The pipeline, the questions
-			and the dataset are in <a href={REPO_URL}>the repository</a>.
+			Reading the whole history cost about ${m.api_cost_usd.toFixed(2)} in API calls.
 		</p>
 	</div>
 </Page>

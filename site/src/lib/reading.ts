@@ -1,7 +1,6 @@
 // What a reading means and how to put it in words. No data in here, so the browser can load
 // this module for the on-demand analysis without downloading the whole dataset.
 
-export const REPO_URL = "https://github.com/alejandrorodriguezalvarez884-dot/decision-signal-lab";
 export const AUTHOR_URL = "https://alejandrorodriguez.dev";
 
 // Inside Market Hub the radar is one of the portal's sections: its header is the portal's, and an
