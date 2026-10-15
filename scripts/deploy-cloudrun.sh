@@ -13,7 +13,7 @@
 #   make deploy-hub   earnings-radar-hub, inside Market Hub: HUB_URL set, only people signed in
 #                     to the hub get in (the hub's secret comes from market-hub-session-secret)
 #
-# Optional overrides: GCP_PROJECT, GCP_REGION, SERVICE_NAME, MAX_INSTANCES, RADAR_DAILY_MAX_USD,
+# Optional overrides: GCP_PROJECT, GCP_REGION, SERVICE_NAME, MIN_INSTANCES, MAX_INSTANCES, RADAR_DAILY_MAX_USD,
 # RADAR_TOTAL_MAX_USD, HUB_URL (from the environment only, never from .env).
 set -euo pipefail
 
@@ -48,6 +48,9 @@ HUB_URL="${HUB_URL:-}"
 if [[ -n "$HUB_URL" && "$SERVICE_NAME" == "earnings-radar" ]]; then
   fail "earnings-radar is the public service of earningsradar.app: it does not go behind the hub's sign-in. Use make deploy-hub."
 fi
+# The copy inside Market Hub keeps one instance warm so nobody waits for a cold start; the public one
+# scales to zero.
+if [[ -n "$HUB_URL" ]]; then MIN_INSTANCES="${MIN_INSTANCES:-1}"; else MIN_INSTANCES="${MIN_INSTANCES:-0}"; fi
 [[ "$SEC_USER_AGENT" == *@* ]] || fail "SEC_USER_AGENT in $ENV_FILE needs a contact email."
 
 gcp() { gcloud --project "$GCP_PROJECT" --quiet "$@"; }
@@ -117,7 +120,7 @@ gcp run deploy "$SERVICE_NAME" \
   --port 8080 \
   --cpu 1 \
   --memory 1Gi \
-  --min-instances 0 \
+  --min-instances "$MIN_INSTANCES" \
   --max-instances "$MAX_INSTANCES" \
   --timeout 120 \
   --set-secrets "$SECRETS" \
