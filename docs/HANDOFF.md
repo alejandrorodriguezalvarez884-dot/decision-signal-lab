@@ -176,7 +176,9 @@ inglés.
 
 > 2026-10-15: **Sin enlace al código fuente.** El pie de página ya no lleva "Source" (el enlace al
 > repo de GitHub) y `REPO_URL` ya no existe en `site/src/lib/`: la web no enlaza ni menciona el
-> código, por decisión del usuario. **Sin desplegar**: llega a la web con el próximo `make deploy`.
+> código, por decisión del usuario. **Desplegado** como `earnings-radar-00005-sdr` y `earnings-radar-hub-00014-s82`, con
+> `gcloud run deploy --source` desde una copia limpia del commit y sin flags: la configuración
+> del servicio es idéntica antes y después.
 > En `/method/` se quitó la frase que decía que el pipeline y el dataset están en el repositorio.
 
 > 2026-10-06: `scripts/deploy-cloudrun.sh` ya solo escribe un permiso cuando falta (`grant`): antes cada
