@@ -174,6 +174,11 @@ inglés.
 
 ## 2. Dónde estamos
 
+> 2026-10-17: **De vuelta a escalar a cero.** Por decisión del usuario, `earnings-radar-hub` vuelve a
+> `--min-instances 0` (revisión `earnings-radar-hub-00016-rjk`, hecha con `gcloud run services update`, sin
+> reconstruir), y `scripts/deploy-cloudrun.sh` pone 0 por defecto (`MIN_INSTANCES=1 make deploy`
+> deja una instancia encendida). La nota de abajo queda como historia.
+
 > 2026-10-15: **Una instancia siempre encendida.** Para el lanzamiento, por decisión del usuario,
 > `earnings-radar-hub` tiene `--min-instances 1` (revisión `earnings-radar-hub-00015-ghv`, hecha con
 > `gcloud run services update`, sin reconstruir): nadie espera un arranque en frío y las cachés en

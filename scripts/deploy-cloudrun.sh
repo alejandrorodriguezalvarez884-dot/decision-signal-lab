@@ -48,9 +48,8 @@ HUB_URL="${HUB_URL:-}"
 if [[ -n "$HUB_URL" && "$SERVICE_NAME" == "earnings-radar" ]]; then
   fail "earnings-radar is the public service of earningsradar.app: it does not go behind the hub's sign-in. Use make deploy-hub."
 fi
-# The copy inside Market Hub keeps one instance warm so nobody waits for a cold start; the public one
-# scales to zero.
-if [[ -n "$HUB_URL" ]]; then MIN_INSTANCES="${MIN_INSTANCES:-1}"; else MIN_INSTANCES="${MIN_INSTANCES:-0}"; fi
+# Both copies scale to zero; MIN_INSTANCES=1 keeps one instance warm.
+MIN_INSTANCES="${MIN_INSTANCES:-0}"
 [[ "$SEC_USER_AGENT" == *@* ]] || fail "SEC_USER_AGENT in $ENV_FILE needs a contact email."
 
 gcp() { gcloud --project "$GCP_PROJECT" --quiet "$@"; }
